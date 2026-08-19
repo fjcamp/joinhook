@@ -87,9 +87,9 @@ jobs:
       - name: Verify starter routes stay unpublished
         run: |
           for path in info blog projects blog/post-one projects/project-one; do
-            code=$(curl --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:3000/$path")
+            code=$(curl --location --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:3000/$path")
             if [ "$code" != "404" ]; then
-              echo "Legacy starter route /$path must return 404, got $code"
+              echo "Legacy starter route /$path must resolve to 404, got $code"
               exit 1
             fi
           done
