@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import path from 'path';
 import glob from 'glob';
-import frontmatter from 'front-matter';
+import { load as loadYaml } from 'js-yaml';
 import { allModels } from '.stackbit/models';
 import * as types from '@/types';
 import { isDev } from './common';
@@ -29,17 +29,30 @@ function contentFilesInPath(dir: string) {
     return glob.sync(globPattern);
 }
 
+function parseMarkdownFrontMatter(rawContent: string) {
+    const match = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)([\s\S]*)$/);
+    if (!match) {
+        return { attributes: {} as Record<string, any>, body: rawContent };
+    }
+    const attributes = loadYaml(match[1]) as Record<string, any> | null;
+    return {
+        attributes: attributes && typeof attributes === 'object' ? attributes : {},
+        body: match[2]
+    };
+}
+
 function readContent(file: string): types.ContentObject {
     const rawContent = fs.readFileSync(file, 'utf8');
     let content = null;
     switch (path.extname(file).substring(1)) {
-        case 'md':
-            const parsedMd = frontmatter<Record<string, any>>(rawContent);
+        case 'md': {
+            const parsedMd = parseMarkdownFrontMatter(rawContent);
             content = {
                 ...parsedMd.attributes,
                 markdownContent: parsedMd.body
             };
             break;
+        }
         case 'json':
             content = JSON.parse(rawContent);
             break;
