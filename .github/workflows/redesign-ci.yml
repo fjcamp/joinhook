@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.20.2
           cache: npm
 
       - name: Install dependencies
@@ -30,6 +30,11 @@ jobs:
 
       - name: Audit runtime dependencies
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Lint
+        env:
+          ESLINT_USE_FLAT_CONFIG: "false"
+        run: npx eslint .
 
       - name: Build
         run: npm run build
@@ -47,11 +52,14 @@ jobs:
           cat /tmp/joinhook-next.log
           exit 1
 
-      - name: Smoke test public routes
+      - name: Smoke test public routes and PWA assets
         run: |
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/herramientas/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/cge-manifest.webmanifest
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/cge-sw.js
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/icons/cge-icon.svg
 
       - name: Stop app
         if: always()
