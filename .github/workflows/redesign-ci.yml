@@ -97,7 +97,7 @@ jobs:
       - name: Smoke test public routes and PWA assets
         run: |
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
-          curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-landing.html
+          curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-landing.html
           grep -Fq 'Solicitar pack fundador' /tmp/cge-landing.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
@@ -173,7 +173,7 @@ jobs:
           npm run start -- -p 3001 > /tmp/joinhook-commercial.log 2>&1 &
           echo $! > /tmp/joinhook-commercial.pid
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:3001/herramientas/control-gastronomico-express > /tmp/cge-commercial.html; then
+            if curl --location -fsS http://127.0.0.1:3001/herramientas/control-gastronomico-express > /tmp/cge-commercial.html; then
               exit 0
             fi
             sleep 1
