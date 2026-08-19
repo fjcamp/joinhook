@@ -55,6 +55,10 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/herramientas/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/robots.txt
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/sitemap.xml
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/cge-manifest.webmanifest
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/cge-sw.js
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/icons/cge-icon.svg

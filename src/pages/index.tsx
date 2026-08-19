@@ -97,7 +97,7 @@ export default function Home() {
                     content="Soy Francisco, creador independiente detrás de JoinHook. Diseño, investigo y construyo productos digitales, sistemas de gestión, PWA y experimentos de interfaz."
                 />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <meta name="theme-color" content="#07111f" />
+                <meta name="theme-color" content="#f3f0e8" />
                 <link rel="canonical" href="https://joinhook.cl/" />
                 <meta property="og:title" content="JoinHook — ideas, productos y experiencias digitales" />
                 <meta
@@ -133,7 +133,7 @@ export default function Home() {
                         <a href="#lab">Lab</a>
                         <a href="#sobre-mi">Sobre mí</a>
                     </nav>
-                    <a className="jh-header-cta" href="#contacto">Conversemos</a>
+                    <a className="jh-header-cta" href="mailto:info@joinhook.cl?subject=Conversemos%20sobre%20un%20proyecto">Conversemos</a>
                 </header>
 
                 <section className="jh-hero" id="inicio">
@@ -149,7 +149,7 @@ export default function Home() {
                             <a className="jh-button jh-button-primary" href="#proyectos">
                                 Explorar lo que construyo <ArrowIcon />
                             </a>
-                            <a className="jh-button jh-button-soft" href="#sobre-mi">Conocer mi enfoque</a>
+                            <a className="jh-button jh-button-soft" href="#herramientas">Ver herramienta disponible</a>
                         </div>
                         <div className="jh-hero-footnotes" aria-label="Principios de trabajo">
                             <span>Aprender haciendo</span>
@@ -284,17 +284,17 @@ export default function Home() {
                 <section className="jh-section jh-product" id="herramientas" aria-labelledby="product-title">
                     <div className="jh-product-panel jh-surface">
                         <div className="jh-product-copy">
-                            <span className="jh-eyebrow">Primera herramienta comercial</span>
+                            <span className="jh-eyebrow">Primera herramienta comercial · beta disponible</span>
                             <h2 id="product-title">Control Gastronómico Express</h2>
                             <p>
-                                Estoy preparando una herramienta simple para pequeños negocios gastronómicos: inventario, compras, mermas, proveedores y un dashboard entendible, sin transformar cada tarea en otro software complejo.
+                                Ya puedes probar una primera versión funcional para pequeños negocios gastronómicos: inventario, compras, mermas, proveedores, stock mínimo, respaldo y PWA, sin partir por un ERP completo.
                             </p>
                             <div className="jh-tags">
-                                <span>Inventario</span><span>Mermas</span><span>Compras</span><span>Dashboard</span>
+                                <span>Inventario</span><span>Mermas</span><span>Compras</span><span>Dashboard</span><span>PWA</span>
                             </div>
                             <div className="jh-actions">
-                                <a className="jh-button jh-button-primary" href="#contacto">Quiero conocer el MVP <ArrowIcon /></a>
-                                <span className="jh-product-status"><i /> En preparación</span>
+                                <a className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Conocer y probar <ArrowIcon /></a>
+                                <span className="jh-product-status"><i /> Beta · $4.990 CLP lanzamiento</span>
                             </div>
                         </div>
                         <div className="jh-product-dashboard">
@@ -356,17 +356,18 @@ export default function Home() {
 
                 <section className="jh-contact" id="contacto" aria-labelledby="contact-title">
                     <span className="jh-eyebrow">Conversemos</span>
-                    <h2 id="contact-title">Si tienes un problema interesante, una idea o simplemente curiosidad, hablemos.</h2>
-                    <p>La siguiente etapa integrará el canal de contacto definitivo y las herramientas comerciales. Primero quiero que la experiencia y el mensaje sean correctos.</p>
-                    <a className="jh-button jh-button-primary" href="https://github.com/fjcamp" target="_blank" rel="noreferrer">
-                        Ver mi GitHub <ArrowIcon />
-                    </a>
+                    <h2 id="contact-title">Si tienes un problema, una idea o quieres probar una herramienta, escríbeme.</h2>
+                    <p>Trabajo de forma independiente y prefiero entender primero el problema. Puedes contarme tu proyecto, pedirme información sobre Control Gastronómico Express o simplemente iniciar una conversación.</p>
+                    <div className="jh-actions">
+                        <a className="jh-button jh-button-primary" href="mailto:info@joinhook.cl?subject=Conversemos%20desde%20JoinHook">Escribirme <ArrowIcon /></a>
+                        <a className="jh-button jh-button-soft" href="https://github.com/fjcamp" target="_blank" rel="noreferrer">Ver mi GitHub</a>
+                    </div>
                 </section>
 
                 <footer className="jh-footer">
                     <a className="jh-brand" href="#inicio"><span className="jh-brand-mark">JH</span><span>JoinHook</span></a>
                     <p>Un espacio independiente para diseñar, construir y aprender.</p>
-                    <span>© {new Date().getFullYear()} Francisco Javier Campos</span>
+                    <span>© {new Date().getFullYear()} Francisco Javier Campos · <a href="/privacidad">Privacidad</a></span>
                 </footer>
             </main>
         </>

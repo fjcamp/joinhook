@@ -9,6 +9,7 @@ import '../css/redesign-light.css';
 import '../css/cge.css';
 import '../css/cge-v02.css';
 import '../css/cge-pwa.css';
+import '../css/cge-launch.css';
 
 export default function MyApp({ Component, pageProps }) {
     const { global, ...page } = pageProps || {};
