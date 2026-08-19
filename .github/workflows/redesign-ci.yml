@@ -65,6 +65,9 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/cge-manifest.webmanifest
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/cge-sw.js
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/icons/cge-icon.svg
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/icons/cge-icon-192.png
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/icons/cge-icon-512.png
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/plantillas/control-gastronomico-inventario.csv
 
       - name: Verify baseline security headers
         run: |
