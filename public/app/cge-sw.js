@@ -1,9 +1,12 @@
-const CACHE_NAME = 'cge-shell-v3';
+const CACHE_NAME = 'cge-shell-v4';
 const APP_ROUTE = '/app/control-gastronomico-express';
 const APP_SHELL = [
   APP_ROUTE,
   '/cge-manifest.webmanifest',
-  '/icons/cge-icon.svg'
+  '/icons/cge-icon.svg',
+  '/icons/cge-icon-192.png',
+  '/icons/cge-icon-512.png',
+  '/plantillas/control-gastronomico-inventario.csv'
 ];
 
 self.addEventListener('install', (event) => {
@@ -56,7 +59,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname.startsWith('/_next/') || url.pathname.startsWith('/icons/') || url.pathname.endsWith('.webmanifest')) {
+  if (
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/icons/') ||
+    url.pathname.startsWith('/plantillas/') ||
+    url.pathname.endsWith('.webmanifest')
+  ) {
     event.respondWith(staleWhileRevalidate(request));
   }
 });
