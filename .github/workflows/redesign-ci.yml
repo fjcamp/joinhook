@@ -227,10 +227,15 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Install Playwright for QA only
+      - name: Install Playwright API for QA only
+        run: npm install --no-save --package-lock=false playwright@1.62.1
+
+      - name: Resolve preinstalled Chromium
         run: |
-          npm install --no-save --package-lock=false playwright@1.62.1
-          npx playwright install --with-deps chromium
+          CHROME_BIN="$(command -v chromium || command -v google-chrome || command -v google-chrome-stable)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
 
       - name: Start browser QA server
         run: |
