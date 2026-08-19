@@ -58,9 +58,13 @@ export type Movement = {
     note?: string;
 };
 
+export type CGEMode = 'demo' | 'real';
+
 export type CGEState = {
     version: 1;
     businessName: string;
+    mode?: CGEMode;
+    onboardingCompleted?: boolean;
     products: Product[];
     suppliers: Supplier[];
     purchases: Purchase[];
