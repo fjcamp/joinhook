@@ -1,53 +1,142 @@
-# Netlify Developer Portfolio Starter (auto-annotated)
+# JoinHook
 
-![Developer Portfolio](https://assets.stackbit.com/docs/personal-nextjs-starter-thumb.png)
+JoinHook es mi espacio independiente para investigar, diseñar y construir productos digitales, sistemas de gestión, PWA y experimentos de interfaz.
 
-This is a full-fledged portfolio website built with Next.js, Tailwind CSS, [visual editor](https://docs.netlify.com/visual-editor/overview/) and the [Git Content Source](https://docs.netlify.com/create/content-sources/git/).
+Detrás del proyecto estoy yo, **Francisco Javier Campos**. No intento presentar JoinHook como una gran compañía: el objetivo es mostrar trabajo real, proyectos en construcción, aprendizajes y herramientas que puedan resolver problemas concretos.
 
-The codebase showcases **how to apply annotations at scale**, meaning: how to make much of your components [highlightable in the visual editor](https://docs.netlify.com/visual-editor/visual-editing/inline-editor/) through data attributes without manually adding code throughout the codebase.
+## Estado
 
-**This is achieved by:**
+La nueva versión del sitio se desarrolla en la rama `redesign-v2` y todavía no se fusiona a `main` hasta completar staging y el gate de publicación.
 
-1. Adding an annotation property to the content objects at they're loaded (see `src/utils/content.ts`)
-1. When rendering the page, each content sub-object is dynamically matched to the appropriate component. At this point, wrap each component with an annotation, based on the abovementioned content property. See `src/components/components-registry.tsx`.
+Proyecto principal en lanzamiento:
 
-**⚡ Demo:** [auto-annotated-portfolio.netlify.app](https://auto-annotated-portfolio.netlify.app)
+### Control Gastronómico Express — Beta 0.3
 
-## Deploying to Netlify
+Herramienta local-first para pequeños negocios gastronómicos que necesitan ordenar:
 
-If you click "Deploy to Netlify" button, it will create a new repo for you that looks exactly like this one, and sets that repo up immediately for deployment on Netlify.
+- inventario y stock mínimo;
+- compras y entradas de mercadería;
+- mermas y sus causas;
+- proveedores;
+- ajustes trazables de inventario;
+- sugerencias simples de reposición;
+- importación/exportación CSV;
+- respaldo y restauración JSON;
+- uso como PWA y continuidad local.
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/auto-annotated-portfolio)
+La beta guarda los datos operativos en el navegador del dispositivo. No utiliza todavía cuentas, sincronización cloud ni una base de datos de JoinHook.
 
-## Getting Started
+## Otros proyectos visibles en JoinHook
 
-The typical development process is to begin by working locally. Clone this repository, then run `npm install` in its root directory.
+- **JoinOps** — sistema modular de gestión y operaciones en desarrollo.
+- **SnowWise** — experiencia digital para montaña, clima y seguridad.
+- **Mi Gestión** — exploración de organización, indicadores y procesos administrativos.
 
-Run the Next.js development server:
+Los estados de los proyectos se muestran de forma explícita; estar en desarrollo, prototipo o beta es parte de la información del proyecto.
 
-```txt
-cd auto-annotated-portfolio
+## Stack actual
+
+- Next.js 16.3
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- PWA / Service Worker para Control Gastronómico Express
+- GitHub como fuente de verdad
+- Netlify preparado para despliegue mediante OpenNext
+
+## Desarrollo local
+
+Requisitos recomendados:
+
+- Node.js 20.20.2
+- npm
+
+```bash
+npm ci
 npm run dev
 ```
 
-Install the [Netlify visual editor CLI](https://www.npmjs.com/package/@stackbit/cli). Then open a new terminal window in the same project directory and run the Netlify visual editor dev server:
+Abrir después:
 
 ```txt
-npm install -g @stackbit/cli
-stackbit dev
+http://localhost:3000
 ```
 
-This outputs your own Netlify visual editor URL. Open this, register or sign in, and you will be directed to Netlify's visual editor for your new project.
+Build de producción:
 
-![Next.js Dev + Netlify visual editor dev](https://assets.stackbit.com/docs/next-dev-stackbit-dev.png)
+```bash
+npm run build
+npm run start
+```
 
-## Next Steps
+## Rutas principales
 
-Here are a few suggestions on what to do next if you're new to Netlify Visual Editor:
+```txt
+/                                           JoinHook V2
+/herramientas/control-gastronomico-express  Landing comercial
+/app/control-gastronomico-express           Aplicación Beta 0.3
+/privacidad                                 Política de privacidad
+/condiciones-beta                           Condiciones de la beta
+```
 
-- Learn [how Netlify Visual Editor works](https://docs.netlify.com/visual-editor/overview/)
-- Check [Netlify visual editor reference documentation](https://visual-editor-reference.netlify.com/)
+El contenido ficticio del starter anterior (`/info`, `/blog`, `/projects` y ejemplos) está despublicado y sus rutas responden 404.
 
-## Support
+## Calidad y seguridad
 
-If you get stuck along the way, get help in our [support forums](https://answers.netlify.com/).
+El pipeline de CI de `redesign-v2` comprueba actualmente:
+
+- auditoría completa de dependencias;
+- auditoría de dependencias runtime;
+- ESLint;
+- build de Next.js;
+- presupuesto interno de JavaScript cliente;
+- arranque real del servidor;
+- smoke tests de rutas públicas y activos PWA;
+- rutas heredadas despublicadas;
+- headers base y Content-Security-Policy.
+
+El proyecto mantiene el checkout de Control Gastronómico Express **deshabilitado por defecto**. Un enlace de pago solo puede activarse cuando están configurados de forma explícita el enlace HTTPS y los datos públicos del vendedor. No se deben guardar tokens, claves privadas ni credenciales de pagos en variables `NEXT_PUBLIC_*` ni en el repositorio.
+
+## Flujo de ramas
+
+```txt
+feature / release branch
+        ↓
+    redesign-v2
+        ↓
+      staging
+        ↓
+       main
+        ↓
+   joinhook.cl
+```
+
+`main` no debe recibir el rediseño hasta aprobar staging en escritorio/móvil, PWA/offline, seguridad, rendimiento y flujo comercial.
+
+## Despliegue
+
+`netlify.toml` mantiene únicamente la configuración necesaria para el build de Next.js. El proyecto deja que Netlify aplique automáticamente su adaptador OpenNext actual.
+
+El primer despliegue de validación debe realizarse desde la rama:
+
+```txt
+redesign-v2
+```
+
+sin reemplazar producción hasta terminar las pruebas.
+
+## Documentación de lanzamiento
+
+- `docs/cge-launch-kit-v1.md` — estrategia orgánica, guiones y primera semana de contenidos.
+- `docs/cge-checkout-config.md` — requisitos para habilitar el checkout de forma segura.
+- Issue **#13** — checklist GO/NO-GO para staging, producción y primeras ventas.
+
+## Contacto
+
+Para conversaciones relacionadas con JoinHook o Control Gastronómico Express:
+
+`info@joinhook.cl`
+
+---
+
+**JoinHook es un proyecto independiente en evolución.** La prioridad es construir, probar con usuarios reales y mejorar antes de agregar complejidad innecesaria.
