@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import Link from 'next/link';
 
 export default function ControlGastronomicoExpress() {
     return (
@@ -14,21 +15,21 @@ export default function ControlGastronomicoExpress() {
 
             <main className="jh-site">
                 <header className="jh-header">
-                    <a className="jh-brand" href="/" aria-label="Volver a JoinHook">
+                    <Link className="jh-brand" href="/" aria-label="Volver a JoinHook">
                         <span className="jh-brand-mark" aria-hidden="true">JH</span>
                         <span>JoinHook</span>
-                    </a>
+                    </Link>
                     <nav className="jh-nav" aria-label="Navegación del producto">
                         <a href="#que-resuelve">Qué resuelve</a>
                         <a href="#incluye">Qué incluye</a>
                         <a href="#mvp">MVP</a>
                     </nav>
-                    <a className="jh-header-cta" href="#interes">Quiero probarlo</a>
+                    <Link className="jh-header-cta" href="/app/control-gastronomico-express">Abrir demo</Link>
                 </header>
 
                 <section className="jh-hero" style={{ minHeight: '720px' }}>
                     <div className="jh-hero-copy">
-                        <div className="jh-kicker"><span className="jh-status-dot" /> Herramienta JoinHook · lanzamiento inicial</div>
+                        <div className="jh-kicker"><span className="jh-status-dot" /> Herramienta JoinHook · MVP en validación</div>
                         <h1 style={{ fontSize: 'clamp(3.2rem, 6vw, 6.3rem)' }}>
                             Controla tu negocio gastronómico <span>sin complicarlo más.</span>
                         </h1>
@@ -36,12 +37,12 @@ export default function ControlGastronomicoExpress() {
                             Control Gastronómico Express está pensado para restaurantes pequeños, cafeterías, pastelerías, panaderías, food trucks y emprendimientos que necesitan ordenar inventario, compras y mermas sin comenzar con un ERP completo ni pagar otra mensualidad.
                         </p>
                         <div className="jh-actions">
-                            <a className="jh-button jh-button-primary" href="#interes">Quiero acceso al lanzamiento</a>
+                            <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar el MVP</Link>
                             <a className="jh-button jh-button-soft" href="#incluye">Ver qué incluye</a>
                         </div>
                         <div className="jh-hero-footnotes">
                             <span>Simple de comenzar</span>
-                            <span>Sin mensualidad en el MVP</span>
+                            <span>Datos locales en el MVP</span>
                             <span>Pensado para Chile</span>
                         </div>
                     </div>
@@ -83,8 +84,9 @@ export default function ControlGastronomicoExpress() {
                         <div className="jh-product-copy">
                             <span className="jh-eyebrow">MVP inicial</span>
                             <h2>Lo necesario para empezar. Nada de relleno.</h2>
-                            <p>Dashboard, inventario, stock mínimo, entradas, salidas, ajustes, mermas clasificadas, proveedores e indicadores simples. La guía rápida permitirá comenzar sin una implementación larga.</p>
-                            <div className="jh-tags"><span>Dashboard</span><span>Inventario</span><span>Compras</span><span>Mermas</span><span>Proveedores</span></div>
+                            <p>Dashboard, inventario, stock mínimo, compras, mermas clasificadas, proveedores, historial de movimientos y respaldo. La primera versión trabaja localmente para que podamos validar el flujo sin sumar backend, cuentas ni costos innecesarios.</p>
+                            <div className="jh-tags"><span>Dashboard</span><span>Inventario</span><span>Compras</span><span>Mermas</span><span>Proveedores</span><span>Respaldo</span></div>
+                            <div className="jh-actions"><Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Abrir Control Gastronómico</Link></div>
                         </div>
                         <div className="jh-about-quote jh-surface">
                             <span>“</span>
@@ -96,7 +98,7 @@ export default function ControlGastronomicoExpress() {
                 <section className="jh-section" id="mvp">
                     <div className="jh-section-heading">
                         <div><span className="jh-eyebrow">Evolución</span><h2>Primero validar. Después crecer.</h2></div>
-                        <p>Si esta herramienta demuestra uso real, la experiencia puede evolucionar hacia una aplicación web más completa sin obligar al primer usuario a financiar funciones que no necesita.</p>
+                        <p>Si esta herramienta demuestra uso real, puede evolucionar hacia sincronización en nube, cuentas, multi-dispositivo, recetas y producción. Esas funciones entrarán después de probar que la base realmente ayuda.</p>
                     </div>
                 </section>
 
@@ -104,7 +106,11 @@ export default function ControlGastronomicoExpress() {
                     <span className="jh-eyebrow">Lanzamiento</span>
                     <h2>¿Tienes un negocio gastronómico y quieres probar la primera versión?</h2>
                     <p>Estoy buscando los primeros usuarios para validar que la herramienta sea realmente simple y útil antes de agregar más funciones.</p>
-                    <div className="jh-actions"><a className="jh-button jh-button-primary" href="mailto:info@joinhook.cl?subject=Control%20Gastronómico%20Express">Quiero participar</a><a className="jh-button jh-button-soft" href="/">Volver a JoinHook</a></div>
+                    <div className="jh-actions">
+                        <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar MVP</Link>
+                        <a className="jh-button jh-button-soft" href="mailto:info@joinhook.cl?subject=Control%20Gastronómico%20Express">Contarme mi caso</a>
+                        <Link className="jh-button jh-button-soft" href="/">Volver a JoinHook</Link>
+                    </div>
                 </section>
 
                 <footer className="jh-footer"><span>JoinHook · proyecto independiente</span><span>Diseñado y construido por Francisco Javier Campos</span></footer>
