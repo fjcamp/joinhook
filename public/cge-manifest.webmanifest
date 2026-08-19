@@ -1,0 +1,22 @@
+{
+  "name": "Control Gastronómico Express",
+  "short_name": "Control Gastro",
+  "description": "Inventario, compras, mermas y proveedores para pequeños negocios gastronómicos.",
+  "id": "/app/control-gastronomico-express",
+  "start_url": "/app/control-gastronomico-express?source=pwa",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eee8dc",
+  "theme_color": "#728d78",
+  "lang": "es-CL",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/cge-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
