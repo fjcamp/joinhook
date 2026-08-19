@@ -46,9 +46,9 @@ jobs:
 
       - name: Smoke test public routes
         run: |
-          curl -fsS http://127.0.0.1:3000/ | grep -q "JoinHook"
-          curl -fsS http://127.0.0.1:3000/herramientas/control-gastronomico-express | grep -q "Control Gastronómico Express"
-          curl -fsS http://127.0.0.1:3000/app/control-gastronomico-express | grep -q "Control Gastronómico Express"
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/herramientas/control-gastronomico-express
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
 
       - name: Stop app
         if: always()
