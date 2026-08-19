@@ -30,3 +30,29 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Start app for smoke tests
+        run: |
+          npm run start -- -p 3000 > /tmp/joinhook-next.log 2>&1 &
+          echo $! > /tmp/joinhook-next.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/joinhook-next.log
+          exit 1
+
+      - name: Smoke test public routes
+        run: |
+          curl -fsS http://127.0.0.1:3000/ | grep -q "JoinHook"
+          curl -fsS http://127.0.0.1:3000/herramientas/control-gastronomico-express | grep -q "Control Gastronómico Express"
+          curl -fsS http://127.0.0.1:3000/app/control-gastronomico-express | grep -q "Control Gastronómico Express"
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/joinhook-next.pid ]; then
+            kill "$(cat /tmp/joinhook-next.pid)" || true
+          fi
