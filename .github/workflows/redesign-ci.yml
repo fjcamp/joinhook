@@ -40,6 +40,21 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check client JavaScript budget
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import gzip
+
+          files = list(Path('.next/static').rglob('*.js'))
+          total = sum(len(gzip.compress(path.read_bytes(), compresslevel=9)) for path in files)
+          limit = 1_500_000
+          print(f'Client JS gzip total: {total / 1024:.1f} KiB across {len(files)} files')
+          print(f'Internal budget: {limit / 1024:.1f} KiB')
+          if total > limit:
+              raise SystemExit('Client JavaScript budget exceeded')
+          PY
+
       - name: Start app for smoke tests
         run: |
           npm run start -- -p 3000 > /tmp/joinhook-next.log 2>&1 &
@@ -72,6 +87,9 @@ jobs:
       - name: Verify baseline security headers
         run: |
           curl --fail --silent --show-error --dump-header /tmp/headers.txt --output /dev/null http://127.0.0.1:3000/
+          grep -qi '^content-security-policy:' /tmp/headers.txt
+          grep -qi "default-src 'self'" /tmp/headers.txt
+          grep -qi "object-src 'none'" /tmp/headers.txt
           grep -qi '^x-content-type-options: nosniff' /tmp/headers.txt
           grep -qi '^referrer-policy: strict-origin-when-cross-origin' /tmp/headers.txt
           grep -qi '^x-frame-options: SAMEORIGIN' /tmp/headers.txt
