@@ -2,5 +2,6 @@
   publish = ".next"
   command = "npm run build"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+[build.environment]
+  NODE_VERSION = "20.20.2"
+  NETLIFY_NEXT_SKEW_PROTECTION = "true"
