@@ -30,9 +30,26 @@ export function createDemoState(): CGEState {
 
     return {
         version: 1,
-        businessName: 'Mi negocio gastronómico',
+        businessName: '',
+        mode: 'demo',
+        onboardingCompleted: false,
         products,
         suppliers: [s1, s2, s3],
+        purchases: [],
+        wastes: [],
+        movements: [],
+        lastSavedAt: now()
+    };
+}
+
+export function createBlankState(businessName = ''): CGEState {
+    return {
+        version: 1,
+        businessName,
+        mode: 'real',
+        onboardingCompleted: true,
+        products: [],
+        suppliers: [],
         purchases: [],
         wastes: [],
         movements: [],
@@ -46,7 +63,12 @@ export function loadState(): CGEState {
     if (!raw) return createDemoState();
     try {
         const parsed = JSON.parse(raw) as CGEState;
-        return parsed?.version === 1 ? parsed : createDemoState();
+        if (parsed?.version !== 1) return createDemoState();
+        return {
+            ...parsed,
+            mode: parsed.mode || 'demo',
+            onboardingCompleted: parsed.onboardingCompleted ?? false
+        };
     } catch {
         return createDemoState();
     }
