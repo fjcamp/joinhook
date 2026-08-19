@@ -245,7 +245,7 @@ export default function Home() {
                             </div>
                         </div>
 
-                        <div className="jh-project-deck" role="list" aria-label="Proyectos JoinHook">
+                        <div className="jh-project-deck" aria-label="Proyectos JoinHook">
                             {projects.map((item, index) => {
                                 const offset = index - activeProject;
                                 return (
@@ -256,7 +256,6 @@ export default function Home() {
                                         onClick={() => setActiveProject(index)}
                                         style={{ '--card-offset': offset } as CSSProperties}
                                         aria-pressed={index === activeProject}
-                                        role="listitem"
                                     >
                                         <div className="jh-project-card-top">
                                             <span>{item.name}</span>
