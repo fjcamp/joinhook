@@ -6,14 +6,11 @@ type InstallPromptEvent = Event & {
 };
 
 export function CGEPwaStatus() {
-    const [online, setOnline] = useState(true);
+    const [online, setOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);
     const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
-    const [installed, setInstalled] = useState(false);
+    const [installed, setInstalled] = useState(() => typeof window === 'undefined' ? false : window.matchMedia('(display-mode: standalone)').matches);
 
     useEffect(() => {
-        setOnline(navigator.onLine);
-        setInstalled(window.matchMedia('(display-mode: standalone)').matches);
-
         const goOnline = () => setOnline(true);
         const goOffline = () => setOnline(false);
         const captureInstall = (event: Event) => {
