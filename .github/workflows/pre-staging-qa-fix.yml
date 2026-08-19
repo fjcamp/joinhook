@@ -1,0 +1,65 @@
+name: Apply pre-staging QA fixes
+
+on:
+  push:
+    branches:
+      - release/pre-staging-qa
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/pre-staging-qa
+
+      - name: Apply focused QA fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          pwa = Path('src/features/cge/pwa.tsx')
+          text = pwa.read_text(encoding='utf-8')
+          text = text.replace(
+              "    const [online, setOnline] = useState(true);\n    const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);\n    const [installed, setInstalled] = useState(false);\n\n    useEffect(() => {\n        setOnline(navigator.onLine);\n        setInstalled(window.matchMedia('(display-mode: standalone)').matches);\n",
+              "    const [online, setOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);\n    const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);\n    const [installed, setInstalled] = useState(() => typeof window === 'undefined' ? false : window.matchMedia('(display-mode: standalone)').matches);\n\n    useEffect(() => {\n"
+          )
+          pwa.write_text(text, encoding='utf-8')
+
+          app = Path('src/pages/app/control-gastronomico-express.tsx')
+          text = app.read_text(encoding='utf-8')
+          old = """    useEffect(() => {\n        const loaded = loadState();\n        setState(loaded);\n        if (!loaded.onboardingCompleted) {\n            setOnboardingName(loaded.businessName || '');\n            setOnboardingOpen(true);\n        }\n    }, []);"""
+          new = """    useEffect(() => {\n        const frame = window.requestAnimationFrame(() => {\n            const loaded = loadState();\n            setState(loaded);\n            if (!loaded.onboardingCompleted) {\n                setOnboardingName(loaded.businessName || '');\n                setOnboardingOpen(true);\n            }\n        });\n        return () => window.cancelAnimationFrame(frame);\n    }, []);"""
+          if old not in text:
+              raise SystemExit('CGE hydration effect marker not found')
+          app.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          ci = Path('.github/workflows/redesign-ci.yml')
+          text = ci.read_text(encoding='utf-8')
+          marker = """      - name: Start app for smoke tests\n        run: |\n"""
+          validation = """      - name: Validate PWA manifest and offline shell\n        run: |\n          python - <<'PY2'\n          import json\n          from pathlib import Path\n\n          manifest = json.loads(Path('public/cge-manifest.webmanifest').read_text(encoding='utf-8'))\n          assert manifest['start_url'] == '/app/control-gastronomico-express'\n          assert manifest['display'] == 'standalone'\n          sizes = {icon.get('sizes') for icon in manifest.get('icons', [])}\n          assert {'192x192', '512x512'} <= sizes\n\n          sw = Path('public/app/cge-sw.js').read_text(encoding='utf-8')\n          required = [\n              '/app/control-gastronomico-express',\n              '/cge-manifest.webmanifest',\n              '/icons/cge-icon.svg',\n              '/icons/cge-icon-192.png',\n              '/icons/cge-icon-512.png',\n              '/plantillas/control-gastronomico-inventario.csv'\n          ]\n          for asset in required:\n              assert asset in sw, f'Missing offline shell asset: {asset}'\n          print('PWA manifest and offline shell validated')\n          PY2\n\n"""
+          if marker not in text:
+              raise SystemExit('CI start marker not found')
+          text = text.replace(marker, validation + marker, 1)
+
+          smoke_marker = """          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/herramientas/control-gastronomico-express\n"""
+          smoke_replacement = """          curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-landing.html\n          grep -q 'Solicitar pack fundador' /tmp/cge-landing.html\n"""
+          if smoke_marker not in text:
+              raise SystemExit('Landing smoke marker not found')
+          text = text.replace(smoke_marker, smoke_replacement, 1)
+
+          text += """\n  commercial-checkout:\n    runs-on: ubuntu-latest\n    env:\n      NEXT_PUBLIC_CGE_CHECKOUT_ENABLED: 'true'\n      NEXT_PUBLIC_CGE_CHECKOUT_URL: 'https://example.com/cge-qa-checkout'\n      NEXT_PUBLIC_SELLER_NAME: 'Proveedor QA JoinHook'\n      NEXT_PUBLIC_SELLER_RUT: '00.000.000-0'\n      NEXT_PUBLIC_SELLER_EMAIL: 'qa@example.com'\n      NEXT_PUBLIC_SELLER_ADDRESS: 'Dirección QA no comercial'\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v6\n\n      - name: Setup Node.js\n        uses: actions/setup-node@v6\n        with:\n          node-version: 20.20.2\n          cache: npm\n\n      - name: Install dependencies\n        run: npm ci\n\n      - name: Build with checkout enabled using QA-only public data\n        run: npm run build\n\n      - name: Start QA commercial build\n        run: |\n          npm run start -- -p 3001 > /tmp/joinhook-commercial.log 2>&1 &\n          echo $! > /tmp/joinhook-commercial.pid\n          for i in {1..30}; do\n            if curl -fsS http://127.0.0.1:3001/herramientas/control-gastronomico-express > /tmp/cge-commercial.html; then\n              exit 0\n            fi\n            sleep 1\n          done\n          cat /tmp/joinhook-commercial.log\n          exit 1\n\n      - name: Verify enabled checkout state\n        run: |\n          grep -q 'Comprar pack fundador' /tmp/cge-commercial.html\n          grep -q 'Proveedor QA JoinHook' /tmp/cge-commercial.html\n          grep -q 'https://example.com/cge-qa-checkout' /tmp/cge-commercial.html\n\n      - name: Stop QA commercial build\n        if: always()\n        run: |\n          if [ -f /tmp/joinhook-commercial.pid ]; then\n            kill \"$(cat /tmp/joinhook-commercial.pid)\" || true\n          fi\n"""
+          ci.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit QA fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/features/cge/pwa.tsx src/pages/app/control-gastronomico-express.tsx .github/workflows/redesign-ci.yml
+          git commit -m "fix(qa): corregir hidratación y ampliar gates pre-staging [skip ci]"
+          git push origin HEAD:release/pre-staging-qa
