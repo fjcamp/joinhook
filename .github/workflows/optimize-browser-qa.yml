@@ -1,0 +1,63 @@
+name: Optimize browser QA runner
+
+on:
+  push:
+    branches:
+      - release/browser-qa
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/browser-qa
+
+      - name: Reuse preinstalled Chromium
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/redesign-ci.yml')
+          text = workflow.read_text(encoding='utf-8')
+          old = """      - name: Install Playwright for QA only
+        run: |
+          npm install --no-save --package-lock=false playwright@1.62.1
+          npx playwright install --with-deps chromium
+"""
+          new = """      - name: Install Playwright API for QA only
+        run: npm install --no-save --package-lock=false playwright@1.62.1
+
+      - name: Resolve preinstalled Chromium
+        run: |
+          CHROME_BIN=\"$(command -v chromium || command -v google-chrome || command -v google-chrome-stable)\"
+          test -n \"$CHROME_BIN\"
+          echo \"CHROME_BIN=$CHROME_BIN\" >> \"$GITHUB_ENV\"
+          \"$CHROME_BIN\" --version
+"""
+          if old not in text:
+              raise SystemExit('Playwright install block not found')
+          workflow.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          wrapper = Path('scripts/browser-qa.cjs')
+          wrapper.write_text("""const playwright = require('playwright');
+const originalLaunch = playwright.chromium.launch.bind(playwright.chromium);
+playwright.chromium.launch = (options = {}) => originalLaunch({ ...options, executablePath: process.env.CHROME_BIN });
+require('./browser-qa.js');
+""", encoding='utf-8')
+          PY
+
+      - name: Remove this temporary workflow
+        run: rm .github/workflows/optimize-browser-qa.yml
+
+      - name: Commit optimization
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/redesign-ci.yml scripts/browser-qa.cjs .github/workflows/optimize-browser-qa.yml
+          git commit -m "test(browser): reutilizar Chromium preinstalado [skip ci]"
+          git push origin HEAD:release/browser-qa
