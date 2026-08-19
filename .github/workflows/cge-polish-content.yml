@@ -1,0 +1,52 @@
+name: Polish CGE release labels
+
+on:
+  push:
+    branches:
+      - release/cge-final-polish
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/cge-final-polish
+
+      - name: Align beta labels
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/pages/app/control-gastronomico-express.tsx')
+          text = path.read_text(encoding='utf-8')
+          replacements = {
+              'JoinHook · MVP 0.2': 'JoinHook · Beta 0.3',
+              'MVP local-first para inventario, compras, mermas y proveedores de pequeños negocios gastronómicos.': 'Beta local-first para inventario, compras, mermas y proveedores de pequeños negocios gastronómicos.',
+              'acumulado del MVP': 'acumulado de la beta',
+              'Este MVP guarda todo localmente en este navegador.': 'Esta beta guarda todo localmente en este navegador.',
+              'Privacidad del MVP': 'Privacidad de la beta',
+              'durante el MVP.': 'durante esta beta.'
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  print(f'Warning: not found: {old}')
+              text = text.replace(old, new)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit aligned labels
+        run: |
+          if git diff --quiet -- src/pages/app/control-gastronomico-express.tsx; then
+            echo "No text changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/app/control-gastronomico-express.tsx
+          git commit -m "chore(cge): alinear versión Beta 0.3 [skip ci]"
+          git push origin HEAD:release/cge-final-polish
