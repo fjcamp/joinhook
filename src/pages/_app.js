@@ -25,10 +25,12 @@ export default function MyApp({ Component, pageProps }) {
 
     return (
         <>
+            <Head>
+                <link rel="icon" href={isCGEApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
+            </Head>
             {isCGEApp && (
                 <Head>
                     <link rel="manifest" href="/cge-manifest.webmanifest" />
-                    <link rel="icon" href="/icons/cge-icon.svg" type="image/svg+xml" />
                     <meta name="application-name" content="Control Gastronómico Express" />
                     <meta name="apple-mobile-web-app-capable" content="yes" />
                     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
