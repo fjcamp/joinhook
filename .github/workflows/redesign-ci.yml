@@ -98,7 +98,7 @@ jobs:
         run: |
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
           curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-landing.html
-          grep -q 'Solicitar pack fundador' /tmp/cge-landing.html
+          grep -Fq 'Solicitar pack fundador' /tmp/cge-landing.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
@@ -183,9 +183,18 @@ jobs:
 
       - name: Verify enabled checkout state
         run: |
-          grep -q 'Comprar pack fundador' /tmp/cge-commercial.html
-          grep -q 'Proveedor QA JoinHook' /tmp/cge-commercial.html
-          grep -q 'https://example.com/cge-qa-checkout' /tmp/cge-commercial.html
+          echo 'Rendered commercial markers:'
+          grep -oE '(Comprar|Solicitar) pack fundador[^<]*|Proveedor QA JoinHook|cge-qa-checkout' /tmp/cge-commercial.html || true
+          for pattern in 'Comprar pack fundador' 'Proveedor QA JoinHook' 'cge-qa-checkout'; do
+            if ! grep -Fq "$pattern" /tmp/cge-commercial.html; then
+              echo "Missing expected commercial marker: $pattern"
+              exit 1
+            fi
+          done
+          if grep -Fq 'Solicitar pack fundador' /tmp/cge-commercial.html; then
+            echo 'Checkout-enabled build must not render the fallback CTA'
+            exit 1
+          fi
 
       - name: Stop QA commercial build
         if: always()
