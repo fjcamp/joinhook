@@ -1,5 +1,3 @@
-import { ConfigModel } from '.stackbit/models/Config';
-import { ThemeStyleModel } from '.stackbit/models/ThemeStyle';
 import {
     Config,
     ContentObject,
@@ -16,11 +14,14 @@ import {
 } from '@/types';
 import { deepMapObject } from './data-utils';
 
+const CONFIG_MODEL_NAME = 'Config';
+const THEME_STYLE_MODEL_NAME = 'ThemeStyle';
+
 export function resolveStaticProps(urlPath: string, allData: ContentObject[]): PageComponentProps {
     const originalPage = allData.find((obj) => obj.__metadata.urlPath === urlPath);
     const globalProps: GlobalProps = {
-        site: allData.find((obj) => obj.__metadata.modelName === ConfigModel.name) as Config,
-        theme: allData.find((obj) => obj.__metadata.modelName === ThemeStyleModel.name) as ThemeStyle
+        site: allData.find((obj) => obj.__metadata.modelName === CONFIG_MODEL_NAME) as Config,
+        theme: allData.find((obj) => obj.__metadata.modelName === THEME_STYLE_MODEL_NAME) as ThemeStyle
     };
 
     function enrichContent(value: any) {
