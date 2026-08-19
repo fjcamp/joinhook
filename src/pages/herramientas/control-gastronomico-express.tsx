@@ -1,16 +1,75 @@
 import Head from 'next/head';
 import Link from 'next/link';
 
+const purchaseMail = 'mailto:info@joinhook.cl?subject=Quiero%20comprar%20Control%20Gastron%C3%B3mico%20Express&body=Hola%20Francisco%2C%0A%0AQuiero%20solicitar%20el%20acceso%20de%20lanzamiento%20a%20Control%20Gastron%C3%B3mico%20Express%20por%20%244.990%20CLP.%0A%0AMi%20negocio%20es%3A%20%0ACiudad%3A%20%0A%0AGracias.';
+
+const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Control Gastronómico Express',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web, PWA',
+    description: 'Herramienta local-first para pequeños negocios gastronómicos con inventario, compras, mermas, proveedores, alertas y respaldo.',
+    url: 'https://joinhook.cl/herramientas/control-gastronomico-express',
+    author: {
+        '@type': 'Person',
+        name: 'Francisco Javier Campos',
+        url: 'https://joinhook.cl/'
+    },
+    offers: {
+        '@type': 'Offer',
+        priceCurrency: 'CLP',
+        price: '4990',
+        availability: 'https://schema.org/PreOrder',
+        url: 'https://joinhook.cl/herramientas/control-gastronomico-express'
+    }
+};
+
+const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+        {
+            '@type': 'Question',
+            name: '¿Necesito pagar una mensualidad?',
+            acceptedAnswer: { '@type': 'Answer', text: 'La oferta inicial está planteada como pago único de lanzamiento, sin mensualidad para las funciones incluidas en esta versión.' }
+        },
+        {
+            '@type': 'Question',
+            name: '¿Dónde se guardan mis datos?',
+            acceptedAnswer: { '@type': 'Answer', text: 'La beta actual es local-first: los datos operativos se guardan en el navegador del dispositivo y no se sincronizan con una nube de JoinHook.' }
+        },
+        {
+            '@type': 'Question',
+            name: '¿Funciona sin internet?',
+            acceptedAnswer: { '@type': 'Answer', text: 'Después de una primera carga compatible, la PWA está preparada para continuar funcionando sin conexión en el dispositivo, sujeto a la prueba final de staging y navegador.' }
+        },
+        {
+            '@type': 'Question',
+            name: '¿Reemplaza un ERP, POS o sistema contable?',
+            acceptedAnswer: { '@type': 'Answer', text: 'No. Express se concentra en inventario, compras, mermas, proveedores y control operativo básico. No emite documentos tributarios ni reemplaza un sistema contable o POS.' }
+        }
+    ]
+};
+
 export default function ControlGastronomicoExpress() {
     return (
         <>
             <Head>
-                <title>Control Gastronómico Express | JoinHook</title>
+                <title>Control Gastronómico Express | Inventario y mermas para pequeños negocios</title>
                 <meta
                     name="description"
-                    content="Herramienta simple para pequeños negocios gastronómicos: inventario, compras, mermas, proveedores y dashboard sin mensualidad ni software complejo."
+                    content="Controla inventario, compras, mermas y proveedores sin partir por un ERP complejo. Control Gastronómico Express: beta PWA local-first, lanzamiento $4.990 CLP pago único."
                 />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <meta name="theme-color" content="#f3f0e8" />
                 <link rel="canonical" href="https://joinhook.cl/herramientas/control-gastronomico-express" />
+                <meta property="og:title" content="Control Gastronómico Express | JoinHook" />
+                <meta property="og:description" content="Inventario, compras, mermas y proveedores en una herramienta simple para pequeños negocios gastronómicos." />
+                <meta property="og:type" content="product" />
+                <meta property="og:url" content="https://joinhook.cl/herramientas/control-gastronomico-express" />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             </Head>
 
             <main className="jh-site">
@@ -22,28 +81,29 @@ export default function ControlGastronomicoExpress() {
                     <nav className="jh-nav" aria-label="Navegación del producto">
                         <a href="#que-resuelve">Qué resuelve</a>
                         <a href="#incluye">Qué incluye</a>
-                        <a href="#mvp">MVP</a>
+                        <a href="#precio">Precio</a>
+                        <a href="#faq">Preguntas</a>
                     </nav>
-                    <Link className="jh-header-cta" href="/app/control-gastronomico-express">Abrir demo</Link>
+                    <Link className="jh-header-cta" href="/app/control-gastronomico-express">Probar beta</Link>
                 </header>
 
-                <section className="jh-hero" style={{ minHeight: '720px' }}>
+                <section className="jh-hero jh-sales-hero">
                     <div className="jh-hero-copy">
-                        <div className="jh-kicker"><span className="jh-status-dot" /> Herramienta JoinHook · MVP en validación</div>
-                        <h1 style={{ fontSize: 'clamp(3.2rem, 6vw, 6.3rem)' }}>
-                            Controla tu negocio gastronómico <span>sin complicarlo más.</span>
+                        <div className="jh-kicker"><span className="jh-status-dot" /> Beta de lanzamiento · proyecto independiente</div>
+                        <h1 style={{ fontSize: 'clamp(3.1rem, 6vw, 6.2rem)' }}>
+                            Ordena tu negocio gastronómico <span>sin partir por un sistema enorme.</span>
                         </h1>
                         <p className="jh-hero-lead">
-                            Control Gastronómico Express está pensado para restaurantes pequeños, cafeterías, pastelerías, panaderías, food trucks y emprendimientos que necesitan ordenar inventario, compras y mermas sin comenzar con un ERP completo ni pagar otra mensualidad.
+                            Inventario, compras, mermas, proveedores y alertas de stock en una PWA simple. Pensada para restaurantes pequeños, cafeterías, pastelerías, panaderías, food trucks y emprendimientos que hoy necesitan control antes que complejidad.
                         </p>
                         <div className="jh-actions">
-                            <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar el MVP</Link>
-                            <a className="jh-button jh-button-soft" href="#incluye">Ver qué incluye</a>
+                            <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar gratis la beta</Link>
+                            <a className="jh-button jh-button-soft" href="#precio">Ver precio de lanzamiento</a>
                         </div>
                         <div className="jh-hero-footnotes">
-                            <span>Simple de comenzar</span>
-                            <span>Datos locales en el MVP</span>
-                            <span>Pensado para Chile</span>
+                            <span>PWA instalable</span>
+                            <span>Datos locales en esta beta</span>
+                            <span>Sin mensualidad en el lanzamiento</span>
                         </div>
                     </div>
 
@@ -64,15 +124,15 @@ export default function ControlGastronomicoExpress() {
 
                 <section className="jh-section" id="que-resuelve">
                     <div className="jh-section-heading">
-                        <div><span className="jh-eyebrow">Problema real</span><h2>Si no sabes qué tienes, qué pierdes o qué comprar, es difícil decidir.</h2></div>
-                        <p>La primera versión no intenta reemplazar la caja, el SII ni un ERP completo. Su objetivo es ayudarte a ordenar la base operativa con la menor fricción posible.</p>
+                        <div><span className="jh-eyebrow">El problema</span><h2>Vender no basta si no sabes qué tienes, qué perdiste y qué necesitas reponer.</h2></div>
+                        <p>Express no intenta reemplazar tu caja, el SII ni un ERP completo. Resuelve primero la capa operativa que suele terminar repartida entre cuadernos, mensajes y planillas.</p>
                     </div>
                     <div className="jh-capability-grid">
                         {[
-                            ['01', 'Inventario', 'Productos, unidades, stock actual y niveles mínimos.'],
-                            ['02', 'Compras', 'Registro de entradas y seguimiento básico de compras.'],
-                            ['03', 'Mermas', 'Qué se perdió, cuánto costó y por qué ocurrió.'],
-                            ['04', 'Proveedores', 'Información útil para volver a comprar con más contexto.']
+                            ['01', 'Inventario', 'Productos, unidades, stock actual, costos y niveles mínimos.'],
+                            ['02', 'Compras', 'Entradas de mercadería que actualizan el stock y dejan historial.'],
+                            ['03', 'Mermas', 'Registra qué se perdió, cuánto y por qué ocurrió.'],
+                            ['04', 'Proveedores', 'Mantén los contactos y el contexto necesario para volver a comprar.']
                         ].map(([n, title, text]) => (
                             <article className="jh-capability jh-surface" key={n}><span>{n}</span><h3>{title}</h3><p>{text}</p></article>
                         ))}
@@ -82,38 +142,82 @@ export default function ControlGastronomicoExpress() {
                 <section className="jh-section" id="incluye">
                     <div className="jh-product-panel jh-surface">
                         <div className="jh-product-copy">
-                            <span className="jh-eyebrow">MVP inicial</span>
-                            <h2>Lo necesario para empezar. Nada de relleno.</h2>
-                            <p>Dashboard, inventario, stock mínimo, compras, mermas clasificadas, proveedores, historial de movimientos y respaldo. La primera versión trabaja localmente para que podamos validar el flujo sin sumar backend, cuentas ni costos innecesarios.</p>
-                            <div className="jh-tags"><span>Dashboard</span><span>Inventario</span><span>Compras</span><span>Mermas</span><span>Proveedores</span><span>Respaldo</span></div>
-                            <div className="jh-actions"><Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Abrir Control Gastronómico</Link></div>
+                            <span className="jh-eyebrow">Incluido en la beta</span>
+                            <h2>Una base operativa que puedes empezar a usar en minutos.</h2>
+                            <p>Dashboard, inventario, compras, mermas, proveedores, ajustes trazables, sugerencias de reposición, importación/exportación CSV, respaldo JSON, onboarding y modo PWA.</p>
+                            <div className="jh-tags">
+                                <span>Dashboard</span><span>Inventario</span><span>Compras</span><span>Mermas</span><span>Proveedores</span><span>CSV</span><span>Respaldo</span><span>PWA</span>
+                            </div>
+                            <div className="jh-actions"><Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Abrir la aplicación</Link></div>
                         </div>
                         <div className="jh-about-quote jh-surface">
                             <span>“</span>
-                            <p>No quiero venderte un sistema enorme si todavía necesitas resolver algo mucho más simple.</p>
+                            <p>Primero quiero ayudarte a ver y ordenar lo básico. Si el negocio necesita más, recién ahí tiene sentido crecer.</p>
                         </div>
                     </div>
                 </section>
 
-                <section className="jh-section" id="mvp">
+                <section className="jh-section" id="precio">
+                    <div className="jh-sales-grid">
+                        <article className="jh-price-card jh-surface">
+                            <span className="jh-eyebrow">Oferta de lanzamiento</span>
+                            <h2>Control Gastronómico Express</h2>
+                            <div className="jh-price"><strong>$4.990</strong><span>CLP · pago único</span></div>
+                            <p>Acceso de lanzamiento a las funciones incluidas en esta versión. Sin mensualidad para este alcance inicial.</p>
+                            <ul className="jh-check-list">
+                                <li>Uso en navegador y PWA compatible</li>
+                                <li>Inventario, compras, mermas y proveedores</li>
+                                <li>Importación/exportación y respaldo local</li>
+                                <li>Actualizaciones correctivas de la beta</li>
+                                <li>Soporte inicial por correo</li>
+                            </ul>
+                            <div className="jh-actions">
+                                <a className="jh-button jh-button-primary" href={purchaseMail}>Solicitar compra por $4.990</a>
+                                <Link className="jh-button jh-button-soft" href="/app/control-gastronomico-express">Probar antes</Link>
+                            </div>
+                            <small className="jh-purchase-note">La solicitud abre tu correo y no realiza un cobro automático. El checkout se habilitará después de completar la configuración comercial y legal del lanzamiento.</small>
+                        </article>
+
+                        <article className="jh-surface jh-fit-card">
+                            <span className="jh-eyebrow">¿Para quién es?</span>
+                            <h3>Buena opción si hoy quieres control, no otro proyecto de implementación.</h3>
+                            <p><strong>Sí:</strong> negocios pequeños que quieren ordenar stock, compras y pérdidas con una herramienta simple.</p>
+                            <p><strong>Todavía no:</strong> empresas que necesitan POS, facturación electrónica, recetas complejas, multi-sucursal, permisos avanzados o sincronización cloud.</p>
+                            <p>Para esos escenarios estoy desarrollando proyectos de mayor alcance, pero Express deliberadamente comienza más pequeño.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section className="jh-section" id="faq">
                     <div className="jh-section-heading">
-                        <div><span className="jh-eyebrow">Evolución</span><h2>Primero validar. Después crecer.</h2></div>
-                        <p>Si esta herramienta demuestra uso real, puede evolucionar hacia sincronización en nube, cuentas, multi-dispositivo, recetas y producción. Esas funciones entrarán después de probar que la base realmente ayuda.</p>
+                        <div><span className="jh-eyebrow">Preguntas frecuentes</span><h2>Lo importante antes de usar la beta.</h2></div>
+                        <p>Prefiero que tengas claro qué hace y qué no hace la primera versión antes de decidir.</p>
+                    </div>
+                    <div className="jh-faq-grid">
+                        <article className="jh-surface"><h3>¿Dónde quedan mis datos?</h3><p>En esta beta los datos operativos se guardan localmente en el navegador del dispositivo. Por eso el respaldo JSON es importante.</p></article>
+                        <article className="jh-surface"><h3>¿Puedo usarlo en varios equipos?</h3><p>No existe sincronización cloud todavía. Cada navegador mantiene su propio espacio local; puedes mover información mediante respaldo/restauración.</p></article>
+                        <article className="jh-surface"><h3>¿Funciona sin internet?</h3><p>La PWA está preparada para continuidad local después de una primera carga compatible. Esta función se terminará de validar en staging antes de la beta externa.</p></article>
+                        <article className="jh-surface"><h3>¿Emite boletas o factura?</h3><p>No. Express no reemplaza un POS, un sistema contable ni las herramientas tributarias que correspondan a tu negocio.</p></article>
+                        <article className="jh-surface"><h3>¿Puedo cargar mi inventario?</h3><p>Sí. La beta permite importar productos desde CSV y exportar el inventario para Excel o Google Sheets.</p></article>
+                        <article className="jh-surface"><h3>¿Qué pasa si borro los datos del navegador?</h3><p>Puedes perder la información local. Por eso la app incorpora respaldo y restauración; antes de usarla en operación real conviene respaldar periódicamente.</p></article>
                     </div>
                 </section>
 
                 <section className="jh-contact" id="interes">
-                    <span className="jh-eyebrow">Lanzamiento</span>
-                    <h2>¿Tienes un negocio gastronómico y quieres probar la primera versión?</h2>
-                    <p>Estoy buscando los primeros usuarios para validar que la herramienta sea realmente simple y útil antes de agregar más funciones.</p>
+                    <span className="jh-eyebrow">Primeros usuarios</span>
+                    <h2>¿Tu negocio todavía controla inventario y mermas con demasiados pasos?</h2>
+                    <p>Prueba la beta, cuéntame dónde se te hace difícil y ayúdame a convertir Express en una herramienta realmente útil para pequeños negocios gastronómicos de Chile.</p>
                     <div className="jh-actions">
-                        <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar MVP</Link>
-                        <a className="jh-button jh-button-soft" href="mailto:info@joinhook.cl?subject=Control%20Gastronómico%20Express">Contarme mi caso</a>
-                        <Link className="jh-button jh-button-soft" href="/">Volver a JoinHook</Link>
+                        <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar ahora</Link>
+                        <a className="jh-button jh-button-soft" href={purchaseMail}>Solicitar compra</a>
+                        <a className="jh-button jh-button-soft" href="mailto:info@joinhook.cl?subject=Mi%20caso%20gastron%C3%B3mico">Contarme mi caso</a>
                     </div>
                 </section>
 
-                <footer className="jh-footer"><span>JoinHook · proyecto independiente</span><span>Diseñado y construido por Francisco Javier Campos</span></footer>
+                <footer className="jh-footer">
+                    <span>JoinHook · proyecto independiente de Francisco Javier Campos</span>
+                    <span><Link href="/privacidad">Privacidad</Link> · <Link href="/condiciones-beta">Condiciones de beta</Link> · <Link href="/">Volver a JoinHook</Link></span>
+                </footer>
             </main>
         </>
     );
