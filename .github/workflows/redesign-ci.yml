@@ -60,9 +60,14 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          from urllib.parse import parse_qs, urlparse
 
           manifest = json.loads(Path('public/cge-manifest.webmanifest').read_text(encoding='utf-8'))
-          assert manifest['start_url'] == '/app/control-gastronomico-express'
+          start = urlparse(manifest['start_url'])
+          assert manifest['id'] == '/app/control-gastronomico-express'
+          assert start.path == '/app/control-gastronomico-express'
+          assert parse_qs(start.query).get('source') == ['pwa']
+          assert manifest['scope'] == '/app/'
           assert manifest['display'] == 'standalone'
           sizes = {icon.get('sizes') for icon in manifest.get('icons', [])}
           assert {'192x192', '512x512'} <= sizes
