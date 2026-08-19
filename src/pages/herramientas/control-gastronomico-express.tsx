@@ -1,7 +1,17 @@
 import Head from 'next/head';
 import Link from 'next/link';
 
-const purchaseMail = 'mailto:info@joinhook.cl?subject=Quiero%20comprar%20Control%20Gastron%C3%B3mico%20Express&body=Hola%20Francisco%2C%0A%0AQuiero%20solicitar%20el%20acceso%20de%20lanzamiento%20a%20Control%20Gastron%C3%B3mico%20Express%20por%20%244.990%20CLP.%0A%0AMi%20negocio%20es%3A%20%0ACiudad%3A%20%0A%0AGracias.';
+const purchaseMail = 'mailto:info@joinhook.cl?subject=Quiero%20el%20pack%20fundador%20de%20Control%20Gastron%C3%B3mico%20Express&body=Hola%20Francisco%2C%0A%0AMe%20interesa%20el%20pack%20fundador%20de%20Control%20Gastron%C3%B3mico%20Express%20por%20%244.990%20CLP.%0A%0AMi%20negocio%20es%3A%20%0ACiudad%3A%20%0AGracias.';
+const checkoutUrl = process.env.NEXT_PUBLIC_CGE_CHECKOUT_URL?.trim();
+const seller = {
+    name: process.env.NEXT_PUBLIC_SELLER_NAME?.trim(),
+    rut: process.env.NEXT_PUBLIC_SELLER_RUT?.trim(),
+    email: process.env.NEXT_PUBLIC_SELLER_EMAIL?.trim(),
+    address: process.env.NEXT_PUBLIC_SELLER_ADDRESS?.trim()
+};
+const sellerReady = Boolean(seller.name && seller.rut && seller.email && seller.address);
+const checkoutEnabled = process.env.NEXT_PUBLIC_CGE_CHECKOUT_ENABLED === 'true' && sellerReady && Boolean(checkoutUrl?.startsWith('https://'));
+const purchaseHref = checkoutEnabled && checkoutUrl ? checkoutUrl : purchaseMail;
 
 const productJsonLd = {
     '@context': 'https://schema.org',
@@ -32,7 +42,12 @@ const faqJsonLd = {
         {
             '@type': 'Question',
             name: '¿Necesito pagar una mensualidad?',
-            acceptedAnswer: { '@type': 'Answer', text: 'La oferta inicial está planteada como pago único de lanzamiento, sin mensualidad para las funciones incluidas en esta versión.' }
+            acceptedAnswer: { '@type': 'Answer', text: 'El pack fundador está planteado como pago único de lanzamiento, sin mensualidad para el alcance inicial descrito.' }
+        },
+        {
+            '@type': 'Question',
+            name: '¿Qué compro si la beta se puede probar gratis?',
+            acceptedAnswer: { '@type': 'Answer', text: 'La beta abierta sirve para evaluar la herramienta. El pack fundador reserva el acceso a la versión de lanzamiento e incluye guía de puesta en marcha, soporte inicial y actualizaciones correctivas dentro de ese alcance.' }
         },
         {
             '@type': 'Question',
@@ -59,7 +74,7 @@ export default function ControlGastronomicoExpress() {
                 <title>Control Gastronómico Express | Inventario y mermas para pequeños negocios</title>
                 <meta
                     name="description"
-                    content="Controla inventario, compras, mermas y proveedores sin partir por un ERP complejo. Control Gastronómico Express: beta PWA local-first, lanzamiento $4.990 CLP pago único."
+                    content="Controla inventario, compras, mermas y proveedores sin partir por un ERP complejo. Control Gastronómico Express: beta PWA local-first y pack fundador de lanzamiento por $4.990 CLP."
                 />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#f3f0e8" />
@@ -98,12 +113,12 @@ export default function ControlGastronomicoExpress() {
                         </p>
                         <div className="jh-actions">
                             <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar gratis la beta</Link>
-                            <a className="jh-button jh-button-soft" href="#precio">Ver precio de lanzamiento</a>
+                            <a className="jh-button jh-button-soft" href="#precio">Ver pack fundador</a>
                         </div>
                         <div className="jh-hero-footnotes">
                             <span>PWA instalable</span>
                             <span>Datos locales en esta beta</span>
-                            <span>Sin mensualidad en el lanzamiento</span>
+                            <span>Pack fundador sin mensualidad</span>
                         </div>
                     </div>
 
@@ -160,22 +175,38 @@ export default function ControlGastronomicoExpress() {
                 <section className="jh-section" id="precio">
                     <div className="jh-sales-grid">
                         <article className="jh-price-card jh-surface">
-                            <span className="jh-eyebrow">Oferta de lanzamiento</span>
+                            <span className="jh-eyebrow">Pack fundador · lanzamiento</span>
                             <h2>Control Gastronómico Express</h2>
                             <div className="jh-price"><strong>$4.990</strong><span>CLP · pago único</span></div>
-                            <p>Acceso de lanzamiento a las funciones incluidas en esta versión. Sin mensualidad para este alcance inicial.</p>
+                            <p>La beta se puede probar gratis. El pack fundador reserva tu acceso a la versión de lanzamiento e incluye acompañamiento inicial, sin mensualidad para este alcance.</p>
                             <ul className="jh-check-list">
-                                <li>Uso en navegador y PWA compatible</li>
+                                <li>Prueba beta abierta antes de decidir</li>
+                                <li>Pack fundador para la versión de lanzamiento</li>
                                 <li>Inventario, compras, mermas y proveedores</li>
-                                <li>Importación/exportación y respaldo local</li>
-                                <li>Actualizaciones correctivas de la beta</li>
-                                <li>Soporte inicial por correo</li>
+                                <li>Plantilla CSV, respaldo local y guía de puesta en marcha</li>
+                                <li>Actualizaciones correctivas de esta versión y soporte inicial</li>
                             </ul>
                             <div className="jh-actions">
-                                <a className="jh-button jh-button-primary" href={purchaseMail}>Solicitar compra por $4.990</a>
+                                <a
+                                    className="jh-button jh-button-primary"
+                                    href={purchaseHref}
+                                    target={checkoutEnabled ? '_blank' : undefined}
+                                    rel={checkoutEnabled ? 'noreferrer' : undefined}
+                                >
+                                    {checkoutEnabled ? 'Comprar pack fundador · $4.990' : 'Solicitar pack fundador · $4.990'}
+                                </a>
                                 <Link className="jh-button jh-button-soft" href="/app/control-gastronomico-express">Probar antes</Link>
                             </div>
-                            <small className="jh-purchase-note">La solicitud abre tu correo y no realiza un cobro automático. El checkout se habilitará después de completar la configuración comercial y legal del lanzamiento.</small>
+                            <small className="jh-purchase-note">
+                                {checkoutEnabled
+                                    ? 'El cobro se abre en el proveedor de pago configurado. Antes de pagar, revisa las condiciones de beta y los datos del vendedor que aparecen aquí.'
+                                    : 'La solicitud abre tu correo y no realiza un cobro automático. El checkout permanecerá deshabilitado hasta configurar medio de pago y datos públicos del vendedor.'}
+                            </small>
+                            {sellerReady && (
+                                <small className="jh-purchase-note">
+                                    <strong>Proveedor:</strong> {seller.name} · RUT {seller.rut} · {seller.email} · {seller.address}
+                                </small>
+                            )}
                         </article>
 
                         <article className="jh-surface jh-fit-card">
@@ -194,6 +225,7 @@ export default function ControlGastronomicoExpress() {
                         <p>Prefiero que tengas claro qué hace y qué no hace la primera versión antes de decidir.</p>
                     </div>
                     <div className="jh-faq-grid">
+                        <article className="jh-surface"><h3>¿Qué compro si puedo probar gratis?</h3><p>La beta abierta permite evaluar el flujo. El pack fundador corresponde a la versión de lanzamiento, su guía de puesta en marcha, soporte inicial y correcciones dentro de ese alcance.</p></article>
                         <article className="jh-surface"><h3>¿Dónde quedan mis datos?</h3><p>En esta beta los datos operativos se guardan localmente en el navegador del dispositivo. Por eso el respaldo JSON es importante.</p></article>
                         <article className="jh-surface"><h3>¿Puedo usarlo en varios equipos?</h3><p>No existe sincronización cloud todavía. Cada navegador mantiene su propio espacio local; puedes mover información mediante respaldo/restauración.</p></article>
                         <article className="jh-surface"><h3>¿Funciona sin internet?</h3><p>La PWA está preparada para continuidad local después de una primera carga compatible. Esta función se terminará de validar en staging antes de la beta externa.</p></article>
@@ -209,7 +241,14 @@ export default function ControlGastronomicoExpress() {
                     <p>Prueba la beta, cuéntame dónde se te hace difícil y ayúdame a convertir Express en una herramienta realmente útil para pequeños negocios gastronómicos de Chile.</p>
                     <div className="jh-actions">
                         <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar ahora</Link>
-                        <a className="jh-button jh-button-soft" href={purchaseMail}>Solicitar compra</a>
+                        <a
+                            className="jh-button jh-button-soft"
+                            href={purchaseHref}
+                            target={checkoutEnabled ? '_blank' : undefined}
+                            rel={checkoutEnabled ? 'noreferrer' : undefined}
+                        >
+                            {checkoutEnabled ? 'Comprar pack fundador' : 'Solicitar pack fundador'}
+                        </a>
                         <a className="jh-button jh-button-soft" href="mailto:info@joinhook.cl?subject=Mi%20caso%20gastron%C3%B3mico">Contarme mi caso</a>
                     </div>
                 </section>
