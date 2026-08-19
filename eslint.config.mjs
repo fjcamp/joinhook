@@ -13,6 +13,12 @@ const eslintConfig = [
         }
     },
     {
+        files: ['scripts/browser-qa.js'],
+        rules: {
+            '@typescript-eslint/no-require-imports': 'off'
+        }
+    },
+    {
         ignores: [
             '.next/**',
             'out/**',
