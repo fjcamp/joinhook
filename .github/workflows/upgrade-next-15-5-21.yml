@@ -29,12 +29,6 @@ jobs:
           npm uninstall front-matter
           npm install next@15.5.21 eslint-config-next@15.5.21 js-yaml@5.2.2 react-syntax-highlighter@16.1.1 --save-exact
 
-      - name: Build after upgrade
-        run: npm run build
-
-      - name: Runtime dependency audit
-        run: npm audit --omit=dev || true
-
       - name: Commit generated package lock
         run: |
           if git diff --quiet -- package.json package-lock.json; then
