@@ -24,8 +24,10 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Upgrade patched Next.js maintenance release
-        run: npm install next@15.5.21 eslint-config-next@15.5.21 --save-exact
+      - name: Refresh patched runtime dependencies
+        run: |
+          npm uninstall front-matter
+          npm install next@15.5.21 eslint-config-next@15.5.21 js-yaml@5.2.2 react-syntax-highlighter@16.1.1 --save-exact
 
       - name: Build after upgrade
         run: npm run build
@@ -42,5 +44,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json package-lock.json
-          git commit -m "chore(security): upgrade Next.js to 15.5.21 [skip ci]"
+          git commit -m "chore(security): refresh patched runtime dependencies [skip ci]"
           git push origin HEAD:security/next-15-5-21
