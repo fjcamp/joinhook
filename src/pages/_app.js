@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
 import '../css/redesign-light.css';
+import '../css/cge.css';
 
 export default function MyApp({ Component, pageProps }) {
     const { global, ...page } = pageProps || {};
