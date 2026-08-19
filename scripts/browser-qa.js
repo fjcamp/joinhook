@@ -62,13 +62,13 @@ function selectOptionContaining(select, text) {
         await dialog.getByLabel('Stock inicial').fill('10');
         await dialog.getByLabel('Stock mínimo').fill('5');
         await dialog.getByLabel('Costo unitario').fill('1000');
-        await selectOptionContaining(dialog.getByLabel('Proveedor'), 'Proveedor QA');
+        await selectOptionContaining(dialog.locator('select[name="supplierId"]'), 'Proveedor QA');
         await dialog.getByRole('button', { name: 'Guardar producto' }).click();
         await page.getByText(/Harina QA: producto agregado/).waitFor({ state: 'visible' });
 
         await page.getByRole('button', { name: /Registrar compra/ }).first().click();
         dialog = page.getByRole('dialog', { name: 'Registrar compra' });
-        await selectOptionContaining(dialog.getByLabel('Producto'), 'Harina QA');
+        await selectOptionContaining(dialog.locator('select[name="productId"]'), 'Harina QA');
         await dialog.getByLabel('Cantidad').fill('5');
         await dialog.getByLabel('Costo unitario').fill('1100');
         await dialog.getByRole('button', { name: 'Registrar y sumar stock' }).click();
@@ -76,7 +76,7 @@ function selectOptionContaining(select, text) {
 
         await page.getByRole('button', { name: 'Registrar merma' }).click();
         dialog = page.getByRole('dialog', { name: 'Registrar merma' });
-        await selectOptionContaining(dialog.getByLabel('Producto'), 'Harina QA');
+        await selectOptionContaining(dialog.locator('select[name="productId"]'), 'Harina QA');
         await dialog.getByLabel('Cantidad').fill('2');
         await dialog.getByLabel('Causa').selectOption({ label: 'Preparación' });
         await dialog.getByRole('button', { name: 'Registrar y descontar stock' }).click();
