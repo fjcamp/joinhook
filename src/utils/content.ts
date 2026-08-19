@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import path from 'path';
-import glob from 'glob';
 import { load as loadYaml } from 'js-yaml';
 import * as types from '@/types';
 import { isDev } from './common';
@@ -22,10 +21,15 @@ function isRefField(modelName: string, fieldName: string) {
     return referenceFields.has(`${modelName}:${fieldName}`);
 }
 
-const supportedFileTypes = ['md', 'json'];
-function contentFilesInPath(dir: string) {
-    const globPattern = `${dir}/**/*.{${supportedFileTypes.join(',')}}`;
-    return glob.sync(globPattern);
+const supportedFileTypes = new Set(['.md', '.json']);
+function contentFilesInPath(dir: string): string[] {
+    if (!fs.existsSync(dir)) return [];
+
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const entryPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) return contentFilesInPath(entryPath);
+        return supportedFileTypes.has(path.extname(entry.name).toLowerCase()) ? [entryPath] : [];
+    });
 }
 
 function parseMarkdownFrontMatter(rawContent: string) {
@@ -60,7 +64,7 @@ function readContent(file: string): types.ContentObject {
     }
 
     content.__metadata = {
-        id: file,
+        id: file.replace(/\\/g, '/'),
         modelName: content.type
     };
 
