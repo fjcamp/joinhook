@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import path from 'path';
 import glob from 'glob';
 import { load as loadYaml } from 'js-yaml';
-import { allModels } from '.stackbit/models';
 import * as types from '@/types';
 import { isDev } from './common';
 import { PAGE_MODEL_NAMES, PageModelType } from '@/types/generated';
@@ -10,17 +9,17 @@ import { PAGE_MODEL_NAMES, PageModelType } from '@/types/generated';
 const contentBaseDir = 'content';
 const pagesBaseDir = contentBaseDir + '/pages';
 
-const allReferenceFields = {};
-allModels.forEach((model) => {
-    model.fields.forEach((field) => {
-        if (field.type === 'reference' || (field.type === 'list' && field.items?.type === 'reference')) {
-            allReferenceFields[model.name + ':' + field.name] = true;
-        }
-    });
-});
+// Reference fields used by the legacy content collection. This small map replaces
+// the old Stackbit model registry without changing how existing markdown content
+// resolves authors, featured posts or featured projects.
+const referenceFields = new Set([
+    'PostLayout:author',
+    'FeaturedPostsSection:posts',
+    'FeaturedProjectsSection:projects'
+]);
 
 function isRefField(modelName: string, fieldName: string) {
-    return !!allReferenceFields[modelName + ':' + fieldName];
+    return referenceFields.has(`${modelName}:${fieldName}`);
 }
 
 const supportedFileTypes = ['md', 'json'];
