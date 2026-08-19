@@ -27,7 +27,7 @@ jobs:
       - name: Upgrade to stable Next.js 16.3.0
         run: |
           npm install next@16.3.0 eslint-config-next@16.3.0 react@latest react-dom@latest --save-exact
-          npm audit fix
+          npm audit fix --omit=dev
 
       - name: Commit generated package lock
         run: |
