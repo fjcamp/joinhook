@@ -2,6 +2,7 @@ import { generateGlobalCssVariables } from '@/utils/theme-style-utils';
 import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
+import '../css/redesign-light.css';
 
 export default function MyApp({ Component, pageProps }) {
     const { global, ...page } = pageProps || {};
