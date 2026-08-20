@@ -31,7 +31,6 @@ export function CGEField({ label, children, hint }: PropsWithChildren<{ label: s
 
 export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildren<{ title: string; eyebrow?: string; onClose: () => void }>) {
     const dialogRef = useRef<HTMLElement>(null);
-    const openerRef = useRef<HTMLElement | null>(null);
     const onCloseRef = useRef(onClose);
 
     useEffect(() => {
@@ -40,7 +39,6 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
 
     useEffect(() => {
         const dialog = dialogRef.current;
-        openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         if (!dialog) return undefined;
 
         const focusableSelector = [
@@ -85,13 +83,7 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
         };
 
         document.addEventListener('keydown', handleKeyDown);
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            const opener = openerRef.current;
-            window.requestAnimationFrame(() => {
-                if (opener?.isConnected) opener.focus({ preventScroll: true });
-            });
-        };
+        return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
     return <div className="cge-modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
