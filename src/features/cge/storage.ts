@@ -1,9 +1,124 @@
-import { CGEState, Product, Supplier } from './types';
+import { CGEMode, CGEState, Movement, Product, Purchase, Supplier, Waste } from './types';
 
 export const CGE_STORAGE_KEY = 'joinhook.cge.state.v1';
 
 const now = () => new Date().toISOString();
 const id = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+const productUnits: Product['unit'][] = ['kg', 'g', 'l', 'ml', 'unidad', 'caja', 'bolsa'];
+const wasteReasons: Waste['reason'][] = ['Vencimiento', 'Preparación', 'Daño', 'Error de producción', 'Cortesía', 'Otro'];
+const movementTypes: Movement['type'][] = ['compra', 'merma', 'ajuste'];
+const modes: CGEMode[] = ['demo', 'real'];
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+type UnknownRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is UnknownRecord {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isString(value: unknown): value is string {
+    return typeof value === 'string';
+}
+
+function isOptionalString(value: unknown): value is string | undefined {
+    return value === undefined || isString(value);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNonNegativeNumber(value: unknown): value is number {
+    return isFiniteNumber(value) && value >= 0;
+}
+
+function isDate(value: unknown): value is string {
+    return isString(value) && datePattern.test(value);
+}
+
+function isProduct(value: unknown): value is Product {
+    if (!isRecord(value)) return false;
+    return isString(value.id)
+        && isString(value.name)
+        && isString(value.category)
+        && productUnits.includes(value.unit as Product['unit'])
+        && isNonNegativeNumber(value.stock)
+        && isNonNegativeNumber(value.minStock)
+        && isNonNegativeNumber(value.unitCost)
+        && isOptionalString(value.supplierId)
+        && typeof value.active === 'boolean'
+        && isString(value.createdAt)
+        && isString(value.updatedAt);
+}
+
+function isSupplier(value: unknown): value is Supplier {
+    if (!isRecord(value)) return false;
+    return isString(value.id)
+        && isString(value.name)
+        && isOptionalString(value.contactName)
+        && isOptionalString(value.phone)
+        && isOptionalString(value.email)
+        && isOptionalString(value.notes)
+        && isString(value.createdAt);
+}
+
+function isPurchase(value: unknown): value is Purchase {
+    if (!isRecord(value)) return false;
+    return isString(value.id)
+        && isString(value.productId)
+        && isFiniteNumber(value.quantity)
+        && value.quantity > 0
+        && isNonNegativeNumber(value.unitCost)
+        && isOptionalString(value.supplierId)
+        && isDate(value.date)
+        && isOptionalString(value.notes);
+}
+
+function isWaste(value: unknown): value is Waste {
+    if (!isRecord(value)) return false;
+    return isString(value.id)
+        && isString(value.productId)
+        && isFiniteNumber(value.quantity)
+        && value.quantity > 0
+        && wasteReasons.includes(value.reason as Waste['reason'])
+        && isDate(value.date)
+        && isOptionalString(value.notes);
+}
+
+function isMovement(value: unknown): value is Movement {
+    if (!isRecord(value)) return false;
+    return isString(value.id)
+        && isString(value.productId)
+        && movementTypes.includes(value.type as Movement['type'])
+        && isFiniteNumber(value.quantity)
+        && isNonNegativeNumber(value.previousStock)
+        && isNonNegativeNumber(value.newStock)
+        && isDate(value.date)
+        && isOptionalString(value.note);
+}
+
+export function normalizeCGEState(input: unknown, fallbackMode: CGEMode = 'demo'): CGEState | null {
+    if (!isRecord(input) || input.version !== 1) return null;
+    if (!Array.isArray(input.products) || !input.products.every(isProduct)) return null;
+    if (!Array.isArray(input.suppliers) || !input.suppliers.every(isSupplier)) return null;
+    if (!Array.isArray(input.purchases) || !input.purchases.every(isPurchase)) return null;
+    if (!Array.isArray(input.wastes) || !input.wastes.every(isWaste)) return null;
+    if (!Array.isArray(input.movements) || !input.movements.every(isMovement)) return null;
+
+    const mode = modes.includes(input.mode as CGEMode) ? input.mode as CGEMode : fallbackMode;
+    return {
+        version: 1,
+        businessName: isString(input.businessName) ? input.businessName : '',
+        mode,
+        onboardingCompleted: typeof input.onboardingCompleted === 'boolean' ? input.onboardingCompleted : false,
+        products: input.products,
+        suppliers: input.suppliers,
+        purchases: input.purchases,
+        wastes: input.wastes,
+        movements: input.movements,
+        lastSavedAt: isOptionalString(input.lastSavedAt) ? input.lastSavedAt : undefined
+    };
+}
 
 function supplier(name: string, contactName: string, phone: string): Supplier {
     return { id: id(), name, contactName, phone, createdAt: now() };
@@ -62,13 +177,7 @@ export function loadState(): CGEState {
     const raw = window.localStorage.getItem(CGE_STORAGE_KEY);
     if (!raw) return createDemoState();
     try {
-        const parsed = JSON.parse(raw) as CGEState;
-        if (parsed?.version !== 1) return createDemoState();
-        return {
-            ...parsed,
-            mode: parsed.mode || 'demo',
-            onboardingCompleted: parsed.onboardingCompleted ?? false
-        };
+        return normalizeCGEState(JSON.parse(raw), 'demo') || createDemoState();
     } catch {
         return createDemoState();
     }
