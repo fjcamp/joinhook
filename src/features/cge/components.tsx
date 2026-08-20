@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode } from 'react';
+import { PropsWithChildren, ReactNode, useEffect, useRef } from 'react';
 
 export function CGEIcon({ name }: { name: string }) {
     const icons: Record<string, ReactNode> = {
@@ -30,8 +30,63 @@ export function CGEField({ label, children, hint }: PropsWithChildren<{ label: s
 }
 
 export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildren<{ title: string; eyebrow?: string; onClose: () => void }>) {
+    const dialogRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+        const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        if (!dialog) return undefined;
+
+        const focusableSelector = [
+            'button:not([disabled])',
+            'a[href]',
+            'input:not([disabled])',
+            'select:not([disabled])',
+            'textarea:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+
+        const getFocusable = () => Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector))
+            .filter((element) => element.getAttribute('aria-hidden') !== 'true' && element.offsetParent !== null);
+
+        const focusable = getFocusable();
+        (focusable[0] || dialog).focus();
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                onClose();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+            const currentFocusable = getFocusable();
+            if (!currentFocusable.length) {
+                event.preventDefault();
+                dialog.focus();
+                return;
+            }
+
+            const first = currentFocusable[0];
+            const last = currentFocusable[currentFocusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            previousFocus?.focus();
+        };
+    }, [onClose]);
+
     return <div className="cge-modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
-        <section className="cge-modal" role="dialog" aria-modal="true" aria-label={title}>
+        <section ref={dialogRef} className="cge-modal" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
             <header><div>{eyebrow && <small>{eyebrow}</small>}<h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="Cerrar"><CGEIcon name="close" /></button></header>
             <div className="cge-modal-body">{children}</div>
         </section>
