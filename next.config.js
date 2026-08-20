@@ -19,6 +19,7 @@ const contentSecurityPolicy = [
 ].join('; ');
 
 const nextConfig = {
+    output: 'standalone',
     trailingSlash: true,
     reactStrictMode: true,
     poweredByHeader: false,
