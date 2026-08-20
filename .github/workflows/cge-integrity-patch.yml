@@ -1,9 +1,9 @@
 name: CGE Integrity Patch
 
 on:
-  push:
+  pull_request:
     branches:
-      - redesign-v2
+      - main
     paths:
       - .github/workflows/cge-integrity-patch.yml
 
