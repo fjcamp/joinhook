@@ -40,6 +40,36 @@ staging.joinhook.cl
 
 **No ejecutar `npm run build` en BlueHosting.**
 
+## Artefacto validado
+
+El pipeline `Redesign CI` generó y probó correctamente un artefacto standalone de staging en el commit:
+
+```txt
+6d58ec435ae337ddd8b9b897463338d5441f85b8
+```
+
+Artifact GitHub Actions:
+
+```txt
+joinhook-bluehosting-standalone
+```
+
+Artifact ID:
+
+```txt
+9397901543
+```
+
+Tamaño aproximado comprimido por GitHub Actions: 26,1 MB.
+
+Digest informado por GitHub Actions:
+
+```txt
+sha256:cd1c400afc3370afe98db0347f86c14f70301203a2e26ae3cf75f5865f3ad57b
+```
+
+El artifact fue descargado y verificado adicionalmente fuera del runner: contiene `.next/`, `server.js`, `package.json`, `node_modules/` y `public/`; se inició con Node.js en modo production, respondió HTTP 200 y entregó CSP, headers de seguridad y `X-Robots-Tag: noindex, nofollow, noarchive`.
+
 ## Separación de producción
 
 La aplicación Node se mantiene fuera de `public_html`:
@@ -86,7 +116,7 @@ El job `build` de `.github/workflows/redesign-ci.yml`:
 5. ejecuta smoke tests del build normal;
 6. prepara `deploy-bluehosting/` a partir de `.next/standalone`;
 7. copia `.next/static` y `public`;
-8. ejecuta el `server.js` standalone en un puerto temporal y vuelve a probar Home, CGE, manifest y CSP;
+8. ejecuta el `server.js` standalone en un puerto temporal y vuelve a probar Home, CGE, manifest, CSP y no-indexación de staging;
 9. publica el artefacto `joinhook-bluehosting-standalone` con archivos ocultos incluidos para conservar `.next/`.
 
 El artefacto contiene el runtime mínimo ya compilado, incluyendo `server.js`, `package.json`, dependencias trazadas de producción, `.next/static` y `public`.
@@ -179,13 +209,16 @@ Comprobar en la respuesta real de BlueHosting:
 - `Referrer-Policy: strict-origin-when-cross-origin`;
 - `X-Frame-Options: SAMEORIGIN`;
 - `Permissions-Policy`;
+- `X-Robots-Tag: noindex, nofollow, noarchive` en staging;
 - ausencia de `X-Powered-By`.
 
 No activar HSTS hasta validar producción y los subdominios que deban quedar incluidos.
 
 ## Staging y SEO
 
-El staging no debe competir con `joinhook.cl` en buscadores. Durante la prueba debe mantenerse fuera de indexación mediante robots/meta apropiados o protección de acceso si se decide añadirla.
+El build de staging se genera con `JOINHOOK_DEPLOY_TARGET=staging`; `next.config.js` añade `X-Robots-Tag: noindex, nofollow, noarchive` a todas las respuestas. El pipeline verifica este header tanto en el build normal como en el runtime standalone.
+
+El artefacto de producción no debe compilarse con ese target.
 
 ## Checkout
 
