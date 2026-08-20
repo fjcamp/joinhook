@@ -4,7 +4,11 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "next start"
+        "start": "next start",
+        "start:passenger": "node server.js"
+    },
+    "engines": {
+        "node": ">=20.9.0"
     },
     "dependencies": {
         "@tailwindcss/postcss": "^4.0.12",
