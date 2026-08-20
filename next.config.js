@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 const isDev = process.env.NODE_ENV !== 'production';
+const isStaging = process.env.JOINHOOK_DEPLOY_TARGET === 'staging';
 
 const contentSecurityPolicy = [
     "default-src 'self'",
@@ -18,6 +19,36 @@ const contentSecurityPolicy = [
     "form-action 'self'"
 ].join('; ');
 
+const securityHeaders = [
+    {
+        key: 'Content-Security-Policy',
+        value: contentSecurityPolicy
+    },
+    {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff'
+    },
+    {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin'
+    },
+    {
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN'
+    },
+    {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()'
+    }
+];
+
+if (isStaging) {
+    securityHeaders.push({
+        key: 'X-Robots-Tag',
+        value: 'noindex, nofollow, noarchive'
+    });
+}
+
 const nextConfig = {
     output: 'standalone',
     trailingSlash: true,
@@ -27,28 +58,7 @@ const nextConfig = {
         return [
             {
                 source: '/:path*',
-                headers: [
-                    {
-                        key: 'Content-Security-Policy',
-                        value: contentSecurityPolicy
-                    },
-                    {
-                        key: 'X-Content-Type-Options',
-                        value: 'nosniff'
-                    },
-                    {
-                        key: 'Referrer-Policy',
-                        value: 'strict-origin-when-cross-origin'
-                    },
-                    {
-                        key: 'X-Frame-Options',
-                        value: 'SAMEORIGIN'
-                    },
-                    {
-                        key: 'Permissions-Policy',
-                        value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()'
-                    }
-                ]
+                headers: securityHeaders
             }
         ];
     }
