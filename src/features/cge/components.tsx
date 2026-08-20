@@ -33,7 +33,10 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
     const dialogRef = useRef<HTMLElement>(null);
     const openerRef = useRef<HTMLElement | null>(null);
     const onCloseRef = useRef(onClose);
-    onCloseRef.current = onClose;
+
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
 
     useEffect(() => {
         const dialog = dialogRef.current;
