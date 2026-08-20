@@ -135,6 +135,18 @@ function selectOptionContaining(select, text) {
 
         await page.locator('.cge-sidebar nav button').filter({ hasText: 'Respaldo' }).click();
         const backupInput = page.locator('input[type="file"][accept*="json"]');
+        const invalidBackupDialogPromise = page.waitForEvent('dialog');
+        await backupInput.setInputFiles({
+            name: 'respaldo-invalido.json',
+            mimeType: 'application/json',
+            buffer: Buffer.from(JSON.stringify({ version: 1, products: [] }), 'utf8')
+        });
+        const invalidBackupDialog = await invalidBackupDialogPromise;
+        assert.match(invalidBackupDialog.message(), /No pude leer este respaldo/);
+        await invalidBackupDialog.accept();
+        const stateAfterInvalidBackup = JSON.parse(await page.evaluate(() => localStorage.getItem('joinhook.cge.state.v1')));
+        assert.equal(stateAfterInvalidBackup.products.some((item) => item.name === 'Leche QA'), true, 'Un respaldo inválido no debe reemplazar el estado actual');
+
         await backupInput.setInputFiles(backupPath);
         await page.getByText(/Respaldo restaurado correctamente/).waitFor({ state: 'visible' });
 
@@ -172,7 +184,7 @@ function selectOptionContaining(select, text) {
         const relevantErrors = browserErrors.filter((message) => /content security policy|refused to|uncaught|typeerror|referenceerror/i.test(message));
         assert.deepEqual(relevantErrors, [], `Errores de navegador relevantes:\n${relevantErrors.join('\n')}`);
 
-        console.log('Browser QA PASS: onboarding, modal keyboard accessibility, supplier, product, purchase, waste, adjustment, CSV import/export, JSON backup/restore, persistence, desktop/mobile.');
+        console.log('Browser QA PASS: onboarding, modal keyboard accessibility, supplier, product, purchase, waste, adjustment, CSV import/export, invalid/valid JSON backup handling, persistence, desktop/mobile.');
     } catch (error) {
         try {
             await page.screenshot({ path: path.join(artifactsDir, 'failure.png'), fullPage: true });
