@@ -31,10 +31,13 @@ export function CGEField({ label, children, hint }: PropsWithChildren<{ label: s
 
 export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildren<{ title: string; eyebrow?: string; onClose: () => void }>) {
     const dialogRef = useRef<HTMLElement>(null);
+    const openerRef = useRef<HTMLElement | null>(null);
+    const onCloseRef = useRef(onClose);
+    onCloseRef.current = onClose;
 
     useEffect(() => {
         const dialog = dialogRef.current;
-        const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         if (!dialog) return undefined;
 
         const focusableSelector = [
@@ -55,7 +58,7 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 event.preventDefault();
-                onClose();
+                onCloseRef.current();
                 return;
             }
 
@@ -81,9 +84,10 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
         document.addEventListener('keydown', handleKeyDown);
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
-            previousFocus?.focus();
+            const opener = openerRef.current;
+            if (opener?.isConnected) opener.focus();
         };
-    }, [onClose]);
+    }, []);
 
     return <div className="cge-modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
         <section ref={dialogRef} className="cge-modal" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
