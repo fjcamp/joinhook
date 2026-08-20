@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CGEBadge, CGEEmpty, CGEField, CGEIcon, CGEModal, CGEStatCard } from '@/features/cge/components';
-import { createBlankState, createDemoState, downloadBackup, exportInventoryCsv, loadState, makeId, resetState, saveState } from '@/features/cge/storage';
+import { createBlankState, createDemoState, downloadBackup, exportInventoryCsv, loadState, makeId, normalizeCGEState, resetState, saveState } from '@/features/cge/storage';
 import { CGEState, CGEView, Product, ProductUnit, Supplier, WasteReason } from '@/features/cge/types';
 
 const money = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
@@ -279,12 +279,14 @@ export default function ControlGastronomicoExpressApp() {
     const importBackup = async (file?: File) => {
         if (!file) return;
         try {
-            const parsed = JSON.parse(await file.text()) as CGEState;
-            if (parsed.version !== 1 || !Array.isArray(parsed.products)) throw new Error('Formato inválido');
-            setState({ ...parsed, onboardingCompleted: true, mode: parsed.mode || 'real' });
+            const parsed = normalizeCGEState(JSON.parse(await file.text()), 'real');
+            if (!parsed) throw new Error('Formato inválido');
+            setState({ ...parsed, onboardingCompleted: true });
             notify('Respaldo restaurado correctamente.');
         } catch {
             window.alert('No pude leer este respaldo. Verifica que sea un archivo exportado desde Control Gastronómico Express.');
+        } finally {
+            if (backupRef.current) backupRef.current.value = '';
         }
     };
 
