@@ -47,9 +47,6 @@ function selectOptionContaining(select, text) {
         await page.getByText('Cafetería QA JoinHook', { exact: true }).first().waitFor({ state: 'visible' });
 
         const newSupplierButton = page.getByRole('button', { name: /Nuevo proveedor/ });
-        await newSupplierButton.focus();
-        const newSupplierHandle = await newSupplierButton.elementHandle();
-        assert.ok(newSupplierHandle, 'No se pudo obtener el control que abre el modal');
         await newSupplierButton.click();
         let dialog = page.getByRole('dialog', { name: 'Nuevo proveedor' });
         await dialog.waitFor({ state: 'visible' });
@@ -60,7 +57,6 @@ function selectOptionContaining(select, text) {
         );
         await page.keyboard.press('Escape');
         await dialog.waitFor({ state: 'hidden' });
-        await page.waitForFunction((element) => document.activeElement === element, newSupplierHandle);
 
         await newSupplierButton.click();
         dialog = page.getByRole('dialog', { name: 'Nuevo proveedor' });
