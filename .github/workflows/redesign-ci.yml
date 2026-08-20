@@ -270,3 +270,95 @@ jobs:
           if [ -f /tmp/joinhook-browser.pid ]; then
             kill "$(cat /tmp/joinhook-browser.pid)" || true
           fi
+
+  integrity-patch:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'redesign-v2'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout redesign branch
+        uses: actions/checkout@v6
+        with:
+          ref: redesign-v2
+          fetch-depth: 0
+
+      - name: Patch backup validation and browser QA
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app_path = Path('src/pages/app/control-gastronomico-express.tsx')
+          app = app_path.read_text(encoding='utf-8')
+          old_import = "import { createBlankState, createDemoState, downloadBackup, exportInventoryCsv, loadState, makeId, resetState, saveState } from '@/features/cge/storage';"
+          new_import = "import { createBlankState, createDemoState, downloadBackup, exportInventoryCsv, loadState, makeId, normalizeCGEState, resetState, saveState } from '@/features/cge/storage';"
+          if app.count(old_import) != 1:
+              raise SystemExit('Expected exactly one CGE storage import')
+          app = app.replace(old_import, new_import, 1)
+
+          old_backup = """    const importBackup = async (file?: File) => {
+        if (!file) return;
+        try {
+            const parsed = JSON.parse(await file.text()) as CGEState;
+            if (parsed.version !== 1 || !Array.isArray(parsed.products)) throw new Error('Formato inválido');
+            setState({ ...parsed, onboardingCompleted: true, mode: parsed.mode || 'real' });
+            notify('Respaldo restaurado correctamente.');
+        } catch {
+            window.alert('No pude leer este respaldo. Verifica que sea un archivo exportado desde Control Gastronómico Express.');
+        }
+    };"""
+          new_backup = """    const importBackup = async (file?: File) => {
+        if (!file) return;
+        try {
+            const parsed = normalizeCGEState(JSON.parse(await file.text()), 'real');
+            if (!parsed) throw new Error('Formato inválido');
+            setState({ ...parsed, onboardingCompleted: true });
+            notify('Respaldo restaurado correctamente.');
+        } catch {
+            window.alert('No pude leer este respaldo. Verifica que sea un archivo exportado desde Control Gastronómico Express.');
+        } finally {
+            if (backupRef.current) backupRef.current.value = '';
+        }
+    };"""
+          if app.count(old_backup) != 1:
+              raise SystemExit('Expected exactly one backup import block')
+          app_path.write_text(app.replace(old_backup, new_backup, 1), encoding='utf-8')
+
+          qa_path = Path('scripts/browser-qa.js')
+          qa = qa_path.read_text(encoding='utf-8')
+          old_qa = """        await page.locator('.cge-sidebar nav button').filter({ hasText: 'Respaldo' }).click();
+        const backupInput = page.locator('input[type=\"file\"][accept*=\"json\"]');
+        await backupInput.setInputFiles(backupPath);
+        await page.getByText(/Respaldo restaurado correctamente/).waitFor({ state: 'visible' });"""
+          new_qa = """        await page.locator('.cge-sidebar nav button').filter({ hasText: 'Respaldo' }).click();
+        const backupInput = page.locator('input[type=\"file\"][accept*=\"json\"]');
+        const invalidBackupDialogPromise = page.waitForEvent('dialog');
+        await backupInput.setInputFiles({
+            name: 'respaldo-invalido.json',
+            mimeType: 'application/json',
+            buffer: Buffer.from(JSON.stringify({ version: 1, products: [] }), 'utf8')
+        });
+        const invalidBackupDialog = await invalidBackupDialogPromise;
+        assert.match(invalidBackupDialog.message(), /No pude leer este respaldo/);
+        await invalidBackupDialog.accept();
+        const stateAfterInvalidBackup = JSON.parse(await page.evaluate(() => localStorage.getItem('joinhook.cge.state.v1')));
+        assert.equal(stateAfterInvalidBackup.products.some((item) => item.name === 'Leche QA'), true, 'Un respaldo inválido no debe reemplazar el estado actual');
+
+        await backupInput.setInputFiles(backupPath);
+        await page.getByText(/Respaldo restaurado correctamente/).waitFor({ state: 'visible' });"""
+          if qa.count(old_qa) != 1:
+              raise SystemExit('Expected exactly one backup QA block')
+          qa_path.write_text(qa.replace(old_qa, new_qa, 1), encoding='utf-8')
+          PY
+
+      - name: Commit and push exact integrity fix
+        shell: bash
+        run: |
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/app/control-gastronomico-express.tsx scripts/browser-qa.js
+          git diff --cached --quiet && { echo 'No integrity changes staged'; exit 1; }
+          git commit -m 'fix(cge): reject malformed backup state'
+          git push origin HEAD:redesign-v2
