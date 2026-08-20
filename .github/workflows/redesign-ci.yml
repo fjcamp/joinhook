@@ -15,6 +15,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      JOINHOOK_DEPLOY_TARGET: staging
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -136,6 +138,7 @@ jobs:
           grep -qi '^referrer-policy: strict-origin-when-cross-origin' /tmp/headers.txt
           grep -qi '^x-frame-options: SAMEORIGIN' /tmp/headers.txt
           grep -qi '^permissions-policy:' /tmp/headers.txt
+          grep -qi '^x-robots-tag: noindex, nofollow, noarchive' /tmp/headers.txt
           if grep -qi '^x-powered-by:' /tmp/headers.txt; then
             echo 'X-Powered-By must not be exposed'
             exit 1
@@ -153,6 +156,8 @@ jobs:
           Source commit: $GITHUB_SHA
           Built by: GitHub Actions / Redesign CI
           Runtime: Node.js 20.20.2
+          Deploy target: staging
+          Search indexing: disabled by X-Robots-Tag
           Target: BlueHosting Passenger staging-joinhook
           Startup file: server.js
           Do not run next build on BlueHosting.
@@ -183,6 +188,7 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
           curl --fail --silent --show-error --dump-header /tmp/standalone-headers.txt --output /dev/null http://127.0.0.1:3010/
           grep -qi '^content-security-policy:' /tmp/standalone-headers.txt
+          grep -qi '^x-robots-tag: noindex, nofollow, noarchive' /tmp/standalone-headers.txt
 
       - name: Stop standalone artifact
         if: always()
