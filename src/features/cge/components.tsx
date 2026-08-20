@@ -88,7 +88,9 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             const opener = openerRef.current;
-            if (opener?.isConnected) opener.focus();
+            window.requestAnimationFrame(() => {
+                if (opener?.isConnected) opener.focus({ preventScroll: true });
+            });
         };
     }, []);
 
