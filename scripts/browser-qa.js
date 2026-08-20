@@ -46,8 +46,26 @@ function selectOptionContaining(select, text) {
         await onboarding.getByRole('button', { name: /Crear espacio en blanco/ }).click();
         await page.getByText('Cafetería QA JoinHook', { exact: true }).first().waitFor({ state: 'visible' });
 
-        await page.getByRole('button', { name: /Nuevo proveedor/ }).click();
+        const newSupplierButton = page.getByRole('button', { name: /Nuevo proveedor/ });
+        await newSupplierButton.focus();
+        await newSupplierButton.click();
         let dialog = page.getByRole('dialog', { name: 'Nuevo proveedor' });
+        await dialog.waitFor({ state: 'visible' });
+        assert.equal(
+            await dialog.getByRole('button', { name: 'Cerrar' }).evaluate((element) => element === document.activeElement),
+            true,
+            'El modal debe mover el foco a un control interno al abrirse'
+        );
+        await page.keyboard.press('Escape');
+        await dialog.waitFor({ state: 'hidden' });
+        assert.equal(
+            await newSupplierButton.evaluate((element) => element === document.activeElement),
+            true,
+            'El foco debe volver al control que abrió el modal'
+        );
+
+        await newSupplierButton.click();
+        dialog = page.getByRole('dialog', { name: 'Nuevo proveedor' });
         await dialog.getByLabel('Nombre comercial').fill('Proveedor QA');
         await dialog.getByLabel('Persona de contacto').fill('Persona QA');
         await dialog.getByLabel('Correo').fill('qa@example.com');
@@ -160,7 +178,7 @@ function selectOptionContaining(select, text) {
         const relevantErrors = browserErrors.filter((message) => /content security policy|refused to|uncaught|typeerror|referenceerror/i.test(message));
         assert.deepEqual(relevantErrors, [], `Errores de navegador relevantes:\n${relevantErrors.join('\n')}`);
 
-        console.log('Browser QA PASS: onboarding, supplier, product, purchase, waste, adjustment, CSV import/export, JSON backup/restore, persistence, desktop/mobile.');
+        console.log('Browser QA PASS: onboarding, modal keyboard accessibility, supplier, product, purchase, waste, adjustment, CSV import/export, JSON backup/restore, persistence, desktop/mobile.');
     } catch (error) {
         try {
             await page.screenshot({ path: path.join(artifactsDir, 'failure.png'), fullPage: true });
