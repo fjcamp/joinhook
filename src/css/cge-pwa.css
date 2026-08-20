@@ -78,11 +78,36 @@
 @media (max-width: 720px) {
     .cge-pwa-status {
         right: 12px;
-        bottom: 76px;
-        left: 12px;
-        justify-content: space-between;
+        bottom: 88px;
+        left: auto;
+        max-width: calc(100vw - 24px);
+        justify-content: flex-end;
+        padding: 7px 9px;
+        border-radius: 15px;
     }
+
     .cge-pwa-status > div {
         min-width: 0;
+        grid-template-columns: 9px auto;
+        padding: 3px 4px;
+    }
+
+    .cge-pwa-status > div > span {
+        width: 7px;
+        height: 7px;
+    }
+
+    .cge-pwa-status small {
+        display: none;
+    }
+
+    .cge-pwa-status strong {
+        font-size: .58rem;
+        white-space: nowrap;
+    }
+
+    .cge-pwa-status > button {
+        min-height: 34px;
+        padding: 0 10px;
     }
 }
