@@ -207,3 +207,66 @@ jobs:
           if [ -f /tmp/joinhook-commercial.pid ]; then
             kill "$(cat /tmp/joinhook-commercial.pid)" || true
           fi
+
+  browser-qa:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.20.2
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Install Playwright API for QA only
+        run: npm install --no-save --package-lock=false playwright@1.62.1
+
+      - name: Resolve preinstalled Chromium
+        run: |
+          CHROME_BIN="$(command -v chromium || command -v google-chrome || command -v google-chrome-stable)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+
+      - name: Start browser QA server
+        run: |
+          npm run start -- -p 3002 > /tmp/joinhook-browser.log 2>&1 &
+          echo $! > /tmp/joinhook-browser.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3002/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/joinhook-browser.log
+          exit 1
+
+      - name: Run Chromium end-to-end QA
+        env:
+          BROWSER_QA_BASE_URL: http://127.0.0.1:3002
+        run: node scripts/browser-qa.cjs
+
+      - name: Upload browser QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: joinhook-browser-qa
+          path: artifacts/browser-qa
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Stop browser QA server
+        if: always()
+        run: |
+          if [ -f /tmp/joinhook-browser.pid ]; then
+            kill "$(cat /tmp/joinhook-browser.pid)" || true
+          fi

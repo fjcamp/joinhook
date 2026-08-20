@@ -13,11 +13,18 @@ const eslintConfig = [
         }
     },
     {
+        files: ['scripts/browser-qa.js'],
+        rules: {
+            '@typescript-eslint/no-require-imports': 'off'
+        }
+    },
+    {
         ignores: [
             '.next/**',
             'out/**',
             'build/**',
-            'next-env.d.ts'
+            'next-env.d.ts',
+            'scripts/browser-qa.cjs'
         ]
     }
 ];
