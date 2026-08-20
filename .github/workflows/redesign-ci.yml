@@ -141,6 +141,65 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare BlueHosting standalone artifact
+        run: |
+          rm -rf deploy-bluehosting
+          mkdir -p deploy-bluehosting/.next
+          cp -a .next/standalone/. deploy-bluehosting/
+          cp -a .next/static deploy-bluehosting/.next/static
+          cp -a public deploy-bluehosting/public
+          cat > deploy-bluehosting/DEPLOYMENT.txt <<EOF
+          JoinHook V2 + CGE Beta 0.3
+          Source commit: $GITHUB_SHA
+          Built by: GitHub Actions / Redesign CI
+          Runtime: Node.js 20.20.2
+          Target: BlueHosting Passenger staging-joinhook
+          Startup file: server.js
+          Do not run next build on BlueHosting.
+          EOF
+          test -f deploy-bluehosting/server.js
+          test -f deploy-bluehosting/package.json
+          test -d deploy-bluehosting/node_modules
+          test -d deploy-bluehosting/.next/static
+          test -f deploy-bluehosting/public/cge-manifest.webmanifest
+
+      - name: Smoke test standalone artifact
+        run: |
+          PORT=3010 HOSTNAME=127.0.0.1 NODE_ENV=production node deploy-bluehosting/server.js > /tmp/joinhook-standalone.log 2>&1 &
+          echo $! > /tmp/joinhook-standalone.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3010/ > /dev/null; then
+              break
+            fi
+            if [ "$i" = 30 ]; then
+              cat /tmp/joinhook-standalone.log
+              exit 1
+            fi
+            sleep 1
+          done
+          curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
+          grep -Fq 'Solicitar pack fundador' /tmp/cge-standalone.html
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
+          curl --fail --silent --show-error --dump-header /tmp/standalone-headers.txt --output /dev/null http://127.0.0.1:3010/
+          grep -qi '^content-security-policy:' /tmp/standalone-headers.txt
+
+      - name: Stop standalone artifact
+        if: always()
+        run: |
+          if [ -f /tmp/joinhook-standalone.pid ]; then
+            kill "$(cat /tmp/joinhook-standalone.pid)" || true
+          fi
+
+      - name: Upload BlueHosting deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: joinhook-bluehosting-standalone
+          path: deploy-bluehosting
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Stop app
         if: always()
         run: |
