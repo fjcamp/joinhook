@@ -1,0 +1,179 @@
+.jh-sales-hero {
+    min-height: 720px;
+}
+
+.jh-sales-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+    gap: 1.4rem;
+    align-items: stretch;
+}
+
+.jh-price-card,
+.jh-fit-card,
+.jh-faq-grid article,
+.jh-legal {
+    border: 1px solid rgba(69, 77, 72, .09);
+}
+
+.jh-price-card,
+.jh-fit-card {
+    padding: clamp(1.6rem, 4vw, 3rem);
+    border-radius: 30px;
+}
+
+.jh-price-card h2,
+.jh-fit-card h3,
+.jh-faq-grid h3,
+.jh-legal h1,
+.jh-legal h2 {
+    color: #28332e;
+}
+
+.jh-price-card > p,
+.jh-fit-card p,
+.jh-faq-grid p,
+.jh-legal p,
+.jh-legal li {
+    color: #68736d;
+    line-height: 1.75;
+}
+
+.jh-price {
+    display: flex;
+    align-items: baseline;
+    gap: .8rem;
+    flex-wrap: wrap;
+    margin: 1rem 0 1.2rem;
+}
+
+.jh-price strong {
+    font-size: clamp(3.2rem, 7vw, 5.8rem);
+    line-height: .95;
+    letter-spacing: -.055em;
+    color: #314039;
+}
+
+.jh-price span {
+    color: #8b756b;
+    font-weight: 700;
+}
+
+.jh-check-list {
+    display: grid;
+    gap: .75rem;
+    padding: 0;
+    margin: 1.5rem 0 2rem;
+    list-style: none;
+}
+
+.jh-check-list li {
+    position: relative;
+    padding-left: 1.7rem;
+}
+
+.jh-check-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #668674;
+    font-weight: 800;
+}
+
+.jh-purchase-note {
+    display: block;
+    margin-top: 1rem;
+    color: #7c8780;
+    line-height: 1.6;
+}
+
+.jh-fit-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 90% 0, rgba(180, 127, 109, .12), transparent 18rem),
+        linear-gradient(145deg, rgba(250, 248, 242, .96), rgba(235, 231, 221, .96));
+}
+
+.jh-fit-card h3 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    line-height: 1.08;
+    letter-spacing: -.035em;
+}
+
+.jh-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.jh-faq-grid article {
+    padding: 1.5rem;
+    border-radius: 24px;
+}
+
+.jh-faq-grid h3 {
+    margin: 0 0 .7rem;
+    font-size: 1.05rem;
+}
+
+.jh-faq-grid p {
+    margin: 0;
+    font-size: .95rem;
+}
+
+.jh-legal-page {
+    min-height: 100vh;
+    padding-bottom: 4rem;
+}
+
+.jh-legal {
+    width: min(900px, calc(100% - 2rem));
+    margin: 3rem auto 0;
+    padding: clamp(1.5rem, 5vw, 4rem);
+    border-radius: 32px;
+}
+
+.jh-legal h1 {
+    margin: .8rem 0 2rem;
+    max-width: 16ch;
+    font-size: clamp(2.4rem, 6vw, 4.8rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+}
+
+.jh-legal h2 {
+    margin: 2.3rem 0 .6rem;
+    font-size: 1.25rem;
+}
+
+.jh-legal a:not(.jh-button) {
+    color: #5f7c6b;
+    text-decoration: underline;
+    text-underline-offset: .18em;
+}
+
+.jh-footer a {
+    color: inherit;
+}
+
+@media (max-width: 900px) {
+    .jh-sales-grid,
+    .jh-faq-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .jh-price-card,
+    .jh-fit-card,
+    .jh-legal {
+        border-radius: 22px;
+    }
+
+    .jh-sales-hero {
+        min-height: auto;
+    }
+}

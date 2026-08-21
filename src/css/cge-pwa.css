@@ -1,0 +1,113 @@
+.cge-pwa-status {
+    position: fixed;
+    z-index: 75;
+    right: 22px;
+    bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid rgba(78, 86, 80, .1);
+    border-radius: 17px;
+    background: rgba(247, 243, 234, .92);
+    box-shadow: 10px 10px 28px rgba(95, 86, 72, .14), -7px -7px 20px rgba(255,255,255,.72);
+    backdrop-filter: blur(14px);
+}
+
+.cge-pwa-status > div {
+    min-width: 158px;
+    display: grid;
+    grid-template-columns: 10px 1fr;
+    column-gap: 7px;
+    align-items: center;
+    padding: 4px 7px;
+}
+
+.cge-pwa-status > div > span {
+    grid-row: 1 / span 2;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #76927e;
+    box-shadow: 0 0 0 5px rgba(118,146,126,.09);
+}
+
+.cge-pwa-status > div.is-offline > span {
+    background: #b97861;
+    box-shadow: 0 0 0 5px rgba(185,120,97,.09);
+}
+
+.cge-pwa-status strong,
+.cge-pwa-status small {
+    display: block;
+}
+
+.cge-pwa-status strong {
+    color: #445149;
+    font-size: .62rem;
+}
+
+.cge-pwa-status small {
+    margin-top: 1px;
+    color: #7b837d;
+    font-size: .5rem;
+}
+
+.cge-pwa-status > button {
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid rgba(81, 103, 88, .13);
+    border-radius: 12px;
+    color: #f8f5ed;
+    background: linear-gradient(145deg, #7e9a84, #607866);
+    box-shadow: 5px 5px 13px rgba(83,101,90,.18), inset 0 1px 0 rgba(255,255,255,.24);
+    font-size: .59rem;
+    font-weight: 780;
+    cursor: pointer;
+}
+
+.cge-pwa-installed {
+    padding: 7px 9px;
+    border-radius: 10px;
+    color: #607866;
+    background: rgba(118,146,126,.1);
+    font-size: .55rem;
+    font-weight: 760;
+}
+
+@media (max-width: 720px) {
+    .cge-pwa-status {
+        right: 12px;
+        bottom: 88px;
+        left: auto;
+        max-width: calc(100vw - 24px);
+        justify-content: flex-end;
+        padding: 7px 9px;
+        border-radius: 15px;
+    }
+
+    .cge-pwa-status > div {
+        min-width: 0;
+        grid-template-columns: 9px auto;
+        padding: 3px 4px;
+    }
+
+    .cge-pwa-status > div > span {
+        width: 7px;
+        height: 7px;
+    }
+
+    .cge-pwa-status small {
+        display: none;
+    }
+
+    .cge-pwa-status strong {
+        font-size: .58rem;
+        white-space: nowrap;
+    }
+
+    .cge-pwa-status > button {
+        min-height: 34px;
+        padding: 0 10px;
+    }
+}

@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import path from 'path';
-import glob from 'glob';
-import frontmatter from 'front-matter';
-import { allModels } from '.stackbit/models';
+import { load as loadYaml } from 'js-yaml';
 import * as types from '@/types';
 import { isDev } from './common';
 import { PAGE_MODEL_NAMES, PageModelType } from '@/types/generated';
@@ -10,36 +8,54 @@ import { PAGE_MODEL_NAMES, PageModelType } from '@/types/generated';
 const contentBaseDir = 'content';
 const pagesBaseDir = contentBaseDir + '/pages';
 
-const allReferenceFields = {};
-allModels.forEach((model) => {
-    model.fields.forEach((field) => {
-        if (field.type === 'reference' || (field.type === 'list' && field.items?.type === 'reference')) {
-            allReferenceFields[model.name + ':' + field.name] = true;
-        }
-    });
-});
+// Reference fields used by the legacy content collection. This small map replaces
+// the old Stackbit model registry without changing how existing markdown content
+// resolves authors, featured posts or featured projects.
+const referenceFields = new Set([
+    'PostLayout:author',
+    'FeaturedPostsSection:posts',
+    'FeaturedProjectsSection:projects'
+]);
 
 function isRefField(modelName: string, fieldName: string) {
-    return !!allReferenceFields[modelName + ':' + fieldName];
+    return referenceFields.has(`${modelName}:${fieldName}`);
 }
 
-const supportedFileTypes = ['md', 'json'];
-function contentFilesInPath(dir: string) {
-    const globPattern = `${dir}/**/*.{${supportedFileTypes.join(',')}}`;
-    return glob.sync(globPattern);
+const supportedFileTypes = new Set(['.md', '.json']);
+function contentFilesInPath(dir: string): string[] {
+    if (!fs.existsSync(dir)) return [];
+
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const entryPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) return contentFilesInPath(entryPath);
+        return supportedFileTypes.has(path.extname(entry.name).toLowerCase()) ? [entryPath] : [];
+    });
+}
+
+function parseMarkdownFrontMatter(rawContent: string) {
+    const match = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)([\s\S]*)$/);
+    if (!match) {
+        return { attributes: {} as Record<string, any>, body: rawContent };
+    }
+    const attributes = loadYaml(match[1]) as Record<string, any> | null;
+    return {
+        attributes: attributes && typeof attributes === 'object' ? attributes : {},
+        body: match[2]
+    };
 }
 
 function readContent(file: string): types.ContentObject {
     const rawContent = fs.readFileSync(file, 'utf8');
     let content = null;
     switch (path.extname(file).substring(1)) {
-        case 'md':
-            const parsedMd = frontmatter<Record<string, any>>(rawContent);
+        case 'md': {
+            const parsedMd = parseMarkdownFrontMatter(rawContent);
             content = {
                 ...parsedMd.attributes,
                 markdownContent: parsedMd.body
             };
             break;
+        }
         case 'json':
             content = JSON.parse(rawContent);
             break;
@@ -48,7 +64,7 @@ function readContent(file: string): types.ContentObject {
     }
 
     content.__metadata = {
-        id: file,
+        id: file.replace(/\\/g, '/'),
         modelName: content.type
     };
 

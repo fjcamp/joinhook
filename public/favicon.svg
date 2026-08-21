@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="JoinHook">
+  <rect width="64" height="64" rx="18" fill="#f3f0e8"/>
+  <path d="M17 17h9v22c0 6-4 10-11 10h-2v-8h2c2 0 2-1 2-3V17Zm15 0h9v12h10V17h9v32h-9V37H41v12h-9V17Z" fill="#4f6459"/>
+  <circle cx="51" cy="51" r="5" fill="#b97861"/>
+</svg>
