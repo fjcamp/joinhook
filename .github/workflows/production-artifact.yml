@@ -12,6 +12,9 @@ permissions:
 jobs:
   production:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_CGE_CHECKOUT_ENABLED: 'true'
+      NEXT_PUBLIC_CGE_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -66,7 +69,9 @@ jobs:
           fi
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/robots.txt
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/sitemap.xml
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/herramientas/control-gastronomico-express
+          curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-production.html
+          grep -Fq 'Comprar pack fundador' /tmp/cge-production.html
+          grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/cge-production.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
@@ -85,6 +90,7 @@ jobs:
           Runtime: Node.js 20.20.2
           Deploy target: production
           Search indexing: enabled (no staging X-Robots-Tag)
+          CGE checkout: Mercado Pago https://mpago.li/1ZUHT1R
           Target: BlueHosting Passenger joinhook.cl
           Startup file: server.js
           Do not run next build on BlueHosting.
@@ -116,6 +122,9 @@ jobs:
             echo 'Standalone production artifact contains staging noindex header'
             exit 1
           fi
+          curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-production-standalone.html
+          grep -Fq 'Comprar pack fundador' /tmp/cge-production-standalone.html
+          grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/cge-production-standalone.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
@@ -144,7 +153,7 @@ jobs:
         with:
           script: |
             const marker = '<!-- joinhook-production-artifact -->';
-            const body = `${marker}\n## Production artifact ready\n\n- Commit: \`${context.sha}\`\n- Artifact: \`joinhook-bluehosting-production\`\n- Artifact ID: \`${process.env.ARTIFACT_ID}\`\n- Digest: \`${process.env.ARTIFACT_DIGEST}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n- Artifact URL: ${process.env.ARTIFACT_URL}\n- Production build verified without staging \`X-Robots-Tag\`.\n`;
+            const body = `${marker}\n## Production artifact ready\n\n- Commit: \`${context.sha}\`\n- Artifact: \`joinhook-bluehosting-production\`\n- Artifact ID: \`${process.env.ARTIFACT_ID}\`\n- Digest: \`${process.env.ARTIFACT_DIGEST}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n- Artifact URL: ${process.env.ARTIFACT_URL}\n- CGE checkout: Mercado Pago \`https://mpago.li/1ZUHT1R\` verified in the rendered production landing.\n- Production build verified without staging \`X-Robots-Tag\`.\n`;
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
