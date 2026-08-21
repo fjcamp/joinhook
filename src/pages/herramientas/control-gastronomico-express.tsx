@@ -10,7 +10,7 @@ const seller = {
     address: process.env.NEXT_PUBLIC_SELLER_ADDRESS?.trim()
 };
 const sellerReady = Boolean(seller.name && seller.rut && seller.email && seller.address);
-const checkoutEnabled = process.env.NEXT_PUBLIC_CGE_CHECKOUT_ENABLED === 'true' && sellerReady && Boolean(checkoutUrl?.startsWith('https://'));
+const checkoutEnabled = process.env.NEXT_PUBLIC_CGE_CHECKOUT_ENABLED === 'true' && Boolean(checkoutUrl?.startsWith('https://'));
 const purchaseHref = checkoutEnabled && checkoutUrl ? checkoutUrl : purchaseMail;
 
 const productJsonLd = {
@@ -199,8 +199,8 @@ export default function ControlGastronomicoExpress() {
                             </div>
                             <small className="jh-purchase-note">
                                 {checkoutEnabled
-                                    ? 'El cobro se abre en el proveedor de pago configurado. Antes de pagar, revisa las condiciones de beta y los datos del vendedor que aparecen aquí.'
-                                    : 'La solicitud abre tu correo y no realiza un cobro automático. El checkout permanecerá deshabilitado hasta configurar medio de pago y datos públicos del vendedor.'}
+                                    ? 'El pago se abre de forma segura en Mercado Pago. Antes de pagar, revisa el producto, el monto y los datos del receptor que muestra la pasarela.'
+                                    : 'La solicitud abre tu correo y no realiza un cobro automático. El checkout permanecerá deshabilitado hasta configurar medio de pago.'}
                             </small>
                             {sellerReady && (
                                 <small className="jh-purchase-note">
