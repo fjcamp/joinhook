@@ -2,6 +2,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { generateGlobalCssVariables } from '@/utils/theme-style-utils';
 import { CGEPwaStatus } from '@/features/cge/pwa';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
@@ -10,6 +11,23 @@ import '../css/cge.css';
 import '../css/cge-v02.css';
 import '../css/cge-pwa.css';
 import '../css/cge-launch.css';
+import '../css/theme-modes.css';
+
+const themeBootstrap = `
+(function () {
+    try {
+        var stored = window.localStorage.getItem('joinhook.color-mode');
+        var mode = stored === 'light' || stored === 'dark'
+            ? stored
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-color-mode', mode);
+        document.documentElement.style.colorScheme = mode;
+    } catch (error) {
+        document.documentElement.setAttribute('data-color-mode', 'light');
+        document.documentElement.style.colorScheme = 'light';
+    }
+})();
+`;
 
 export default function MyApp({ Component, pageProps }) {
     const { global, ...page } = pageProps || {};
@@ -26,6 +44,7 @@ export default function MyApp({ Component, pageProps }) {
     return (
         <>
             <Head>
+                <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
                 <link rel="icon" href={isCGEApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
             </Head>
             {isCGEApp && (
@@ -45,6 +64,7 @@ export default function MyApp({ Component, pageProps }) {
                 }
             `}</style>
             <Component {...pageProps} />
+            <ThemeToggle compact={isCGEApp} />
             {isCGEApp && <CGEPwaStatus />}
         </>
     );
