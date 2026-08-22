@@ -43,6 +43,20 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 - Consumo atómico del allowance tanto a nivel token como entitlement.
 - Auditoría de IP solo con HMAC y sal privada; si la sal no existe, no se guarda hash de IP.
 - Catálogo central es la fuente de verdad del precio mostrado en checkout y del monto validado por backend.
+- Claim de compra almacenado como cookie HttpOnly/SameSite en vez de `sessionStorage`/`localStorage`.
+- RPCs `SECURITY DEFINER` revocados para `PUBLIC`, `anon` y `authenticated`; solo `service_role` puede ejecutarlos.
+- Tablas Commerce con RLS, privilegios de cliente revocados y políticas explícitas `false` para roles de navegador.
+
+## Base dedicada JoinHook Commerce — provisionada
+
+El 22 de agosto de 2026 se confirmó el costo informado por Supabase de **$0 mensual** y se creó un proyecto independiente **JoinHook Commerce** dentro de la organización existente, sin compartir base ni credenciales con SnowWise.
+
+- Región elegida: `sa-east-1`, por cercanía geográfica con Chile dentro de las regiones disponibles del conector.
+- Estado al crear: `ACTIVE_HEALTHY`.
+- Se aplicaron migraciones `commerce_core_v1`, `harden_commerce_api_privileges`, `index_commerce_foreign_keys` y `explicitly_deny_commerce_client_access`.
+- Security Advisor quedó sin hallazgos después del hardening.
+- Performance Advisor solo informa índices aún no utilizados, comportamiento esperado en una base recién creada sin tráfico.
+- La URL/credenciales reales no se documentan en este repositorio público; los secretos permanecen fuera de GitHub.
 
 ## Autorización operativa vigente
 
@@ -50,8 +64,8 @@ El usuario autorizó continuar con gestión de desarrollo, documentación y resp
 
 ## Bloqueadores externos antes de READY
 
-- base dedicada JoinHook Commerce;
 - app/credenciales sandbox Mercado Pago;
+- secreto server-side de la base Commerce para conectar el runtime de JoinHook;
 - archivo digital privado definitivo;
 - pruebas sandbox completas;
 - correo transaccional/recuperación;
