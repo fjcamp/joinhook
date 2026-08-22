@@ -24,6 +24,7 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 17. Reclamos, contracargos y alertas de fraude se reciben en un endpoint opcional separado para no confundir sus resource IDs con Order IDs.
 18. Las nuevas instalaciones de JoinHook Commerce usarán preferentemente una Secret key moderna de Supabase (`sb_secret_...`) mediante `JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY`. El JWT histórico `service_role` queda solo como compatibilidad temporal.
 19. Una Secret key moderna se envía a Supabase por `apikey` y no como `Authorization: Bearer`; nunca se expone en frontend, GitHub, chat ni documentación.
+20. El plan gratuito de Supabase actualmente permite dos proyectos activos para el miembro propietario/administrador. El cupo vigente queda ocupado por SnowWise y JoinHook Commerce. Esta restricción no autoriza mezclar bases: antes de un tercer backend se evaluará infraestructura legítima alternativa o un plan superior, sin pausar/eliminar proyectos activos sin revisar impacto.
 
 ## Desarrollo asociado
 
@@ -66,7 +67,7 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 El 22 de agosto de 2026 se confirmó el costo informado por Supabase de **$0 mensual** y se creó un proyecto independiente **JoinHook Commerce** dentro de la organización existente, sin compartir base ni credenciales con SnowWise.
 
 - Región elegida: `sa-east-1`, por cercanía geográfica con Chile dentro de las regiones disponibles del conector.
-- Estado al crear: `ACTIVE_HEALTHY`.
+- Estado verificado: `ACTIVE_HEALTHY`.
 - Migraciones iniciales: `commerce_core_v1`, `harden_commerce_api_privileges`, `index_commerce_foreign_keys`, `explicitly_deny_commerce_client_access`.
 - Migraciones posteriores: expansión de estados de Order e índice único parcial por `provider_payment_id` para correlación de eventos postventa.
 - Estados normalizados actuales: `pending`, `paid`, `review`, `failed`, `refunded`, `partially_refunded`, `cancelled`, `charged_back`.
