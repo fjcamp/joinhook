@@ -1,8 +1,20 @@
 import Head from 'next/head';
 import Link from 'next/link';
 
-const purchaseMail = 'mailto:info@joinhook.cl?subject=Quiero%20el%20pack%20fundador%20de%20Control%20Gastron%C3%B3mico%20Express&body=Hola%20Francisco%2C%0A%0AMe%20interesa%20el%20pack%20fundador%20de%20Control%20Gastron%C3%B3mico%20Express%20por%20%244.990%20CLP.%0A%0AMi%20negocio%20es%3A%20%0ACiudad%3A%20%0AGracias.';
-const checkoutUrl = process.env.NEXT_PUBLIC_CGE_CHECKOUT_URL?.trim();
+const purchaseMail = 'mailto:ventas@joinhook.cl?subject=Quiero%20el%20pack%20fundador%20de%20Control%20Gastron%C3%B3mico%20Express&body=Hola%2C%0A%0AMe%20interesa%20el%20pack%20fundador%20de%20Control%20Gastron%C3%B3mico%20Express%20por%20%244.990%20CLP.%0A%0AMi%20negocio%20es%3A%20%0ACiudad%3A%20%0AGracias.';
+const embeddedCommerceEnabled = process.env.NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED === 'true';
+
+// Compatibility fallback while the current Mercado Pago Link remains available.
+// New configuration must use CONTROL_EXPRESS names; the historical CGE names are read-only aliases.
+const fallbackCheckoutUrl = (
+    process.env.NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_URL
+    || process.env.NEXT_PUBLIC_CGE_CHECKOUT_URL
+)?.trim();
+const fallbackCheckoutEnabled = (
+    process.env.NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_ENABLED === 'true'
+    || process.env.NEXT_PUBLIC_CGE_CHECKOUT_ENABLED === 'true'
+) && Boolean(fallbackCheckoutUrl?.startsWith('https://'));
+
 const seller = {
     name: process.env.NEXT_PUBLIC_SELLER_NAME?.trim(),
     rut: process.env.NEXT_PUBLIC_SELLER_RUT?.trim(),
@@ -10,8 +22,17 @@ const seller = {
     address: process.env.NEXT_PUBLIC_SELLER_ADDRESS?.trim()
 };
 const sellerReady = Boolean(seller.name && seller.rut && seller.email && seller.address);
-const checkoutEnabled = process.env.NEXT_PUBLIC_CGE_CHECKOUT_ENABLED === 'true' && Boolean(checkoutUrl?.startsWith('https://'));
-const purchaseHref = checkoutEnabled && checkoutUrl ? checkoutUrl : purchaseMail;
+const purchaseMode: 'embedded' | 'external' | 'mail' = embeddedCommerceEnabled
+    ? 'embedded'
+    : fallbackCheckoutEnabled
+        ? 'external'
+        : 'mail';
+const purchaseHref = purchaseMode === 'embedded'
+    ? '/checkout/control-gastronomico-express'
+    : purchaseMode === 'external' && fallbackCheckoutUrl
+        ? fallbackCheckoutUrl
+        : purchaseMail;
+const opensExternalCheckout = purchaseMode === 'external';
 
 const productJsonLd = {
     '@context': 'https://schema.org',
@@ -190,17 +211,19 @@ export default function ControlGastronomicoExpress() {
                                 <a
                                     className="jh-button jh-button-primary"
                                     href={purchaseHref}
-                                    target={checkoutEnabled ? '_blank' : undefined}
-                                    rel={checkoutEnabled ? 'noreferrer' : undefined}
+                                    target={opensExternalCheckout ? '_blank' : undefined}
+                                    rel={opensExternalCheckout ? 'noreferrer' : undefined}
                                 >
-                                    {checkoutEnabled ? 'Comprar pack fundador · $4.990' : 'Solicitar pack fundador · $4.990'}
+                                    {purchaseMode === 'mail' ? 'Solicitar pack fundador · $4.990' : 'Comprar pack fundador · $4.990'}
                                 </a>
                                 <Link className="jh-button jh-button-soft" href="/app/control-gastronomico-express">Probar antes</Link>
                             </div>
                             <small className="jh-purchase-note">
-                                {checkoutEnabled
-                                    ? 'El pago se abre de forma segura en Mercado Pago. Antes de pagar, revisa el producto, el monto y los datos del receptor que muestra la pasarela.'
-                                    : 'La solicitud abre tu correo y no realiza un cobro automático. El checkout permanecerá deshabilitado hasta configurar medio de pago.'}
+                                {purchaseMode === 'embedded'
+                                    ? 'El pago se realiza dentro de JoinHook mediante Mercado Pago. Los datos de tarjeta son tokenizados por Mercado Pago y JoinHook libera el producto solo después de verificar la operación en el backend.'
+                                    : purchaseMode === 'external'
+                                        ? 'Mientras terminamos el checkout embebido, el pago se abre de forma segura en Mercado Pago. Antes de pagar, revisa el producto, el monto y los datos del receptor que muestra la pasarela.'
+                                        : 'La solicitud abre tu correo y no realiza un cobro automático. El checkout permanecerá deshabilitado hasta configurar medio de pago.'}
                             </small>
                             {sellerReady && (
                                 <small className="jh-purchase-note">
@@ -244,12 +267,12 @@ export default function ControlGastronomicoExpress() {
                         <a
                             className="jh-button jh-button-soft"
                             href={purchaseHref}
-                            target={checkoutEnabled ? '_blank' : undefined}
-                            rel={checkoutEnabled ? 'noreferrer' : undefined}
+                            target={opensExternalCheckout ? '_blank' : undefined}
+                            rel={opensExternalCheckout ? 'noreferrer' : undefined}
                         >
-                            {checkoutEnabled ? 'Comprar pack fundador' : 'Solicitar pack fundador'}
+                            {purchaseMode === 'mail' ? 'Solicitar pack fundador' : 'Comprar pack fundador'}
                         </a>
-                        <a className="jh-button jh-button-soft" href="mailto:info@joinhook.cl?subject=Mi%20caso%20gastron%C3%B3mico">Contarme mi caso</a>
+                        <a className="jh-button jh-button-soft" href="mailto:contacto@joinhook.cl?subject=Mi%20caso%20gastron%C3%B3mico">Contarme mi caso</a>
                     </div>
                 </section>
 
