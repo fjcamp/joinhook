@@ -3,11 +3,13 @@ import { useRouter } from 'next/router';
 import { generateGlobalCssVariables } from '@/utils/theme-style-utils';
 import { CGEPwaStatus } from '@/features/cge/pwa';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { JoinHookAssistant } from '@/components/JoinHookAssistant';
 import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
 import '../css/redesign-light.css';
 import '../css/project-showcase.css';
+import '../css/joinhook-assistant.css';
 import '../css/cge.css';
 import '../css/cge-v02.css';
 import '../css/cge-pwa.css';
@@ -35,6 +37,7 @@ export default function MyApp({ Component, pageProps }) {
     const { theme } = global || {};
     const router = useRouter();
     const isCGEApp = router.pathname === '/app/control-gastronomico-express';
+    const isHome = router.pathname === '/';
 
     const cssVars = theme ? generateGlobalCssVariables(theme) : '';
 
@@ -66,6 +69,7 @@ export default function MyApp({ Component, pageProps }) {
             `}</style>
             <Component {...pageProps} />
             <ThemeToggle compact={isCGEApp} />
+            {isHome && <JoinHookAssistant />}
             {isCGEApp && <CGEPwaStatus />}
         </>
     );
