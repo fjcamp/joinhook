@@ -75,6 +75,9 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/project-covers/joinops-cover.svg
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/project-covers/snowwise-cover.svg
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/project-covers/mi-gestion-cover.svg
 
       - name: Prepare production standalone artifact
         run: |
@@ -83,6 +86,34 @@ jobs:
           cp -a .next/standalone/. deploy-production/
           cp -a .next/static deploy-production/.next/static
           cp -a public deploy-production/public
+
+          # BlueHosting serves static files from /home/joinhook/public_html while Passenger
+          # runs Next.js from /home/joinhook/joinhook-production. Package a ready-to-copy
+          # document-root mirror so each build keeps /_next/static hashes in sync.
+          mkdir -p deploy-production/document-root-assets/_next
+          cp -a .next/static deploy-production/document-root-assets/_next/static
+          cp -a public/. deploy-production/document-root-assets/
+
+          cat > deploy-production/DOCUMENT_ROOT_SYNC.txt <<EOF
+          BLUEHOSTING DOCUMENT ROOT SYNC
+
+          Runtime destination:
+            /home/joinhook/joinhook-production
+
+          Apache/LiteSpeed document root:
+            /home/joinhook/public_html
+
+          After replacing the runtime, copy the CONTENTS of:
+            document-root-assets/
+          into:
+            /home/joinhook/public_html/
+
+          This includes the exact build's _next/static hashes and public assets.
+          Do not create _next/static/static.
+          Verify one real hashed JS/CSS URL in the browser before finishing deployment.
+          See docs/knowledge-base/incidents/JH-OPS-001-next-static-assets-bluehosting.md.
+          EOF
+
           cat > deploy-production/DEPLOYMENT.txt <<EOF
           JoinHook V2 + CGE Beta 0.3
           Source commit: $GITHUB_SHA
@@ -93,14 +124,24 @@ jobs:
           CGE checkout: Mercado Pago https://mpago.li/1ZUHT1R
           Target: BlueHosting Passenger joinhook.cl
           Startup file: server.js
+          Document-root static sync: document-root-assets/ -> /home/joinhook/public_html/
           Do not run next build on BlueHosting.
           EOF
           test -f deploy-production/server.js
           test -f deploy-production/package.json
           test -d deploy-production/node_modules
           test -d deploy-production/.next/static
+          test -d deploy-production/document-root-assets/_next/static
+          test -f deploy-production/document-root-assets/favicon.svg
           test -f deploy-production/public/favicon.svg
           test -f deploy-production/public/cge-manifest.webmanifest
+
+      - name: Verify document-root mirror matches build
+        run: |
+          test "$(find .next/static -type f | wc -l)" -gt 0
+          test "$(find deploy-production/document-root-assets/_next/static -type f | wc -l)" -gt 0
+          diff -qr .next/static deploy-production/document-root-assets/_next/static
+          diff -qr public deploy-production/document-root-assets --exclude=_next
 
       - name: Smoke test standalone production artifact
         run: |
@@ -127,6 +168,7 @@ jobs:
           grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/cge-production-standalone.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/project-covers/snowwise-cover.svg
 
       - name: Stop servers
         if: always()
@@ -153,7 +195,7 @@ jobs:
         with:
           script: |
             const marker = '<!-- joinhook-production-artifact -->';
-            const body = `${marker}\n## Production artifact ready\n\n- Commit: \`${context.sha}\`\n- Artifact: \`joinhook-bluehosting-production\`\n- Artifact ID: \`${process.env.ARTIFACT_ID}\`\n- Digest: \`${process.env.ARTIFACT_DIGEST}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n- Artifact URL: ${process.env.ARTIFACT_URL}\n- CGE checkout: Mercado Pago \`https://mpago.li/1ZUHT1R\` verified in the rendered production landing.\n- Production build verified without staging \`X-Robots-Tag\`.\n`;
+            const body = `${marker}\n## Production artifact ready\n\n- Commit: \`${context.sha}\`\n- Artifact: \`joinhook-bluehosting-production\`\n- Artifact ID: \`${process.env.ARTIFACT_ID}\`\n- Digest: \`${process.env.ARTIFACT_DIGEST}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n- Artifact URL: ${process.env.ARTIFACT_URL}\n- CGE checkout: Mercado Pago \`https://mpago.li/1ZUHT1R\` verified in the rendered production landing.\n- BlueHosting document-root mirror packaged and verified for \`/_next/static\` + public assets.\n- Production build verified without staging \`X-Robots-Tag\`.\n`;
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
