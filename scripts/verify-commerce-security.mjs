@@ -98,9 +98,10 @@ requireContains('src/lib/commerce/store.ts', [
   'charged_back',
   'apikey: store.serverKey',
   "store.serverKeyKind === 'legacy_service_role'",
+  "? { Authorization: `Bearer ${store.serverKey}` }",
 ]);
 requireAbsent('src/lib/commerce/store.ts', [
-  "Authorization: `Bearer ${store.serverKey}`,
+  'store.serviceRoleKey',
 ]);
 requireAbsent('src/lib/commerce/store.ts', [
   "commerce_entitlements?on_conflict=order_id', {\n    method: 'POST',\n    headers: restHeaders('return=representation,resolution=merge-duplicates')",
