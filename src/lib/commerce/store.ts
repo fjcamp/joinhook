@@ -72,6 +72,7 @@ export async function createPendingOrder(input: {
   buyerEmail: string;
   amount: number;
   currency: 'CLP';
+  idempotencyKey: string;
 }) {
   const claimToken = crypto.randomBytes(32).toString('base64url');
   const row = {
@@ -82,6 +83,7 @@ export async function createPendingOrder(input: {
     currency: input.currency,
     status: 'pending',
     provider: 'mercadopago',
+    idempotency_key: input.idempotencyKey,
     claim_token_hash: hashSecret(claimToken),
   };
   const response = await rest<CommerceOrderRecord[]>('commerce_orders', {
@@ -93,11 +95,19 @@ export async function createPendingOrder(input: {
   return { order: response[0], claimToken };
 }
 
-export async function attachProviderOrder(orderId: string, providerOrderId: string, idempotencyKey: string) {
-  await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}`, {
+export async function attachProviderOrder(orderId: string, providerOrderId: string) {
+  await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}&status=eq.pending`, {
     method: 'PATCH',
     headers: restHeaders('return=minimal'),
-    body: JSON.stringify({ provider_order_id: providerOrderId, idempotency_key: idempotencyKey, updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ provider_order_id: providerOrderId, updated_at: new Date().toISOString() }),
+  });
+}
+
+export async function markOrderFailed(orderId: string) {
+  await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}&status=eq.pending`, {
+    method: 'PATCH',
+    headers: restHeaders('return=minimal'),
+    body: JSON.stringify({ status: 'failed', updated_at: new Date().toISOString() }),
   });
 }
 
@@ -117,7 +127,7 @@ export function validateOrderClaim(order: CommerceOrderRecord, rawClaimToken: st
 }
 
 export async function markOrderPaid(input: { orderId: string; providerPaymentId?: string | null }) {
-  await rest(`commerce_orders?id=eq.${encodeURIComponent(input.orderId)}`, {
+  await rest(`commerce_orders?id=eq.${encodeURIComponent(input.orderId)}&status=eq.pending`, {
     method: 'PATCH',
     headers: restHeaders('return=minimal'),
     body: JSON.stringify({
