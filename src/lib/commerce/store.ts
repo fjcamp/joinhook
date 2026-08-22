@@ -34,9 +34,15 @@ export type CommerceOrderRecord = {
   provider_order_id: string | null;
   provider_payment_id: string | null;
   idempotency_key: string | null;
+  claim_token_hash: string;
   created_at: string;
   paid_at: string | null;
 };
+
+function hashSecret(value: string) {
+  const { delivery } = commerceConfig();
+  return crypto.createHmac('sha256', delivery.tokenSecret).update(value).digest('hex');
+}
 
 export function createJoinHookOrderCode() {
   const date = new Date();
@@ -53,6 +59,7 @@ export async function createPendingOrder(input: {
   amount: number;
   currency: 'CLP';
 }) {
+  const claimToken = crypto.randomBytes(32).toString('base64url');
   const row = {
     order_code: createJoinHookOrderCode(),
     product_code: input.productCode,
@@ -61,6 +68,7 @@ export async function createPendingOrder(input: {
     currency: input.currency,
     status: 'pending',
     provider: 'mercadopago',
+    claim_token_hash: hashSecret(claimToken),
   };
   const response = await rest<CommerceOrderRecord[]>('commerce_orders', {
     method: 'POST',
@@ -68,14 +76,14 @@ export async function createPendingOrder(input: {
     body: JSON.stringify(row),
   });
   if (!response[0]) throw new Error('Commerce order was not persisted');
-  return response[0];
+  return { order: response[0], claimToken };
 }
 
 export async function attachProviderOrder(orderId: string, providerOrderId: string, idempotencyKey: string) {
   await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}`, {
     method: 'PATCH',
     headers: restHeaders('return=minimal'),
-    body: JSON.stringify({ provider_order_id: providerOrderId, idempotency_key: idempotencyKey }),
+    body: JSON.stringify({ provider_order_id: providerOrderId, idempotency_key: idempotencyKey, updated_at: new Date().toISOString() }),
   });
 }
 
@@ -87,6 +95,13 @@ export async function findOrderByCode(orderCode: string) {
 export async function findOrderByProviderOrderId(providerOrderId: string) {
   const rows = await rest<CommerceOrderRecord[]>(`commerce_orders?provider_order_id=eq.${encodeURIComponent(providerOrderId)}&limit=1`);
   return rows[0] ?? null;
+}
+
+export function validateOrderClaim(order: CommerceOrderRecord, rawClaimToken: string) {
+  if (!rawClaimToken) return false;
+  const expected = Buffer.from(order.claim_token_hash, 'hex');
+  const received = Buffer.from(hashSecret(rawClaimToken), 'hex');
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
 }
 
 export async function markOrderPaid(input: { orderId: string; providerPaymentId?: string | null }) {
@@ -134,7 +149,7 @@ export async function createEntitlement(orderId: string, productCode: string, bu
 export async function createDownloadToken(input: { entitlementId: string }) {
   const { delivery } = commerceConfig();
   const rawToken = crypto.randomBytes(32).toString('base64url');
-  const tokenHash = crypto.createHmac('sha256', delivery.tokenSecret).update(rawToken).digest('hex');
+  const tokenHash = hashSecret(rawToken);
   const expiresAt = new Date(Date.now() + delivery.defaultTtlHours * 60 * 60 * 1000).toISOString();
   const rows = await rest<Array<{ id: string }>>('commerce_download_tokens', {
     method: 'POST',
@@ -150,8 +165,8 @@ export async function createDownloadToken(input: { entitlementId: string }) {
 }
 
 export async function consumeDownloadToken(rawToken: string) {
-  const { delivery, store } = commerceConfig();
-  const tokenHash = crypto.createHmac('sha256', delivery.tokenSecret).update(rawToken).digest('hex');
+  const { store } = commerceConfig();
+  const tokenHash = hashSecret(rawToken);
   const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/consume_commerce_download_token`, {
     method: 'POST',
     headers: restHeaders(),
