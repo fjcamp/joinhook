@@ -12,7 +12,9 @@ const projects = [
         tags: ['Inventario', 'Operaciones', 'RR.HH.', 'PWA'],
         metric: 'Arquitectura modular',
         accent: '#6e7cff',
-        glow: 'rgba(110, 124, 255, .36)'
+        glow: 'rgba(110, 124, 255, .36)',
+        cover: '/project-covers/joinops-cover.svg',
+        coverLabel: 'Vista de inicio · operaciones y gestión'
     },
     {
         key: 'snowwise',
@@ -24,7 +26,9 @@ const projects = [
         tags: ['Weather', 'GPS', 'Maps', 'Safety'],
         metric: 'Diseño inmersivo',
         accent: '#32d7e8',
-        glow: 'rgba(50, 215, 232, .28)'
+        glow: 'rgba(50, 215, 232, .28)',
+        cover: '/project-covers/snowwise-cover.svg',
+        coverLabel: 'Vista de inicio · montaña, clima y seguridad'
     },
     {
         key: 'mi-gestion',
@@ -36,7 +40,9 @@ const projects = [
         tags: ['Dashboard', 'Procesos', 'Datos', 'Offline'],
         metric: 'Gestión práctica',
         accent: '#58e2a3',
-        glow: 'rgba(88, 226, 163, .24)'
+        glow: 'rgba(88, 226, 163, .24)',
+        cover: '/project-covers/mi-gestion-cover.svg',
+        coverLabel: 'Vista de inicio · agenda, tareas e indicadores'
     }
 ];
 
@@ -238,44 +244,58 @@ export default function Home() {
                                 <div><small>Enfoque</small><strong>{project.metric}</strong></div>
                                 <div><small>Estado</small><strong>{project.stage}</strong></div>
                             </div>
-                            <div className="jh-project-controls">
-                                <button type="button" onClick={() => moveProject(-1)} aria-label="Proyecto anterior">←</button>
-                                <span>{activeProject + 1} / {projects.length}</span>
-                                <button type="button" onClick={() => moveProject(1)} aria-label="Proyecto siguiente">→</button>
-                            </div>
                         </div>
 
-                        <div className="jh-project-deck" aria-label="Proyectos JoinHook">
-                            {projects.map((item, index) => {
-                                const offset = index - activeProject;
-                                return (
-                                    <button
-                                        type="button"
-                                        className={`jh-project-card jh-surface ${index === activeProject ? 'is-active' : ''}`}
-                                        key={item.key}
-                                        onClick={() => setActiveProject(index)}
-                                        style={{ '--card-offset': offset } as CSSProperties}
-                                        aria-pressed={index === activeProject}
-                                    >
-                                        <div className="jh-project-card-top">
-                                            <span>{item.name}</span>
-                                            <small>{String(index + 1).padStart(2, '0')}</small>
-                                        </div>
-                                        <div className={`jh-project-visual jh-project-visual-${item.key}`}>
-                                            <div className="jh-project-screen">
-                                                <i /><i /><i />
-                                                <div className="jh-screen-line" />
-                                                <div className="jh-screen-line short" />
-                                                <div className="jh-screen-chart"><span /><span /><span /><span /></div>
+                        <div className="jh-project-deck-shell">
+                            <button className="jh-project-side-nav is-prev" type="button" onClick={() => moveProject(-1)} aria-label="Proyecto anterior">
+                                <span aria-hidden="true">←</span>
+                            </button>
+
+                            <div className="jh-project-deck" aria-label="Proyectos JoinHook">
+                                {projects.map((item, index) => {
+                                    const offset = index - activeProject;
+                                    return (
+                                        <button
+                                            type="button"
+                                            className={`jh-project-card jh-surface ${index === activeProject ? 'is-active' : ''}`}
+                                            key={item.key}
+                                            onClick={() => setActiveProject(index)}
+                                            style={{ '--card-offset': offset } as CSSProperties}
+                                            aria-pressed={index === activeProject}
+                                            aria-label={`Mostrar ${item.name}`}
+                                        >
+                                            <div className="jh-project-card-top">
+                                                <span>{item.name}</span>
+                                                <small>{String(index + 1).padStart(2, '0')}</small>
                                             </div>
-                                        </div>
-                                        <div className="jh-project-card-bottom">
-                                            <small>{item.stage}</small>
-                                            <span>Explorar</span>
-                                        </div>
-                                    </button>
-                                );
-                            })}
+                                            <div className={`jh-project-visual jh-project-visual-${item.key}`}>
+                                                <img
+                                                    className="jh-project-cover"
+                                                    src={item.cover}
+                                                    alt={`Vista de inicio de ${item.name}`}
+                                                    loading={index === activeProject ? 'eager' : 'lazy'}
+                                                    decoding="async"
+                                                />
+                                                <span className="jh-project-cover-label">{item.coverLabel}</span>
+                                            </div>
+                                            <div className="jh-project-card-bottom">
+                                                <small>{item.stage}</small>
+                                                <span>Explorar</span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <button className="jh-project-side-nav is-next" type="button" onClick={() => moveProject(1)} aria-label="Proyecto siguiente">
+                                <span aria-hidden="true">→</span>
+                            </button>
+
+                            <div className="jh-project-pagination" aria-live="polite" aria-label={`Proyecto ${activeProject + 1} de ${projects.length}`}>
+                                <span className="jh-project-pagination-current">{String(activeProject + 1).padStart(2, '0')}</span>
+                                <span>/</span>
+                                <span>{String(projects.length).padStart(2, '0')}</span>
+                            </div>
                         </div>
                     </div>
                 </section>
