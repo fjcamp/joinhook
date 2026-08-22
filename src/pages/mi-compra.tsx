@@ -20,11 +20,6 @@ export default function MyPurchase() {
 
   useEffect(() => {
     if (!router.isReady || !orderCode) return;
-    const claim = sessionStorage.getItem(`jh-commerce-claim:${orderCode}`) || '';
-    if (!claim) {
-      setMessage('No encontramos la credencial temporal de esta compra en este navegador. Si ya pagaste, no vuelvas a pagar: contacta a soporte@joinhook.cl.');
-      return;
-    }
     let cancelled = false;
     let attempts = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -34,7 +29,8 @@ export default function MyPurchase() {
         const response = await fetch('/api/commerce/order-status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderCode, claimToken: claim }),
+          credentials: 'same-origin',
+          body: JSON.stringify({ orderCode }),
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data?.error || 'status_failed');
@@ -57,7 +53,7 @@ export default function MyPurchase() {
         else setMessage('La confirmación está demorando más de lo esperado. No vuelvas a pagar. Conserva tu código de compra y contacta a soporte@joinhook.cl.');
       } catch (error) {
         console.error(error);
-        if (!cancelled) setMessage('No pudimos verificar la compra en este momento. No vuelvas a pagar; intenta actualizar la página o contacta soporte@joinhook.cl.');
+        if (!cancelled) setMessage('No pudimos verificar la compra en este navegador. Si ya pagaste, no vuelvas a pagar. Conserva el código de compra y contacta a soporte@joinhook.cl para recuperar el acceso.');
       }
     };
     void check();
