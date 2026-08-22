@@ -23,6 +23,15 @@ Base/almacén separado para sesiones, navegación, campañas, chat, leads, funne
 ### Plataforma de Conocimiento Empresarial Regional
 Base propia para fuentes, procedencia, vigencias, territorio, legislación, turismo, gastronomía, RR.HH., capacitación y conocimiento estructurado/RAG aprobado.
 
+## Restricción de capacidad del plan gratuito
+
+Al provisionar JoinHook Commerce, Supabase informó un costo de **$0 mensual**, pero también confirmó el límite vigente de **dos proyectos gratuitos activos** para el miembro propietario/administrador. Actualmente ese cupo queda ocupado por:
+
+1. `SnowWise`.
+2. `JoinHook Commerce`.
+
+Esta restricción **no cambia** el principio de aislamiento. No se compartirán bases solo para eludir un límite del proveedor. Antes de crear un tercer producto con backend independiente se deberá evaluar la alternativa de infraestructura más conveniente y legítima para ese producto: plan superior, otro proveedor compatible, o mantenerlo en desarrollo local hasta que exista capacidad. No se pausará ni eliminará un proyecto activo sin revisión explícita del impacto.
+
 ## JoinHook como Control Plane
 
 `joinhook.cl` no tendrá acceso irrestricto a todas las tablas de cada producto. Consumirá únicamente contratos explícitos.
