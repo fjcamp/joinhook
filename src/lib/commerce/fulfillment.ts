@@ -1,7 +1,6 @@
 import { getCommerceProduct } from './catalog';
 import { getMercadoPagoOrder, isMercadoPagoOrderApproved } from './mercadopago';
 import {
-  createDownloadToken,
   createEntitlement,
   findOrderByProviderOrderId,
   markOrderPaid,
@@ -28,13 +27,12 @@ export async function fulfillMercadoPagoOrder(providerOrderId: string) {
 
   const entitlement = await createEntitlement(localOrder.id, localOrder.product_code, localOrder.buyer_email);
   if (!entitlement?.id) throw new Error('Entitlement could not be created');
-  const download = await createDownloadToken({ entitlementId: entitlement.id });
 
   await recordPaymentEvent({
     orderId: localOrder.id,
     providerOrderId,
-    eventType: 'fulfillment.granted',
-    payload: { product_code: localOrder.product_code, token_id: download.tokenId },
+    eventType: 'fulfillment.entitlement_granted',
+    payload: { product_code: localOrder.product_code, entitlement_id: entitlement.id },
   });
 
   return {
@@ -42,6 +40,6 @@ export async function fulfillMercadoPagoOrder(providerOrderId: string) {
     orderCode: localOrder.order_code,
     buyerEmail: localOrder.buyer_email,
     product,
-    download,
+    entitlement,
   };
 }
