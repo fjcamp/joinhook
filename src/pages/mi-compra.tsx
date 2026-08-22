@@ -15,9 +15,14 @@ type PurchaseStatus = {
 function displayStatus(value?: string) {
   if (value === 'paid') return 'Pagado y verificado';
   if (value === 'verification_pending') return 'Verificación adicional';
+  if (value === 'review') return 'En revisión';
   if (value === 'access_revoked') return 'Acceso revocado';
   if (value === 'refunded') return 'Reembolsado';
+  if (value === 'partially_refunded') return 'Reembolso parcial · en revisión';
+  if (value === 'charged_back') return 'Contracargo · acceso suspendido';
   if (value === 'cancelled') return 'Cancelado';
+  if (value === 'failed') return 'Fallido';
+  if (value === 'pending') return 'Pendiente';
   return value || '';
 }
 
@@ -49,8 +54,8 @@ export default function MyPurchase() {
           setMessage('Pago verificado. Tu producto está listo.');
           return;
         }
-        if (data.status === 'access_revoked' || data.status === 'refunded') {
-          setMessage('Esta compra ya no tiene un acceso de descarga activo. Si necesitas antecedentes sobre el reembolso o la revocación, contacta a soporte@joinhook.cl indicando tu código de compra.');
+        if (['access_revoked', 'refunded', 'partially_refunded', 'charged_back', 'review'].includes(data.status)) {
+          setMessage('Esta compra requiere revisión y no tiene una descarga activa en este momento. No realices un segundo pago. Conserva tu código de compra y contacta a soporte@joinhook.cl si necesitas antecedentes o regularizar el acceso.');
           return;
         }
         if (data.status === 'cancelled') {
