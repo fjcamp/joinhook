@@ -14,7 +14,7 @@ create table if not exists public.commerce_orders (
   provider text not null check (provider in ('mercadopago')),
   provider_order_id text unique,
   provider_payment_id text,
-  idempotency_key text,
+  idempotency_key text not null unique,
   claim_token_hash text not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
