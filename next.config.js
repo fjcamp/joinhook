@@ -5,11 +5,12 @@ const isStaging = process.env.JOINHOOK_DEPLOY_TARGET === 'staging';
 
 const contentSecurityPolicy = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'unsafe-inline' https://sdk.mercadopago.com${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self'",
+    "connect-src 'self' https://api.mercadopago.com https://*.mercadopago.com https://*.mercadopago.cl",
+    "frame-src 'self' https://*.mercadopago.com https://*.mercadopago.cl",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
     "media-src 'self' blob:",
