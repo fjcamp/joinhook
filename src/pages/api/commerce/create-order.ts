@@ -1,9 +1,23 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCommerceProduct } from '@/lib/commerce/catalog';
-import { createMercadoPagoCardOrder } from '@/lib/commerce/mercadopago';
-import { attachProviderOrder, createPendingOrder, recordPaymentEvent } from '@/lib/commerce/store';
+import {
+  createMercadoPagoCardOrder,
+  isDefiniteMercadoPagoRejection,
+  newIdempotencyKey,
+  type MercadoPagoApiError,
+} from '@/lib/commerce/mercadopago';
+import {
+  attachProviderOrder,
+  createPendingOrder,
+  markOrderFailed,
+  recordPaymentEvent,
+} from '@/lib/commerce/store';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function providerStatus(error: unknown) {
+  return (error as MercadoPagoApiError | null)?.status ?? null;
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -11,60 +25,92 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'method_not_allowed' });
   }
 
-  try {
-    const {
-      productCode,
-      email,
-      cardToken,
-      paymentMethodId,
-      paymentMethodType,
-      installments,
-      identificationType,
-      identificationNumber,
-    } = req.body ?? {};
-    const product = getCommerceProduct(String(productCode || ''));
-    if (!product || !product.active) return res.status(400).json({ error: 'invalid_product' });
-    if (!emailPattern.test(String(email || ''))) return res.status(400).json({ error: 'invalid_email' });
-    if (!cardToken || !paymentMethodId || !paymentMethodType) return res.status(400).json({ error: 'missing_payment_token' });
-    const installmentCount = Number(installments || 1);
-    if (!Number.isInteger(installmentCount) || installmentCount < 1 || installmentCount > 24) return res.status(400).json({ error: 'invalid_installments' });
+  const {
+    productCode,
+    email,
+    cardToken,
+    paymentMethodId,
+    paymentMethodType,
+    installments,
+    identificationType,
+    identificationNumber,
+  } = req.body ?? {};
+  const product = getCommerceProduct(String(productCode || ''));
+  if (!product || !product.active) return res.status(400).json({ error: 'invalid_product' });
+  if (!emailPattern.test(String(email || ''))) return res.status(400).json({ error: 'invalid_email' });
+  if (!cardToken || !paymentMethodId || !paymentMethodType) return res.status(400).json({ error: 'missing_payment_token' });
+  const installmentCount = Number(installments || 1);
+  if (!Number.isInteger(installmentCount) || installmentCount < 1 || installmentCount > 24) return res.status(400).json({ error: 'invalid_installments' });
 
-    const { order: localOrder, claimToken } = await createPendingOrder({
+  const idempotencyKey = newIdempotencyKey();
+  let localOrder: Awaited<ReturnType<typeof createPendingOrder>> | null = null;
+
+  try {
+    localOrder = await createPendingOrder({
       productCode: product.code,
       buyerEmail: String(email),
       amount: product.amount,
       currency: product.currency,
+      idempotencyKey,
     });
 
-    const { order, idempotencyKey } = await createMercadoPagoCardOrder({
-      externalReference: localOrder.order_code,
-      amount: product.amount,
-      payerEmail: String(email),
-      identificationType: identificationType ? String(identificationType) : undefined,
-      identificationNumber: identificationNumber ? String(identificationNumber) : undefined,
-      paymentMethodId: String(paymentMethodId),
-      paymentMethodType: String(paymentMethodType),
-      cardToken: String(cardToken),
-      installments: installmentCount,
-    });
+    try {
+      const { order } = await createMercadoPagoCardOrder({
+        externalReference: localOrder.order.order_code,
+        amount: product.amount,
+        payerEmail: String(email),
+        identificationType: identificationType ? String(identificationType) : undefined,
+        identificationNumber: identificationNumber ? String(identificationNumber) : undefined,
+        paymentMethodId: String(paymentMethodId),
+        paymentMethodType: String(paymentMethodType),
+        cardToken: String(cardToken),
+        installments: installmentCount,
+        idempotencyKey,
+      });
 
-    await attachProviderOrder(localOrder.id, order.id, idempotencyKey);
-    await recordPaymentEvent({
-      orderId: localOrder.id,
-      providerOrderId: order.id,
-      eventType: 'mercadopago.order.created',
-      payload: { status: order.status, status_detail: order.status_detail },
-    });
+      await attachProviderOrder(localOrder.order.id, order.id);
+      await recordPaymentEvent({
+        orderId: localOrder.order.id,
+        providerOrderId: order.id,
+        eventType: 'mercadopago.order.created',
+        payload: { status: order.status ?? null, status_detail: order.status_detail ?? null },
+      });
 
-    return res.status(201).json({
-      orderCode: localOrder.order_code,
-      claimToken,
-      providerOrderId: order.id,
-      status: order.status ?? 'created',
-      statusDetail: order.status_detail ?? null,
-    });
+      return res.status(201).json({
+        orderCode: localOrder.order.order_code,
+        claimToken: localOrder.claimToken,
+        providerOrderId: order.id,
+        status: order.status ?? 'created',
+        statusDetail: order.status_detail ?? null,
+      });
+    } catch (error) {
+      const status = providerStatus(error);
+      const definite = isDefiniteMercadoPagoRejection(error);
+
+      await recordPaymentEvent({
+        orderId: localOrder.order.id,
+        eventType: definite ? 'mercadopago.order.creation_rejected' : 'mercadopago.order.creation_uncertain',
+        payload: { http_status: status, classification: definite ? 'definite_rejection' : 'ambiguous_or_transient' },
+      }).catch((auditError) => console.error('[commerce/create-order] payment audit failed', auditError));
+
+      if (definite) {
+        await markOrderFailed(localOrder.order.id).catch((storeError) => console.error('[commerce/create-order] mark failed error', storeError));
+        return res.status(422).json({ error: 'payment_not_created' });
+      }
+
+      // A network/timeout/5xx path can be ambiguous: Mercado Pago may have
+      // accepted the order even when JoinHook did not receive the response.
+      // Preserve the claim and direct the customer to a safe verification state
+      // instead of encouraging a second payment attempt.
+      return res.status(202).json({
+        orderCode: localOrder.order.order_code,
+        claimToken: localOrder.claimToken,
+        status: 'verification_pending',
+        recoveryRequired: true,
+      });
+    }
   } catch (error) {
     console.error('[commerce/create-order]', error);
-    return res.status(502).json({ error: 'payment_provider_error' });
+    return res.status(500).json({ error: 'commerce_order_failed' });
   }
 }
