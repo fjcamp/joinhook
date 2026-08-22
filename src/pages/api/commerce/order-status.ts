@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fulfillMercadoPagoOrder } from '@/lib/commerce/fulfillment';
-import { createDownloadToken, createEntitlement, findOrderByCode, validateOrderClaim } from '@/lib/commerce/store';
 import { getCommerceProduct } from '@/lib/commerce/catalog';
+import { readOrderClaimCookie } from '@/lib/commerce/order-claim-cookie';
+import { createDownloadToken, createEntitlement, findOrderByCode, validateOrderClaim } from '@/lib/commerce/store';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -11,8 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const orderCode = String(req.body?.orderCode || '');
-    const claimToken = String(req.body?.claimToken || '');
-    if (!orderCode || !claimToken) return res.status(400).json({ error: 'missing_order_claim' });
+    if (!orderCode) return res.status(400).json({ error: 'missing_order_code' });
+    const claimToken = readOrderClaimCookie(req.headers.cookie, orderCode);
+    if (!claimToken) return res.status(404).json({ error: 'order_not_found' });
 
     let order = await findOrderByCode(orderCode);
     if (!order || !validateOrderClaim(order, claimToken)) return res.status(404).json({ error: 'order_not_found' });
@@ -28,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (order.status !== 'paid') {
       const verificationRequired = order.status === 'pending' && Boolean(order.idempotency_key) && !order.provider_order_id;
+      res.setHeader('Cache-Control', 'no-store');
       return res.status(200).json({
         orderCode: order.order_code,
         status: verificationRequired ? 'verification_pending' : order.status,
@@ -40,6 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!entitlement?.id) throw new Error('Entitlement missing');
     const download = await createDownloadToken({ entitlementId: entitlement.id });
 
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({
       orderCode: order.order_code,
       status: 'paid',
