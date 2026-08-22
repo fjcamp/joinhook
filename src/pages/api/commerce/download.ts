@@ -45,7 +45,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      fd = fs.openSync(filePath, 'r');
+      // The artifact intentionally lives outside the application bundle. Tell
+      // Turbopack not to trace this runtime-only absolute path into standalone.
+      fd = fs.openSync(/* turbopackIgnore: true */ filePath, 'r');
     } catch {
       console.error('[commerce/download] private file missing or unreadable', preview.product_code);
       return res.status(503).json({ error: 'product_temporarily_unavailable' });
@@ -82,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Download-Remaining', String(Math.max(0, grant.remaining_uses)));
 
-    const stream = fs.createReadStream(filePath, { fd, autoClose: true });
+    const stream = fs.createReadStream(/* turbopackIgnore: true */ filePath, { fd, autoClose: true });
     fd = null; // ownership transferred to the stream
     stream.on('error', (error) => {
       console.error('[commerce/download] stream failed', error);
