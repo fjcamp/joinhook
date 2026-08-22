@@ -1,8 +1,21 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import Script from 'next/script';
+import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import { GASTRO_EXPRESS_PRODUCT_CODE } from '@/lib/commerce/catalog';
+import { GASTRO_EXPRESS_PRODUCT } from '@/lib/commerce/catalog';
+
+type CardBrickFormData = {
+  payer?: {
+    email?: string;
+    identification?: { type?: string; number?: string };
+  };
+  token?: string;
+  payment_method_id?: string;
+  installments?: number | string;
+};
+
+type CardBrickAdditionalData = { paymentTypeId?: string };
 
 declare global {
   interface Window {
@@ -14,6 +27,7 @@ const PUBLIC_KEY = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '';
 const COMMERCE_ENABLED = process.env.NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED === 'true';
 
 export default function ControlExpressCheckout() {
+  const router = useRouter();
   const controller = useRef<{ unmount: () => void } | null>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [message, setMessage] = useState('Preparando pago seguro…');
@@ -24,7 +38,7 @@ export default function ControlExpressCheckout() {
     const mp = new window.MercadoPago(PUBLIC_KEY);
     const builder = mp.bricks();
     const settings = {
-      initialization: { amount: 4990 },
+      initialization: { amount: GASTRO_EXPRESS_PRODUCT.amount },
       customization: {
         paymentMethods: {
           creditCard: 'all',
@@ -35,35 +49,33 @@ export default function ControlExpressCheckout() {
       },
       callbacks: {
         onReady: () => active && setMessage(''),
-        onSubmit: (formData: any, additionalData: any) => new Promise<void>((resolve, reject) => {
-          const payload = {
-            productCode: GASTRO_EXPRESS_PRODUCT_CODE,
-            email: formData?.payer?.email,
-            cardToken: formData?.token,
-            paymentMethodId: formData?.payment_method_id,
-            paymentMethodType: additionalData?.paymentTypeId,
-            installments: formData?.installments,
-            identificationType: formData?.payer?.identification?.type,
-            identificationNumber: formData?.payer?.identification?.number,
-          };
-          fetch('/api/commerce/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          })
-            .then(async (response) => {
-              const data = await response.json();
-              if (!response.ok) throw new Error(data?.error || 'payment_failed');
-              sessionStorage.setItem(`jh-commerce-claim:${data.orderCode}`, data.claimToken);
-              window.location.assign(`/mi-compra?order=${encodeURIComponent(data.orderCode)}`);
-              resolve();
-            })
-            .catch((error) => {
-              console.error(error);
-              setMessage('No pudimos completar el pago. Revisa los datos o intenta nuevamente. No se libera ninguna descarga si el pago no es verificado.');
-              reject(error);
+        onSubmit: async (formData: CardBrickFormData, additionalData: CardBrickAdditionalData) => {
+          try {
+            const payload = {
+              productCode: GASTRO_EXPRESS_PRODUCT.code,
+              email: formData?.payer?.email,
+              cardToken: formData?.token,
+              paymentMethodId: formData?.payment_method_id,
+              paymentMethodType: additionalData?.paymentTypeId,
+              installments: formData?.installments,
+              identificationType: formData?.payer?.identification?.type,
+              identificationNumber: formData?.payer?.identification?.number,
+            };
+            const response = await fetch('/api/commerce/create-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
             });
-        }),
+            const data = await response.json();
+            if (!response.ok) throw new Error(data?.error || 'payment_failed');
+            sessionStorage.setItem(`jh-commerce-claim:${data.orderCode}`, data.claimToken);
+            await router.push(`/mi-compra?order=${encodeURIComponent(data.orderCode)}`);
+          } catch (error) {
+            console.error(error);
+            if (active) setMessage('No pudimos completar el pago. Revisa los datos o intenta nuevamente. No se libera ninguna descarga si el pago no es verificado.');
+            throw error;
+          }
+        },
         onError: (error: unknown) => {
           console.error(error);
           if (active) setMessage('El formulario de pago tuvo un inconveniente. Intenta nuevamente.');
@@ -80,14 +92,15 @@ export default function ControlExpressCheckout() {
       controller.current?.unmount();
       controller.current = null;
     };
-  }, [sdkReady]);
+  }, [router, sdkReady]);
 
   const configured = Boolean(PUBLIC_KEY && COMMERCE_ENABLED);
+  const formattedAmount = new Intl.NumberFormat('es-CL', { style: 'currency', currency: GASTRO_EXPRESS_PRODUCT.currency, maximumFractionDigits: 0 }).format(GASTRO_EXPRESS_PRODUCT.amount);
 
   return (
     <>
       <Head>
-        <title>Pago seguro | Control Gastronómico Express · JoinHook</title>
+        <title>Pago seguro | {GASTRO_EXPRESS_PRODUCT.name} · JoinHook</title>
         <meta name="robots" content="noindex,nofollow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -99,8 +112,8 @@ export default function ControlExpressCheckout() {
         </header>
         <section className="jh-section" style={{ maxWidth: 920, margin: '0 auto', paddingTop: 72 }}>
           <div className="jh-section-heading">
-            <div><span className="jh-eyebrow">Checkout JoinHook · Mercado Pago</span><h1 style={{ fontSize: 'clamp(2.5rem,5vw,4.8rem)', lineHeight: .95 }}>Control Gastronómico Express</h1></div>
-            <p>Pack fundador · <strong>$4.990 CLP</strong>. Los datos de tarjeta son capturados y tokenizados por Mercado Pago; JoinHook no almacena número de tarjeta ni CVV.</p>
+            <div><span className="jh-eyebrow">Checkout JoinHook · Mercado Pago</span><h1 style={{ fontSize: 'clamp(2.5rem,5vw,4.8rem)', lineHeight: .95 }}>{GASTRO_EXPRESS_PRODUCT.name}</h1></div>
+            <p>Pack fundador · <strong>{formattedAmount}</strong>. Los datos de tarjeta son capturados y tokenizados por Mercado Pago; JoinHook no almacena número de tarjeta ni CVV.</p>
           </div>
           <div className="jh-surface" style={{ padding: 'clamp(18px,4vw,34px)', borderRadius: 28 }}>
             {!configured ? (
