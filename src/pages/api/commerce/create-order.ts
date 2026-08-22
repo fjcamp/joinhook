@@ -12,7 +12,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { productCode, email, cardToken, paymentMethodId, paymentMethodType, installments } = req.body ?? {};
+    const {
+      productCode,
+      email,
+      cardToken,
+      paymentMethodId,
+      paymentMethodType,
+      installments,
+      identificationType,
+      identificationNumber,
+    } = req.body ?? {};
     const product = getCommerceProduct(String(productCode || ''));
     if (!product || !product.active) return res.status(400).json({ error: 'invalid_product' });
     if (!emailPattern.test(String(email || ''))) return res.status(400).json({ error: 'invalid_email' });
@@ -20,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const installmentCount = Number(installments || 1);
     if (!Number.isInteger(installmentCount) || installmentCount < 1 || installmentCount > 24) return res.status(400).json({ error: 'invalid_installments' });
 
-    const localOrder = await createPendingOrder({
+    const { order: localOrder, claimToken } = await createPendingOrder({
       productCode: product.code,
       buyerEmail: String(email),
       amount: product.amount,
@@ -31,6 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       externalReference: localOrder.order_code,
       amount: product.amount,
       payerEmail: String(email),
+      identificationType: identificationType ? String(identificationType) : undefined,
+      identificationNumber: identificationNumber ? String(identificationNumber) : undefined,
       paymentMethodId: String(paymentMethodId),
       paymentMethodType: String(paymentMethodType),
       cardToken: String(cardToken),
@@ -47,6 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(201).json({
       orderCode: localOrder.order_code,
+      claimToken,
       providerOrderId: order.id,
       status: order.status ?? 'created',
       statusDetail: order.status_detail ?? null,
