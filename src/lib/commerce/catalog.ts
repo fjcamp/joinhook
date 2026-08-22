@@ -9,22 +9,23 @@ export type CommerceProduct = {
 };
 
 /**
- * CGE is intentionally not used as a public or internal acronym because it is
- * strongly associated with another Chilean company. Use the stable product
- * code below for integrations and data correlation.
+ * Stable product code for integrations and data correlation. The public short
+ * name is Control Express; avoid introducing ambiguous external acronyms.
  */
 export const GASTRO_EXPRESS_PRODUCT_CODE = 'JH-GASTRO-EXPRESS-FOUNDERS';
 
+export const GASTRO_EXPRESS_PRODUCT: CommerceProduct = {
+  code: GASTRO_EXPRESS_PRODUCT_CODE,
+  slug: 'control-gastronomico-express',
+  name: 'Control Gastronómico Express',
+  shortName: 'Control Express',
+  currency: 'CLP',
+  amount: 4990,
+  active: true,
+};
+
 export const commerceProducts: Record<string, CommerceProduct> = {
-  [GASTRO_EXPRESS_PRODUCT_CODE]: {
-    code: GASTRO_EXPRESS_PRODUCT_CODE,
-    slug: 'control-gastronomico-express',
-    name: 'Control Gastronómico Express',
-    shortName: 'Control Express',
-    currency: 'CLP',
-    amount: 4990,
-    active: true,
-  },
+  [GASTRO_EXPRESS_PRODUCT_CODE]: GASTRO_EXPRESS_PRODUCT,
 };
 
 export function getCommerceProduct(code: string) {
