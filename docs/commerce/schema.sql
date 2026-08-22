@@ -11,7 +11,7 @@ create table if not exists public.commerce_orders (
   buyer_email text not null,
   amount numeric(12,2) not null check (amount > 0),
   currency text not null check (currency = 'CLP'),
-  status text not null default 'pending' check (status in ('pending','paid','failed','refunded','cancelled')),
+  status text not null default 'pending' check (status in ('pending','paid','review','failed','refunded','partially_refunded','cancelled','charged_back')),
   provider text not null check (provider in ('mercadopago')),
   provider_order_id text unique,
   provider_payment_id text,
@@ -21,6 +21,13 @@ create table if not exists public.commerce_orders (
   updated_at timestamptz not null default now(),
   paid_at timestamptz
 );
+
+-- Keep an existing installation aligned when this canonical schema is replayed.
+alter table public.commerce_orders
+  drop constraint if exists commerce_orders_status_check;
+alter table public.commerce_orders
+  add constraint commerce_orders_status_check
+  check (status in ('pending','paid','review','failed','refunded','partially_refunded','cancelled','charged_back'));
 
 create table if not exists public.commerce_payment_events (
   id uuid primary key default gen_random_uuid(),
@@ -67,6 +74,9 @@ create table if not exists public.commerce_download_events (
 
 create index if not exists commerce_orders_status_idx on public.commerce_orders(status);
 create index if not exists commerce_orders_email_idx on public.commerce_orders(lower(buyer_email));
+create unique index if not exists commerce_orders_provider_payment_id_uidx
+  on public.commerce_orders(provider_payment_id)
+  where provider_payment_id is not null;
 create index if not exists commerce_payment_events_provider_order_idx on public.commerce_payment_events(provider_order_id);
 create index if not exists commerce_payment_events_order_id_idx on public.commerce_payment_events(order_id);
 create index if not exists commerce_download_tokens_entitlement_idx on public.commerce_download_tokens(entitlement_id);
@@ -182,6 +192,12 @@ grant all on table public.commerce_entitlements to service_role;
 grant all on table public.commerce_download_tokens to service_role;
 grant all on table public.commerce_download_events to service_role;
 
+drop policy if exists commerce_orders_no_client_access on public.commerce_orders;
+drop policy if exists commerce_payment_events_no_client_access on public.commerce_payment_events;
+drop policy if exists commerce_entitlements_no_client_access on public.commerce_entitlements;
+drop policy if exists commerce_download_tokens_no_client_access on public.commerce_download_tokens;
+drop policy if exists commerce_download_events_no_client_access on public.commerce_download_events;
+
 create policy commerce_orders_no_client_access on public.commerce_orders
   for all to anon, authenticated using (false) with check (false);
 create policy commerce_payment_events_no_client_access on public.commerce_payment_events
@@ -201,3 +217,4 @@ grant execute on function public.consume_commerce_download_token(text) to servic
 
 comment on function public.preview_commerce_download_token(text) is 'JoinHook Commerce backend-only token preview. service_role only.';
 comment on function public.consume_commerce_download_token(text) is 'JoinHook Commerce backend-only atomic token consumption. service_role only.';
+comment on column public.commerce_orders.status is 'JoinHook normalized order state. Refund and dispute states are explicit so access cannot be silently restored.';
