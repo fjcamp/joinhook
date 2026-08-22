@@ -22,6 +22,16 @@ async function rest<T>(path: string, init: RequestInit = {}) {
   return payload as T;
 }
 
+export type CommerceOrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'review'
+  | 'failed'
+  | 'refunded'
+  | 'partially_refunded'
+  | 'cancelled'
+  | 'charged_back';
+
 export type CommerceOrderRecord = {
   id: string;
   order_code: string;
@@ -29,7 +39,7 @@ export type CommerceOrderRecord = {
   buyer_email: string;
   amount: number;
   currency: 'CLP';
-  status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled';
+  status: CommerceOrderStatus;
   provider: 'mercadopago';
   provider_order_id: string | null;
   provider_payment_id: string | null;
@@ -126,13 +136,18 @@ export async function findOrderByProviderOrderId(providerOrderId: string) {
   return rows[0] ?? null;
 }
 
+export async function findOrderByProviderPaymentId(providerPaymentId: string) {
+  const rows = await rest<CommerceOrderRecord[]>(`commerce_orders?provider_payment_id=eq.${encodeURIComponent(providerPaymentId)}&limit=1`);
+  return rows[0] ?? null;
+}
+
 export function validateOrderClaim(order: CommerceOrderRecord, rawClaimToken: string) {
   if (!rawClaimToken) return false;
   return safeEqualText(order.claim_token_hash, hashSecret(rawClaimToken));
 }
 
 export async function markOrderPaid(input: { orderId: string; providerPaymentId?: string | null }) {
-  await rest(`commerce_orders?id=eq.${encodeURIComponent(input.orderId)}&status=eq.pending`, {
+  await rest(`commerce_orders?id=eq.${encodeURIComponent(input.orderId)}&status=in.(pending,review)`, {
     method: 'PATCH',
     headers: restHeaders('return=minimal'),
     body: JSON.stringify({
@@ -144,12 +159,19 @@ export async function markOrderPaid(input: { orderId: string; providerPaymentId?
   });
 }
 
-export async function markOrderRefunded(orderId: string) {
-  await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}&status=eq.paid`, {
+export async function markOrderPostSaleState(
+  orderId: string,
+  status: Exclude<CommerceOrderStatus, 'pending' | 'paid'>,
+) {
+  await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}`, {
     method: 'PATCH',
     headers: restHeaders('return=minimal'),
-    body: JSON.stringify({ status: 'refunded', updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ status, updated_at: new Date().toISOString() }),
   });
+}
+
+export async function markOrderRefunded(orderId: string) {
+  await markOrderPostSaleState(orderId, 'refunded');
 }
 
 export async function recordPaymentEvent(input: {
