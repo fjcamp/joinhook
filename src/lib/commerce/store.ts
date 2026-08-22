@@ -97,6 +97,7 @@ export async function markOrderPaid(input: { orderId: string; providerPaymentId?
       status: 'paid',
       provider_payment_id: input.providerPaymentId || null,
       paid_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }),
   });
 }
@@ -122,7 +123,7 @@ export async function recordPaymentEvent(input: {
 }
 
 export async function createEntitlement(orderId: string, productCode: string, buyerEmail: string) {
-  const rows = await rest<Array<{ id: string }>>('commerce_entitlements', {
+  const rows = await rest<Array<{ id: string }>>('commerce_entitlements?on_conflict=order_id', {
     method: 'POST',
     headers: restHeaders('return=representation,resolution=merge-duplicates'),
     body: JSON.stringify({ order_id: orderId, product_code: productCode, buyer_email: buyerEmail.toLowerCase(), status: 'active' }),
@@ -146,4 +147,41 @@ export async function createDownloadToken(input: { entitlementId: string }) {
     }),
   });
   return { rawToken, tokenId: rows[0]?.id ?? null, expiresAt };
+}
+
+export async function consumeDownloadToken(rawToken: string) {
+  const { delivery, store } = commerceConfig();
+  const tokenHash = crypto.createHmac('sha256', delivery.tokenSecret).update(rawToken).digest('hex');
+  const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/consume_commerce_download_token`, {
+    method: 'POST',
+    headers: restHeaders(),
+    body: JSON.stringify({ p_token_hash: tokenHash }),
+  });
+  const rows = (await response.json().catch(() => [])) as Array<{
+    token_id: string;
+    order_id: string;
+    product_code: string;
+    buyer_email: string;
+    remaining_uses: number;
+  }>;
+  if (!response.ok) throw new Error(`Commerce token RPC error ${response.status}`);
+  return rows[0] ?? null;
+}
+
+export async function recordDownloadEvent(input: {
+  tokenId: string;
+  orderId: string;
+  userAgent?: string | null;
+  ipHash?: string | null;
+}) {
+  await rest('commerce_download_events', {
+    method: 'POST',
+    headers: restHeaders('return=minimal'),
+    body: JSON.stringify({
+      token_id: input.tokenId,
+      order_id: input.orderId,
+      user_agent: input.userAgent || null,
+      ip_hash: input.ipHash || null,
+    }),
+  });
 }
