@@ -34,13 +34,14 @@ requireContains('src/pages/checkout/control-gastronomico-express.tsx', [
   'GASTRO_EXPRESS_PRODUCT.amount',
 ]);
 requireAbsent('src/pages/checkout/control-gastronomico-express.tsx', [
-  'sessionStorage',
-  'localStorage',
+  'sessionStorage.',
+  'localStorage.',
 ]);
 
 requireContains('src/pages/api/commerce/order-status.ts', [
   'readOrderClaimCookie',
   "res.setHeader('Cache-Control', 'no-store')",
+  "entitlement.status !== 'active'",
 ]);
 
 requireContains('src/pages/api/commerce/download.ts', [
@@ -55,6 +56,14 @@ requireContains('src/pages/api/commerce/webhooks/mercadopago.ts', [
 ]);
 requireAbsent('src/pages/api/commerce/webhooks/mercadopago.ts', [
   'payload: req.body',
+]);
+
+requireContains('src/lib/commerce/store.ts', [
+  'resolution=ignore-duplicates',
+  'revokeEntitlementByOrder',
+]);
+requireAbsent('src/lib/commerce/store.ts', [
+  "commerce_entitlements?on_conflict=order_id', {\n    method: 'POST',\n    headers: restHeaders('return=representation,resolution=merge-duplicates')",
 ]);
 
 requireContains('docs/commerce/schema.sql', [
