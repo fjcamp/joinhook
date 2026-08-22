@@ -162,7 +162,8 @@ begin
 end;
 $$;
 
--- Defense in depth: backend-only tables remain behind RLS and have no client policies.
+-- Defense in depth: backend-only tables remain behind RLS and are explicitly
+-- denied to browser roles. service_role bypasses RLS and is server-only.
 alter table public.commerce_orders enable row level security;
 alter table public.commerce_payment_events enable row level security;
 alter table public.commerce_entitlements enable row level security;
@@ -180,6 +181,17 @@ grant all on table public.commerce_payment_events to service_role;
 grant all on table public.commerce_entitlements to service_role;
 grant all on table public.commerce_download_tokens to service_role;
 grant all on table public.commerce_download_events to service_role;
+
+create policy commerce_orders_no_client_access on public.commerce_orders
+  for all to anon, authenticated using (false) with check (false);
+create policy commerce_payment_events_no_client_access on public.commerce_payment_events
+  for all to anon, authenticated using (false) with check (false);
+create policy commerce_entitlements_no_client_access on public.commerce_entitlements
+  for all to anon, authenticated using (false) with check (false);
+create policy commerce_download_tokens_no_client_access on public.commerce_download_tokens
+  for all to anon, authenticated using (false) with check (false);
+create policy commerce_download_events_no_client_access on public.commerce_download_events
+  for all to anon, authenticated using (false) with check (false);
 
 -- SECURITY DEFINER RPCs must never be executable by PUBLIC/anon/authenticated.
 revoke execute on function public.preview_commerce_download_token(text) from public, anon, authenticated;
