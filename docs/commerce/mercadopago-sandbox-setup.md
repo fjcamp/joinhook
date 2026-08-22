@@ -48,19 +48,31 @@ La referencia canónica de variables es `.env.commerce.example`.
 
 `NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED` controla la interfaz. `JOINHOOK_COMMERCE_ACCEPT_PAYMENTS` controla el backend y es la última barrera para crear cobros. Para pruebas reales en sandbox deben habilitarse conscientemente ambas; en producción permanecen `false` hasta el GO formal.
 
-## Webhook
+## Webhooks
 
-Tópico principal: **Order (Mercado Pago)**.
-
-URL prevista:
+### Tópico principal: Order (Mercado Pago)
 
 ```text
 https://<host>/api/commerce/webhooks/mercadopago
 ```
 
-Mercado Pago envía `x-signature`, `x-request-id` y `data.id`. El backend debe validar HMAC antes de procesar el evento y, aun después de una firma válida, consultar `/v1/orders/{id}` para verificar el estado real de la orden.
+Mercado Pago envía `x-signature`, `x-request-id` y `data.id`. El backend valida HMAC y, aun después de una firma válida, consulta `/v1/orders/{id}` para verificar el estado autoritativo.
 
-El `id` de la notificación se utiliza como clave de idempotencia del evento cuando esté disponible.
+### Tópicos opcionales de postventa
+
+```text
+https://<host>/api/commerce/webhooks/mercadopago-optional
+```
+
+Activar y simular, cuando corresponda:
+
+- `topic_claims_integration_wh` — reclamos;
+- `topic_chargebacks_wh` — contracargos;
+- `stop_delivery_op_wh` — alertas de fraude.
+
+El endpoint opcional valida la firma con el mismo principio, nunca trata el ID de un claim/chargeback como si fuera un Order ID y almacena solo metadata mínima. Cuando una alerta trae `payment_id` y puede correlacionarse con una compra JoinHook, Commerce coloca la compra en hold/revisión o contracargo y revoca inmediatamente el entitlement.
+
+Mercado Pago indica que las alertas de fraude deben reconocerse rápidamente y que no siguen el comportamiento de reintento habitual. Por eso esta ruta debe mantenerse corta, idempotente y enfocada primero en impedir la entrega.
 
 ## Orders API
 
@@ -79,6 +91,21 @@ Commerce crea primero la orden local con su `order_code` y la clave de idempoten
 
 Si el proveedor responde con un rechazo inequívoco, JoinHook puede marcar la orden como fallida. Si la comunicación termina en un estado ambiguo (timeout/red/5xx incluso después del reintento), JoinHook conserva la orden para verificación y **no invita al cliente a volver a pagar**, evitando un posible cobro duplicado.
 
+## Normalización de estados
+
+Commerce no interpreta `processed` de forma genérica como pago válido. La combinación `status/status_detail` se normaliza de forma conservadora:
+
+- `processed/accredited` → `paid`;
+- `processed/partially_refunded` → `partially_refunded` + revocación/hold;
+- `refunded` → `refunded` + revocación;
+- `charged_back/*` → `charged_back` + revocación;
+- `failed/*` → `failed`;
+- `canceled` o `expired` → `cancelled`;
+- `created`, `processing` o `action_required` → `pending`;
+- cualquier estado futuro/desconocido → `review`, nunca fulfillment automático.
+
+Los estados locales de disputa/reembolso/revisión son **sticky**: un Webhook posterior genérico no puede reactivar una descarga automáticamente. La regularización exige revisión explícita.
+
 ## Regla de fulfillment
 
 Nunca entregar un archivo por:
@@ -93,12 +120,14 @@ Antes de otorgar entitlement:
 1. localizar orden JoinHook por `provider_order_id`;
 2. consultar la orden a Mercado Pago server-side;
 3. validar `external_reference`;
-4. validar importe exacto;
+4. validar importe exacto contra orden local y catálogo;
 5. validar producto activo;
-6. validar estado aprobado/procesado;
-7. marcar orden como pagada idempotentemente;
-8. crear/recuperar entitlement;
+6. clasificar `status/status_detail`;
+7. entregar solo en `processed/accredited`;
+8. crear/recuperar entitlement activo;
 9. emitir token de descarga limitado.
+
+Cada vez que el comprador consulta `/mi-compra`, si existe una orden de proveedor se vuelve a reconciliar su estado antes de emitir un token nuevo. Así un reembolso o contracargo posterior puede cortar el acceso.
 
 ## Política de descarga segura
 
@@ -111,9 +140,10 @@ El endpoint hace un preview del token, abre/verifica el artefacto privado y **re
 ## Pruebas obligatorias
 
 ### Pago
-- aprobado;
+- aprobado `processed/accredited`;
 - rechazado;
-- pendiente/acción requerida si aplica;
+- `processing/in_process`;
+- `action_required`;
 - reintento del cliente;
 - refresh del navegador;
 - doble click en pagar;
@@ -124,7 +154,7 @@ El endpoint hace un preview del token, abre/verifica el artefacto privado y **re
 - orden con monto alterado;
 - `external_reference` incorrecta.
 
-### Webhooks
+### Webhook Order
 - firma correcta;
 - firma inválida;
 - `x-request-id` faltante;
@@ -134,6 +164,16 @@ El endpoint hace un preview del token, abre/verifica el artefacto privado y **re
 - orden desconocida;
 - tópico opcional recibido en endpoint de Orders → ignorado sin procesarlo como orden;
 - Webhook válido pero orden todavía pendiente.
+
+### Webhooks opcionales
+- claim simulado y firma válida/incorrecta;
+- chargeback simulado y firma válida/incorrecta;
+- fraude `stop_delivery_op_wh` correlacionado por `payment_id`;
+- fraude con compra desconocida;
+- alerta correlacionada revoca acceso antes de nueva descarga;
+- evento duplicado no restaura acceso;
+- claim/chargeback sin `payment_id` se registra como no correlacionado sin confundir su resource ID con un Order ID;
+- respuesta dentro del plazo exigido por Mercado Pago.
 
 ### Entrega
 - token válido;
@@ -147,13 +187,15 @@ El endpoint hace un preview del token, abre/verifica el artefacto privado y **re
 - auditoría fallida sin impedir una descarga ya autorizada.
 
 ### Postventa
-Antes de producción agregar pruebas de:
-- refund;
+- refund total;
+- refund parcial → hold/revisión;
 - claim;
 - chargeback;
 - alerta de fraude/stop delivery;
 - revocación de entitlement;
-- reemisión controlada de acceso.
+- `/mi-compra` no emite token después de revocación;
+- Webhook Order posterior no reactiva un hold;
+- reemisión controlada de acceso solo después de revisión explícita.
 
 ## Criterio READY
 
@@ -162,16 +204,18 @@ La feature flag no se habilita en producción hasta que:
 - CI esté verde;
 - sandbox completo esté verde;
 - no existan secretos en repo/historial;
-- base Commerce dedicada esté provisionada;
-- Webhook HTTPS esté validado desde Mercado Pago;
+- base Commerce dedicada esté provisionada y endurecida;
+- Webhooks HTTPS estén validados desde Mercado Pago;
 - producto privado esté almacenado fuera de `public_html`;
 - recuperación de compra y correo transaccional estén operativos;
-- refunds/chargebacks revoquen acceso correctamente;
-- exista runbook de rollback al Link de Pago anterior.
+- refunds/chargebacks/fraude revoquen acceso correctamente;
+- exista runbook de rollback al Link de Pago anterior;
+- cumplimiento tributario/productivo esté resuelto.
 
 ## Fuentes oficiales revisadas
 
 - Mercado Pago Checkout API vía Orders API.
-- Referencia `POST /v1/orders` y `X-Idempotency-Key` obligatorio.
-- Configuración de Webhooks del tópico Order y validación `x-signature`.
-- Notificaciones opcionales para claims, chargebacks y alertas de fraude.
+- Estado de Order: `payment-management/status/order-status`.
+- Webhooks del tópico Order y validación `x-signature`.
+- Notificaciones opcionales de reclamos, contracargos y alertas de fraude.
+- Documentación de contracargos y recomendaciones de prevención/stop-delivery.
