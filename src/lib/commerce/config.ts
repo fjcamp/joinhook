@@ -4,11 +4,25 @@ function required(name: string) {
   return value;
 }
 
+function commerceSupabaseServerKey() {
+  const modernSecret = process.env.JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY?.trim();
+  const legacyServiceRole = process.env.JOINHOOK_COMMERCE_SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const value = modernSecret || legacyServiceRole;
+  if (!value) {
+    throw new Error('Missing required environment variable: JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY');
+  }
+  return {
+    value,
+    kind: modernSecret ? ('modern_secret' as const) : ('legacy_service_role' as const),
+  };
+}
+
 export function commerceAcceptsPayments() {
   return process.env.JOINHOOK_COMMERCE_ACCEPT_PAYMENTS === 'true';
 }
 
 export function commerceConfig() {
+  const supabaseKey = commerceSupabaseServerKey();
   return {
     siteUrl: (process.env.JOINHOOK_SITE_URL || 'https://joinhook.cl').replace(/\/$/, ''),
     environment: process.env.JOINHOOK_COMMERCE_ENV === 'production' ? 'production' : 'test',
@@ -20,7 +34,8 @@ export function commerceConfig() {
     },
     store: {
       supabaseUrl: required('JOINHOOK_COMMERCE_SUPABASE_URL').replace(/\/$/, ''),
-      serviceRoleKey: required('JOINHOOK_COMMERCE_SUPABASE_SERVICE_ROLE_KEY'),
+      serverKey: supabaseKey.value,
+      serverKeyKind: supabaseKey.kind,
     },
     delivery: {
       tokenSecret: required('JOINHOOK_DOWNLOAD_TOKEN_SECRET'),
