@@ -4,8 +4,13 @@ import { commerceConfig } from './config';
 function restHeaders(prefer?: string) {
   const { store } = commerceConfig();
   return {
-    apikey: store.serviceRoleKey,
-    Authorization: `Bearer ${store.serviceRoleKey}`,
+    apikey: store.serverKey,
+    // Modern sb_secret_* keys are API keys, not JWTs. Sending them as Bearer
+    // tokens can trigger invalid-JWT behavior. Legacy service_role JWT remains
+    // supported temporarily for migration compatibility.
+    ...(store.serverKeyKind === 'legacy_service_role'
+      ? { Authorization: `Bearer ${store.serverKey}` }
+      : {}),
     'Content-Type': 'application/json',
     ...(prefer ? { Prefer: prefer } : {}),
   };
