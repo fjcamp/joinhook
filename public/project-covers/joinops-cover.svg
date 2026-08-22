@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 980" role="img" aria-labelledby="title desc">
+  <title id="title">JoinOps — vista de inicio</title>
+  <desc id="desc">Portada visual del sistema JoinOps con panel de operaciones, inventario, tareas y equipo.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1020"/><stop offset="0.55" stop-color="#121a35"/><stop offset="1" stop-color="#08111d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6e7cff"/><stop offset="1" stop-color="#32d7e8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#000" flood-opacity=".38"/></filter>
+  </defs>
+  <rect width="760" height="980" rx="54" fill="url(#bg)"/>
+  <circle cx="640" cy="130" r="190" fill="#6e7cff" opacity=".14"/>
+  <circle cx="120" cy="850" r="170" fill="#32d7e8" opacity=".08"/>
+  <g transform="translate(44 48)" filter="url(#shadow)">
+    <rect width="672" height="884" rx="36" fill="#0e182a" stroke="#ffffff" stroke-opacity=".09"/>
+    <rect x="22" y="22" width="628" height="58" rx="18" fill="#131f34"/>
+    <rect x="42" y="40" width="32" height="22" rx="8" fill="url(#accent)"/>
+    <text x="86" y="57" fill="#f5f8fc" font-family="Arial, sans-serif" font-size="20" font-weight="700">JoinOps</text>
+    <text x="556" y="57" fill="#8fa0b8" font-family="Arial, sans-serif" font-size="13">Operaciones</text>
+    <g transform="translate(22 100)">
+      <rect width="142" height="744" rx="24" fill="#0a1424" stroke="#fff" stroke-opacity=".05"/>
+      <text x="24" y="44" fill="#6f8198" font-family="Arial, sans-serif" font-size="11" letter-spacing="1.4">MENÚ</text>
+      <g font-family="Arial, sans-serif" font-size="14" fill="#b9c5d5">
+        <rect x="14" y="68" width="114" height="42" rx="12" fill="#6e7cff" opacity=".16"/>
+        <circle cx="34" cy="89" r="6" fill="#6e7cff"/><text x="49" y="94">Panel</text>
+        <circle cx="34" cy="143" r="6" fill="#32d7e8"/><text x="49" y="148">Inventario</text>
+        <circle cx="34" cy="197" r="6" fill="#58e2a3"/><text x="49" y="202">Equipo</text>
+        <circle cx="34" cy="251" r="6" fill="#f3bd63"/><text x="49" y="256">Tareas</text>
+        <circle cx="34" cy="305" r="6" fill="#a66cff"/><text x="49" y="310">Proveedores</text>
+      </g>
+      <rect x="18" y="620" width="106" height="92" rx="18" fill="#101f33"/>
+      <text x="32" y="650" fill="#8da0b6" font-family="Arial, sans-serif" font-size="11">Continuidad</text>
+      <text x="32" y="679" fill="#f5f8fc" font-family="Arial, sans-serif" font-size="18" font-weight="700">Online</text>
+      <circle cx="104" cy="674" r="7" fill="#58e2a3"/>
+    </g>
+    <g transform="translate(182 100)">
+      <text x="0" y="28" fill="#f5f8fc" font-family="Arial, sans-serif" font-size="26" font-weight="700">Panel operativo</text>
+      <text x="0" y="52" fill="#8092aa" font-family="Arial, sans-serif" font-size="12">Resumen de la operación de hoy</text>
+      <g transform="translate(0 82)">
+        <rect width="144" height="112" rx="20" fill="#131f34" stroke="#fff" stroke-opacity=".06"/>
+        <text x="18" y="30" fill="#8294aa" font-family="Arial" font-size="11">Stock crítico</text>
+        <text x="18" y="69" fill="#f5f8fc" font-family="Arial" font-size="29" font-weight="700">06</text>
+        <text x="18" y="91" fill="#6e7cff" font-family="Arial" font-size="11">requieren atención</text>
+        <rect x="158" width="144" height="112" rx="20" fill="#131f34" stroke="#fff" stroke-opacity=".06"/>
+        <text x="176" y="30" fill="#8294aa" font-family="Arial" font-size="11">Tareas abiertas</text>
+        <text x="176" y="69" fill="#f5f8fc" font-family="Arial" font-size="29" font-weight="700">14</text>
+        <text x="176" y="91" fill="#32d7e8" font-family="Arial" font-size="11">4 prioritarias</text>
+        <rect x="316" width="144" height="112" rx="20" fill="#131f34" stroke="#fff" stroke-opacity=".06"/>
+        <text x="334" y="30" fill="#8294aa" font-family="Arial" font-size="11">Turnos activos</text>
+        <text x="334" y="69" fill="#f5f8fc" font-family="Arial" font-size="29" font-weight="700">08</text>
+        <text x="334" y="91" fill="#58e2a3" font-family="Arial" font-size="11">cobertura completa</text>
+      </g>
+      <g transform="translate(0 218)">
+        <rect width="300" height="246" rx="22" fill="#101c30" stroke="#fff" stroke-opacity=".06"/>
+        <text x="20" y="34" fill="#d9e2ed" font-family="Arial" font-size="14" font-weight="700">Movimiento de inventario</text>
+        <g transform="translate(20 62)">
+          <rect x="0" y="88" width="24" height="70" rx="7" fill="#6e7cff" opacity=".55"/>
+          <rect x="38" y="44" width="24" height="114" rx="7" fill="#6e7cff" opacity=".65"/>
+          <rect x="76" y="72" width="24" height="86" rx="7" fill="#32d7e8" opacity=".66"/>
+          <rect x="114" y="18" width="24" height="140" rx="7" fill="#32d7e8" opacity=".8"/>
+          <rect x="152" y="56" width="24" height="102" rx="7" fill="#58e2a3" opacity=".68"/>
+          <rect x="190" y="30" width="24" height="128" rx="7" fill="#58e2a3" opacity=".82"/>
+          <rect x="228" y="78" width="24" height="80" rx="7" fill="#f3bd63" opacity=".72"/>
+        </g>
+        <rect x="316" width="144" height="246" rx="22" fill="#101c30" stroke="#fff" stroke-opacity=".06"/>
+        <text x="334" y="34" fill="#d9e2ed" font-family="Arial" font-size="14" font-weight="700">Alertas</text>
+        <g font-family="Arial" font-size="11">
+          <rect x="332" y="56" width="112" height="46" rx="13" fill="#f3bd63" opacity=".11"/><text x="346" y="76" fill="#e8c98b">Bodega</text><text x="346" y="92" fill="#8fa0b8">reponer insumos</text>
+          <rect x="332" y="112" width="112" height="46" rx="13" fill="#6e7cff" opacity=".11"/><text x="346" y="132" fill="#b9c0ff">Equipo</text><text x="346" y="148" fill="#8fa0b8">confirmar turno</text>
+          <rect x="332" y="168" width="112" height="46" rx="13" fill="#58e2a3" opacity=".10"/><text x="346" y="188" fill="#9de8c4">Proceso</text><text x="346" y="204" fill="#8fa0b8">checklist completo</text>
+        </g>
+      </g>
+      <g transform="translate(0 486)">
+        <rect width="460" height="214" rx="22" fill="#101c30" stroke="#fff" stroke-opacity=".06"/>
+        <text x="20" y="34" fill="#d9e2ed" font-family="Arial" font-size="14" font-weight="700">Actividad reciente</text>
+        <g font-family="Arial" font-size="11" fill="#94a6bb">
+          <circle cx="26" cy="72" r="6" fill="#32d7e8"/><text x="44" y="76">Compra registrada · Proveedor Central</text><text x="380" y="76" fill="#60758f">10:42</text>
+          <line x1="26" y1="90" x2="438" y2="90" stroke="#fff" stroke-opacity=".06"/>
+          <circle cx="26" cy="117" r="6" fill="#6e7cff"/><text x="44" y="121">Ajuste de stock · Bodega principal</text><text x="380" y="121" fill="#60758f">09:18</text>
+          <line x1="26" y1="135" x2="438" y2="135" stroke="#fff" stroke-opacity=".06"/>
+          <circle cx="26" cy="162" r="6" fill="#58e2a3"/><text x="44" y="166">Checklist de apertura completado</text><text x="380" y="166" fill="#60758f">08:05</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
