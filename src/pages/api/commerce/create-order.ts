@@ -7,6 +7,7 @@ import {
   newIdempotencyKey,
   type MercadoPagoApiError,
 } from '@/lib/commerce/mercadopago';
+import { serializeOrderClaimCookie } from '@/lib/commerce/order-claim-cookie';
 import {
   attachProviderOrder,
   createPendingOrder,
@@ -18,6 +19,11 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function providerStatus(error: unknown) {
   return (error as MercadoPagoApiError | null)?.status ?? null;
+}
+
+function setPurchaseClaimCookie(res: NextApiResponse, orderCode: string, claimToken: string) {
+  res.setHeader('Set-Cookie', serializeOrderClaimCookie(orderCode, claimToken));
+  res.setHeader('Cache-Control', 'no-store');
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -80,9 +86,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         payload: { status: order.status ?? null, status_detail: order.status_detail ?? null },
       });
 
+      setPurchaseClaimCookie(res, localOrder.order.order_code, localOrder.claimToken);
       return res.status(201).json({
         orderCode: localOrder.order.order_code,
-        claimToken: localOrder.claimToken,
         providerOrderId: order.id,
         status: order.status ?? 'created',
         statusDetail: order.status_detail ?? null,
@@ -104,11 +110,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // A network/timeout/5xx path can be ambiguous: Mercado Pago may have
       // accepted the order even when JoinHook did not receive the response.
-      // Preserve the claim and direct the customer to a safe verification state
-      // instead of encouraging a second payment attempt.
+      // Preserve the claim in an HttpOnly cookie and direct the customer to a
+      // safe verification state instead of encouraging a second payment.
+      setPurchaseClaimCookie(res, localOrder.order.order_code, localOrder.claimToken);
       return res.status(202).json({
         orderCode: localOrder.order.order_code,
-        claimToken: localOrder.claimToken,
         status: 'verification_pending',
         recoveryRequired: true,
       });
