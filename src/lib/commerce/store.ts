@@ -44,6 +44,12 @@ function hashSecret(value: string) {
   return crypto.createHmac('sha256', delivery.tokenSecret).update(value).digest('hex');
 }
 
+function safeEqualText(left: string, right: string) {
+  if (left.length !== right.length) return false;
+  const encoder = new TextEncoder();
+  return crypto.timingSafeEqual(encoder.encode(left), encoder.encode(right));
+}
+
 export function createJoinHookOrderCode() {
   const date = new Date();
   const y = date.getUTCFullYear();
@@ -99,9 +105,7 @@ export async function findOrderByProviderOrderId(providerOrderId: string) {
 
 export function validateOrderClaim(order: CommerceOrderRecord, rawClaimToken: string) {
   if (!rawClaimToken) return false;
-  const expected = Buffer.from(order.claim_token_hash, 'hex');
-  const received = Buffer.from(hashSecret(rawClaimToken), 'hex');
-  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
+  return safeEqualText(order.claim_token_hash, hashSecret(rawClaimToken));
 }
 
 export async function markOrderPaid(input: { orderId: string; providerPaymentId?: string | null }) {
