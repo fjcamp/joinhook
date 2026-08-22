@@ -2,9 +2,9 @@ import crypto from 'node:crypto';
 
 function safeEqualHex(left: string, right: string) {
   try {
-    const a = Buffer.from(left, 'hex');
-    const b = Buffer.from(right, 'hex');
-    return a.length === b.length && crypto.timingSafeEqual(a, b);
+    if (left.length !== right.length) return false;
+    const encoder = new TextEncoder();
+    return crypto.timingSafeEqual(encoder.encode(left), encoder.encode(right));
   } catch {
     return false;
   }
