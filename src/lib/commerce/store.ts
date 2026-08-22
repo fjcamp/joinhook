@@ -39,6 +39,11 @@ export type CommerceOrderRecord = {
   paid_at: string | null;
 };
 
+type EntitlementRecord = {
+  id: string;
+  status: 'active' | 'revoked';
+};
+
 type DownloadGrant = {
   token_id: string;
   order_id: string;
@@ -139,6 +144,14 @@ export async function markOrderPaid(input: { orderId: string; providerPaymentId?
   });
 }
 
+export async function markOrderRefunded(orderId: string) {
+  await rest(`commerce_orders?id=eq.${encodeURIComponent(orderId)}&status=eq.paid`, {
+    method: 'PATCH',
+    headers: restHeaders('return=minimal'),
+    body: JSON.stringify({ status: 'refunded', updated_at: new Date().toISOString() }),
+  });
+}
+
 export async function recordPaymentEvent(input: {
   orderId?: string | null;
   providerOrderId?: string | null;
@@ -161,9 +174,9 @@ export async function recordPaymentEvent(input: {
 
 export async function createEntitlement(orderId: string, productCode: string, buyerEmail: string) {
   const { delivery } = commerceConfig();
-  const rows = await rest<Array<{ id: string }>>('commerce_entitlements?on_conflict=order_id', {
+  const inserted = await rest<EntitlementRecord[]>('commerce_entitlements?on_conflict=order_id', {
     method: 'POST',
-    headers: restHeaders('return=representation,resolution=merge-duplicates'),
+    headers: restHeaders('return=representation,resolution=ignore-duplicates'),
     body: JSON.stringify({
       order_id: orderId,
       product_code: productCode,
@@ -172,7 +185,20 @@ export async function createEntitlement(orderId: string, productCode: string, bu
       max_downloads: delivery.defaultMaxDownloads,
     }),
   });
-  return rows[0] ?? null;
+  if (inserted[0]) return inserted[0];
+
+  // A previously revoked entitlement must stay revoked. Never use an upsert
+  // that can silently reactivate access after refund/chargeback.
+  const existing = await rest<EntitlementRecord[]>(`commerce_entitlements?order_id=eq.${encodeURIComponent(orderId)}&select=id,status&limit=1`);
+  return existing[0] ?? null;
+}
+
+export async function revokeEntitlementByOrder(orderId: string) {
+  await rest(`commerce_entitlements?order_id=eq.${encodeURIComponent(orderId)}&status=eq.active`, {
+    method: 'PATCH',
+    headers: restHeaders('return=minimal'),
+    body: JSON.stringify({ status: 'revoked', revoked_at: new Date().toISOString() }),
+  });
 }
 
 export async function createDownloadToken(input: { entitlementId: string }) {
