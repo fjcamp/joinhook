@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCommerceProduct } from '@/lib/commerce/catalog';
+import { commerceAcceptsPayments } from '@/lib/commerce/config';
 import {
   createMercadoPagoCardOrder,
   isDefiniteMercadoPagoRejection,
@@ -23,6 +24,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'method_not_allowed' });
+  }
+  if (!commerceAcceptsPayments()) {
+    return res.status(503).json({ error: 'commerce_payments_disabled' });
   }
 
   const {
