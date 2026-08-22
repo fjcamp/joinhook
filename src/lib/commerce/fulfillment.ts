@@ -21,12 +21,27 @@ export async function fulfillMercadoPagoOrder(providerOrderId: string) {
   if (!isMercadoPagoOrderApproved(remoteOrder)) return { status: 'pending' as const, localOrder, remoteOrder };
 
   const providerPaymentId = remoteOrder.transactions?.payments?.[0]?.id ?? null;
-  if (localOrder.status !== 'paid') {
+  if (localOrder.status === 'pending') {
     await markOrderPaid({ orderId: localOrder.id, providerPaymentId });
   }
 
   const entitlement = await createEntitlement(localOrder.id, localOrder.product_code, localOrder.buyer_email);
   if (!entitlement?.id) throw new Error('Entitlement could not be created');
+  if (entitlement.status !== 'active') {
+    await recordPaymentEvent({
+      orderId: localOrder.id,
+      providerOrderId,
+      eventType: 'fulfillment.blocked_revoked',
+      payload: { product_code: localOrder.product_code, entitlement_id: entitlement.id },
+    });
+    return {
+      status: 'access_revoked' as const,
+      orderCode: localOrder.order_code,
+      buyerEmail: localOrder.buyer_email,
+      product,
+      entitlement,
+    };
+  }
 
   await recordPaymentEvent({
     orderId: localOrder.id,
