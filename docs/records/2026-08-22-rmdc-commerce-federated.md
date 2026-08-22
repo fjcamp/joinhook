@@ -22,6 +22,8 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 15. Los estados de Mercado Pago se interpretan por `status + status_detail`; solo `processed/accredited` habilita fulfillment automático.
 16. Reembolsos parciales, reembolsos completos, contracargos y estados desconocidos suspenden o revocan la entrega. Un estado local de disputa/revisión no se reactiva automáticamente por un Webhook genérico posterior.
 17. Reclamos, contracargos y alertas de fraude se reciben en un endpoint opcional separado para no confundir sus resource IDs con Order IDs.
+18. Las nuevas instalaciones de JoinHook Commerce usarán preferentemente una Secret key moderna de Supabase (`sb_secret_...`) mediante `JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY`. El JWT histórico `service_role` queda solo como compatibilidad temporal.
+19. Una Secret key moderna se envía a Supabase por `apikey` y no como `Authorization: Bearer`; nunca se expone en frontend, GitHub, chat ni documentación.
 
 ## Desarrollo asociado
 
@@ -53,8 +55,11 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 - Auditoría de IP solo con HMAC y sal privada; si la sal no existe, no se guarda hash de IP.
 - Catálogo central es la fuente de verdad del precio mostrado en checkout y del monto validado por backend.
 - Claim de compra almacenado como cookie HttpOnly/SameSite en vez de `sessionStorage`/`localStorage`.
-- RPCs `SECURITY DEFINER` revocados para `PUBLIC`, `anon` y `authenticated`; solo `service_role` puede ejecutarlos.
+- RPCs `SECURITY DEFINER` revocados para `PUBLIC`, `anon` y `authenticated`; solo el backend elevado puede ejecutarlos.
 - Tablas Commerce con RLS, privilegios de cliente revocados y políticas explícitas `false` para roles de navegador.
+- El cliente PostgREST ya distingue Secret keys modernas de Supabase de JWT `service_role`: `sb_secret_...` usa `apikey` sin Bearer; legacy JWT conserva Bearer solo durante compatibilidad.
+- El Control Plane privado reconoce ambas configuraciones mientras dure la migración.
+- Turbopack fue instruido para no trazar el artefacto privado externo dentro del bundle standalone.
 
 ## Base dedicada JoinHook Commerce — provisionada
 
@@ -79,8 +84,8 @@ El usuario autorizó continuar con gestión de desarrollo, documentación y resp
 
 ## Bloqueadores externos antes de READY
 
+- crear una Secret key moderna de Supabase y configurarla directamente en el runtime server-side;
 - app/credenciales sandbox Mercado Pago;
-- secreto server-side de la base Commerce para conectar el runtime de JoinHook;
 - archivo digital privado definitivo;
 - pruebas sandbox completas de pagos y Webhooks;
 - correo transaccional/recuperación;
