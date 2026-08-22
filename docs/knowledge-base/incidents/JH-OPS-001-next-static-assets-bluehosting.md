@@ -112,10 +112,31 @@ Procedimiento que resolvió producción:
 6. Si existe y aún devuelve 404, revisar `.htaccess`, permisos y routing Apache/LiteSpeed.
 7. Si devuelve `200` + MIME correcto, investigar caché/build mismatch en lugar de Passenger.
 
+## Recurrencia 2026-08-22 — despliegue del asistente
+
+El incidente reapareció al extraer un nuevo artifact en `/home/joinhook/joinhook-production` y reiniciar Passenger **antes de sincronizar el document root**. El video de diagnóstico mostró además `404 Not Found` para assets públicos nuevos como `/project-covers/joinops-cover.svg` y `/project-covers/mi-gestion-cover.svg`.
+
+La conclusión operativa es más amplia que el incidente original: **cada despliegue de producción debe tratar el runtime y el document root como una unidad inseparable del mismo build**.
+
+El artifact actual ya contiene `document-root-assets/`, preparado por CI con:
+
+- `document-root-assets/_next/static/` → mirror exacto del build activo.
+- assets públicos de `public/`, incluidos `project-covers`, iconos, manifest, favicon y demás recursos estáticos.
+
+### Orden obligatorio de despliegue desde ahora
+
+1. Extraer el artifact en `/home/joinhook/joinhook-production`.
+2. Copiar/mezclar **todo el contenido de** `/home/joinhook/joinhook-production/document-root-assets/` hacia `/home/joinhook/public_html/`, sobrescribiendo los assets del build anterior pero sin borrar todavía WordPress legado ni `.htaccess`.
+3. Verificar al menos una URL `/_next/static/chunks/<hash>.js` y un asset público nuevo, por ejemplo `/project-covers/joinops-cover.svg`.
+4. Reiniciar Passenger si cambió el runtime.
+5. Ejecutar `Ctrl + F5` y smoke test de Home, carrusel, chat, CGE y checkout.
+
+**Regla:** no declarar un deploy completado ni pedir revisión visual hasta que runtime + `document-root-assets` estén sincronizados.
+
 ## Mejora pendiente
 
 Automatizar la promoción staging → producción para que cada despliegue sincronice los assets del build activo hacia el document root. Esto evita que un nuevo Build ID/hash deje `public_html/_next/static` desfasado.
 
 ## Etiquetas
 
-`nextjs` `nextjs-16` `cpanel` `cloudlinux` `passenger` `apache` `litespeed` `bluehosting` `static-assets` `_next` `404` `wordpress` `document-root` `production` `staging` `deploy`
+`nextjs` `nextjs-16` `cpanel` `cloudlinux` `passenger` `apache` `litespeed` `bluehosting` `static-assets` `_next` `404` `wordpress` `document-root` `production` `staging` `deploy` `project-covers` `document-root-assets`
