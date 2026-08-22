@@ -1,5 +1,6 @@
 -- JoinHook Commerce Core v1
--- Apply to a dedicated Postgres/Supabase project before enabling real payments.
+-- Apply only to the dedicated JoinHook Commerce Postgres/Supabase project.
+-- Backend-only model: browser clients must never receive service-role credentials.
 
 create extension if not exists pgcrypto;
 
@@ -67,10 +68,13 @@ create table if not exists public.commerce_download_events (
 create index if not exists commerce_orders_status_idx on public.commerce_orders(status);
 create index if not exists commerce_orders_email_idx on public.commerce_orders(lower(buyer_email));
 create index if not exists commerce_payment_events_provider_order_idx on public.commerce_payment_events(provider_order_id);
+create index if not exists commerce_payment_events_order_id_idx on public.commerce_payment_events(order_id);
 create index if not exists commerce_download_tokens_entitlement_idx on public.commerce_download_tokens(entitlement_id);
+create index if not exists commerce_download_events_token_id_idx on public.commerce_download_events(token_id);
+create index if not exists commerce_download_events_order_id_idx on public.commerce_download_events(order_id);
 
--- Validates a token without consuming a use. This lets the backend verify that
--- the private artifact is actually available before decrementing the allowance.
+-- Validate a token without consuming allowance. The backend uses this before
+-- opening the private artifact so a storage error does not spend a download.
 create or replace function public.preview_commerce_download_token(p_token_hash text)
 returns table(token_id uuid, order_id uuid, product_code text, buyer_email text, remaining_uses integer)
 language plpgsql
@@ -107,9 +111,8 @@ begin
 end;
 $$;
 
--- Atomically consumes one use from BOTH the token and the entitlement. This
--- prevents a buyer/attacker from bypassing the purchase-wide limit by asking
--- for multiple fresh download tokens.
+-- Atomically consumes one use from both the token and its purchase entitlement.
+-- Issuing a fresh token never resets the total purchase download allowance.
 create or replace function public.consume_commerce_download_token(p_token_hash text)
 returns table(token_id uuid, order_id uuid, product_code text, buyer_email text, remaining_uses integer)
 language plpgsql
@@ -159,11 +162,30 @@ begin
 end;
 $$;
 
--- These tables are backend-only. Never expose service-role credentials to the browser.
+-- Defense in depth: backend-only tables remain behind RLS and have no client policies.
 alter table public.commerce_orders enable row level security;
 alter table public.commerce_payment_events enable row level security;
 alter table public.commerce_entitlements enable row level security;
 alter table public.commerce_download_tokens enable row level security;
 alter table public.commerce_download_events enable row level security;
 
--- No anon/authenticated policies are created intentionally. Server-side service role bypasses RLS.
+revoke all on table public.commerce_orders from anon, authenticated;
+revoke all on table public.commerce_payment_events from anon, authenticated;
+revoke all on table public.commerce_entitlements from anon, authenticated;
+revoke all on table public.commerce_download_tokens from anon, authenticated;
+revoke all on table public.commerce_download_events from anon, authenticated;
+
+grant all on table public.commerce_orders to service_role;
+grant all on table public.commerce_payment_events to service_role;
+grant all on table public.commerce_entitlements to service_role;
+grant all on table public.commerce_download_tokens to service_role;
+grant all on table public.commerce_download_events to service_role;
+
+-- SECURITY DEFINER RPCs must never be executable by PUBLIC/anon/authenticated.
+revoke execute on function public.preview_commerce_download_token(text) from public, anon, authenticated;
+revoke execute on function public.consume_commerce_download_token(text) from public, anon, authenticated;
+grant execute on function public.preview_commerce_download_token(text) to service_role;
+grant execute on function public.consume_commerce_download_token(text) to service_role;
+
+comment on function public.preview_commerce_download_token(text) is 'JoinHook Commerce backend-only token preview. service_role only.';
+comment on function public.consume_commerce_download_token(text) is 'JoinHook Commerce backend-only atomic token consumption. service_role only.';
