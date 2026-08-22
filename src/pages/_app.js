@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
 import '../css/redesign-light.css';
+import '../css/project-showcase.css';
 import '../css/cge.css';
 import '../css/cge-v02.css';
 import '../css/cge-pwa.css';
