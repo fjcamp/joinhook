@@ -22,6 +22,16 @@ export type MercadoPagoOrderResponse = {
 
 export type MercadoPagoApiError = Error & { status?: number; payload?: unknown };
 
+export type MercadoPagoOrderDisposition =
+  | 'paid'
+  | 'pending'
+  | 'review'
+  | 'failed'
+  | 'cancelled'
+  | 'refunded'
+  | 'partially_refunded'
+  | 'charged_back';
+
 async function mpRequest<T>(path: string, init: RequestInit = {}) {
   const { mercadopago } = commerceConfig();
   const response = await fetch(`${MP_API}${path}`, {
@@ -133,7 +143,27 @@ export async function getMercadoPagoOrder(orderId: string) {
   return mpRequest<MercadoPagoOrderResponse>(`/v1/orders/${encodeURIComponent(orderId)}`, { method: 'GET' });
 }
 
+/**
+ * Normalize Mercado Pago Orders API status/status_detail into JoinHook states.
+ * Unknown states never grant access: they fall into review.
+ */
+export function classifyMercadoPagoOrder(order: MercadoPagoOrderResponse): MercadoPagoOrderDisposition {
+  const status = String(order.status || '').toLowerCase();
+  const detail = String(order.status_detail || '').toLowerCase();
+
+  if (status === 'processed' && detail === 'accredited') return 'paid';
+  if (status === 'processed' && detail === 'partially_refunded') return 'partially_refunded';
+  if (status === 'refunded') return 'refunded';
+  if (status === 'charged_back') return 'charged_back';
+  if (status === 'failed') return 'failed';
+  if (status === 'canceled' || status === 'cancelled' || status === 'expired') return 'cancelled';
+  if (status === 'created' || status === 'processing' || status === 'action_required') return 'pending';
+
+  // A processed order with a new/unknown status_detail, or any future status we
+  // do not understand, must be reviewed instead of being fulfilled.
+  return 'review';
+}
+
 export function isMercadoPagoOrderApproved(order: MercadoPagoOrderResponse) {
-  const payment = order.transactions?.payments?.[0];
-  return order.status === 'processed' || payment?.status === 'approved';
+  return classifyMercadoPagoOrder(order) === 'paid';
 }
