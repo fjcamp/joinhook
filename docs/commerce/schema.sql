@@ -15,6 +15,7 @@ create table if not exists public.commerce_orders (
   provider_order_id text unique,
   provider_payment_id text,
   idempotency_key text,
+  claim_token_hash text not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   paid_at timestamptz
