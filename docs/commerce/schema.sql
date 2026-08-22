@@ -38,6 +38,8 @@ create table if not exists public.commerce_entitlements (
   product_code text not null,
   buyer_email text not null,
   status text not null default 'active' check (status in ('active','revoked')),
+  max_downloads integer not null default 3 check (max_downloads > 0),
+  downloads_used integer not null default 0 check (downloads_used >= 0 and downloads_used <= max_downloads),
   created_at timestamptz not null default now(),
   revoked_at timestamptz
 );
@@ -47,7 +49,7 @@ create table if not exists public.commerce_download_tokens (
   entitlement_id uuid not null references public.commerce_entitlements(id) on delete cascade,
   token_hash text not null unique,
   max_uses integer not null default 3 check (max_uses > 0),
-  uses integer not null default 0 check (uses >= 0),
+  uses integer not null default 0 check (uses >= 0 and uses <= max_uses),
   expires_at timestamptz not null,
   created_at timestamptz not null default now(),
   last_used_at timestamptz
@@ -67,7 +69,47 @@ create index if not exists commerce_orders_email_idx on public.commerce_orders(l
 create index if not exists commerce_payment_events_provider_order_idx on public.commerce_payment_events(provider_order_id);
 create index if not exists commerce_download_tokens_entitlement_idx on public.commerce_download_tokens(entitlement_id);
 
--- Atomically validates and consumes one download use. The service-role backend calls this RPC.
+-- Validates a token without consuming a use. This lets the backend verify that
+-- the private artifact is actually available before decrementing the allowance.
+create or replace function public.preview_commerce_download_token(p_token_hash text)
+returns table(token_id uuid, order_id uuid, product_code text, buyer_email text, remaining_uses integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_token public.commerce_download_tokens%rowtype;
+  v_ent public.commerce_entitlements%rowtype;
+begin
+  select * into v_token
+  from public.commerce_download_tokens
+  where token_hash = p_token_hash;
+
+  if not found or v_token.expires_at <= now() or v_token.uses >= v_token.max_uses then
+    return;
+  end if;
+
+  select * into v_ent
+  from public.commerce_entitlements
+  where id = v_token.entitlement_id and status = 'active';
+
+  if not found or v_ent.downloads_used >= v_ent.max_downloads then
+    return;
+  end if;
+
+  return query
+  select
+    v_token.id,
+    v_ent.order_id,
+    v_ent.product_code,
+    v_ent.buyer_email,
+    least(v_token.max_uses - v_token.uses, v_ent.max_downloads - v_ent.downloads_used);
+end;
+$$;
+
+-- Atomically consumes one use from BOTH the token and the entitlement. This
+-- prevents a buyer/attacker from bypassing the purchase-wide limit by asking
+-- for multiple fresh download tokens.
 create or replace function public.consume_commerce_download_token(p_token_hash text)
 returns table(token_id uuid, order_id uuid, product_code text, buyer_email text, remaining_uses integer)
 language plpgsql
@@ -89,15 +131,31 @@ begin
 
   select * into v_ent
   from public.commerce_entitlements
-  where id = v_token.entitlement_id and status = 'active';
+  where id = v_token.entitlement_id and status = 'active'
+  for update;
 
-  if not found then return; end if;
+  if not found or v_ent.downloads_used >= v_ent.max_downloads then
+    return;
+  end if;
 
   update public.commerce_download_tokens
   set uses = uses + 1, last_used_at = now()
   where id = v_token.id;
 
-  return query select v_token.id, v_ent.order_id, v_ent.product_code, v_ent.buyer_email, v_token.max_uses - (v_token.uses + 1);
+  update public.commerce_entitlements
+  set downloads_used = downloads_used + 1
+  where id = v_ent.id;
+
+  return query
+  select
+    v_token.id,
+    v_ent.order_id,
+    v_ent.product_code,
+    v_ent.buyer_email,
+    least(
+      v_token.max_uses - (v_token.uses + 1),
+      v_ent.max_downloads - (v_ent.downloads_used + 1)
+    );
 end;
 $$;
 
