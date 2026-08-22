@@ -20,10 +20,13 @@ export type MercadoPagoOrderResponse = {
   [key: string]: unknown;
 };
 
+export type MercadoPagoApiError = Error & { status?: number; payload?: unknown };
+
 async function mpRequest<T>(path: string, init: RequestInit = {}) {
   const { mercadopago } = commerceConfig();
   const response = await fetch(`${MP_API}${path}`, {
     ...init,
+    signal: init.signal ?? AbortSignal.timeout(15_000),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -33,7 +36,7 @@ async function mpRequest<T>(path: string, init: RequestInit = {}) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(`Mercado Pago API ${response.status}`) as Error & { status?: number; payload?: unknown };
+    const error = new Error(`Mercado Pago API ${response.status}`) as MercadoPagoApiError;
     error.status = response.status;
     error.payload = payload;
     throw error;
@@ -43,6 +46,20 @@ async function mpRequest<T>(path: string, init: RequestInit = {}) {
 
 export function newIdempotencyKey() {
   return crypto.randomUUID();
+}
+
+export function isDefiniteMercadoPagoRejection(error: unknown) {
+  const status = (error as MercadoPagoApiError | null)?.status;
+  return typeof status === 'number' && status >= 400 && status < 500 && ![408, 409, 425, 429].includes(status);
+}
+
+export function isTransientMercadoPagoError(error: unknown) {
+  const status = (error as MercadoPagoApiError | null)?.status;
+  return typeof status !== 'number' || status >= 500 || [408, 409, 425, 429].includes(status);
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function createMercadoPagoCardOrder(input: {
@@ -92,12 +109,24 @@ export async function createMercadoPagoCardOrder(input: {
     },
   };
 
-  const order = await mpRequest<MercadoPagoOrderResponse>('/v1/orders', {
+  const createOnce = () => mpRequest<MercadoPagoOrderResponse>('/v1/orders', {
     method: 'POST',
     headers: { 'X-Idempotency-Key': idempotencyKey },
     body: JSON.stringify(body),
   });
-  return { order, idempotencyKey };
+
+  try {
+    const order = await createOnce();
+    return { order, idempotencyKey };
+  } catch (error) {
+    // A retry with the SAME idempotency key is safe for transient/ambiguous
+    // transport/provider failures and reduces the chance of leaving a buyer in
+    // an uncertain state. Never generate a second key for the same attempt.
+    if (!isTransientMercadoPagoError(error)) throw error;
+    await wait(300);
+    const order = await createOnce();
+    return { order, idempotencyKey };
+  }
 }
 
 export async function getMercadoPagoOrder(orderId: string) {
