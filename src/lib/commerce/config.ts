@@ -4,10 +4,15 @@ function required(name: string) {
   return value;
 }
 
+export function commerceAcceptsPayments() {
+  return process.env.JOINHOOK_COMMERCE_ACCEPT_PAYMENTS === 'true';
+}
+
 export function commerceConfig() {
   return {
     siteUrl: (process.env.JOINHOOK_SITE_URL || 'https://joinhook.cl').replace(/\/$/, ''),
     environment: process.env.JOINHOOK_COMMERCE_ENV === 'production' ? 'production' : 'test',
+    acceptsPayments: commerceAcceptsPayments(),
     mercadopago: {
       publicKey: process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY?.trim() || '',
       accessToken: required('MERCADOPAGO_ACCESS_TOKEN'),
