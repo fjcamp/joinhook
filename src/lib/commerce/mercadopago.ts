@@ -49,6 +49,8 @@ export async function createMercadoPagoCardOrder(input: {
   externalReference: string;
   amount: number;
   payerEmail: string;
+  identificationType?: string;
+  identificationNumber?: string;
   paymentMethodId: string;
   paymentMethodType: string;
   cardToken: string;
@@ -56,6 +58,10 @@ export async function createMercadoPagoCardOrder(input: {
   idempotencyKey?: string;
 }) {
   const idempotencyKey = input.idempotencyKey || newIdempotencyKey();
+  const payer: Record<string, unknown> = { email: input.payerEmail };
+  if (input.identificationType && input.identificationNumber) {
+    payer.identification = { type: input.identificationType, number: input.identificationNumber };
+  }
   const body = {
     type: 'online',
     external_reference: input.externalReference,
@@ -70,7 +76,7 @@ export async function createMercadoPagoCardOrder(input: {
         },
       },
     },
-    payer: { email: input.payerEmail },
+    payer,
     transactions: {
       payments: [
         {
