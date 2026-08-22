@@ -19,6 +19,9 @@ Nunca guardar valores reales en GitHub.
 NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED=false
 NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=
 
+# Kill switch server-side para creación de pagos
+JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false
+
 # Entorno
 JOINHOOK_COMMERCE_ENV=test
 JOINHOOK_SITE_URL=https://joinhook.cl
@@ -42,6 +45,8 @@ JOINHOOK_GASTRO_EXPRESS_PRIVATE_FILE=/home/joinhook/private-products/control-exp
 ```
 
 La referencia canónica de variables es `.env.commerce.example`.
+
+`NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED` controla la interfaz. `JOINHOOK_COMMERCE_ACCEPT_PAYMENTS` controla el backend y es la última barrera para crear cobros. Para pruebas reales en sandbox deben habilitarse conscientemente ambas; en producción permanecen `false` hasta el GO formal.
 
 ## Webhook
 
@@ -70,7 +75,9 @@ Headers relevantes:
 - `Authorization: Bearer <ACCESS_TOKEN>`
 - `X-Idempotency-Key: <UUID>`
 
-Commerce guarda una orden local antes de solicitar la orden al proveedor y utiliza su `order_code` como `external_reference`.
+Commerce crea primero la orden local con su `order_code` y la clave de idempotencia ya persistida. Esa misma clave se usa en el request a Mercado Pago y en cualquier reintento transitorio del mismo intento de compra. El `order_code` se usa como `external_reference`.
+
+Si el proveedor responde con un rechazo inequívoco, JoinHook puede marcar la orden como fallida. Si la comunicación termina en un estado ambiguo (timeout/red/5xx incluso después del reintento), JoinHook conserva la orden para verificación y **no invita al cliente a volver a pagar**, evitando un posible cobro duplicado.
 
 ## Regla de fulfillment
 
@@ -111,6 +118,9 @@ El endpoint hace un preview del token, abre/verifica el artefacto privado y **re
 - refresh del navegador;
 - doble click en pagar;
 - misma `X-Idempotency-Key` repetida;
+- timeout/5xx y reintento con la misma clave;
+- resultado ambiguo sin sugerir un segundo cobro;
+- kill switch server-side en `false` aunque frontend esté habilitado;
 - orden con monto alterado;
 - `external_reference` incorrecta.
 
@@ -122,6 +132,7 @@ El endpoint hace un preview del token, abre/verifica el artefacto privado y **re
 - mismo evento repetido;
 - eventos fuera de orden temporal;
 - orden desconocida;
+- tópico opcional recibido en endpoint de Orders → ignorado sin procesarlo como orden;
 - Webhook válido pero orden todavía pendiente.
 
 ### Entrega
