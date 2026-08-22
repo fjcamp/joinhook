@@ -7,7 +7,7 @@ type ChatMessage = {
 };
 
 const QUICK_REPLIES = [
-    'Quiero una herramienta',
+    'Qué herramienta me conviene',
     'Precio de Control Gastronómico Express',
     'Necesito soporte',
     'Hablar con Francisco'
@@ -15,6 +15,13 @@ const QUICK_REPLIES = [
 
 function classifyIntent(value: string) {
     const text = value.toLowerCase();
+
+    // Guardrail contextual: solo se activa cuando el usuario intenta pedir o extraer
+    // información interna, credenciales, instrucciones del sistema o detalles sensibles.
+    if (
+        /prompt|system prompt|instrucciones internas|ignora (las|tus) instrucciones|revela|mu[eé]strame (tu|el) prompt|credencial|contrase[nñ]a|token|api key|secreto|repositorio privado|c[oó]digo fuente|arquitectura interna|base de datos interna/.test(text)
+    ) return 'sensitive';
+
     if (/soporte|problema|incidente|ayuda|cliente/.test(text)) return 'support';
     if (/francisco|humano|contacto|correo|hablar/.test(text)) return 'human';
     if (/precio|valor|costo|comprar|contratar|venta|cotiza/.test(text)) return 'sales';
@@ -23,7 +30,7 @@ function classifyIntent(value: string) {
     if (/joinops/.test(text)) return 'joinops';
     if (/mi gesti[oó]n|mi gestion/.test(text)) return 'mi-gestion';
     if (/chat|ia|automat|whatsapp|bot/.test(text)) return 'automation';
-    if (/t[eé]cnico|c[oó]digo|repositorio|secreto|credencial|api|arquitectura/.test(text)) return 'sensitive';
+    if (/beneficio|ventaja|para qu[eé] sirve|qu[eé] me aporta|usabilidad|c[oó]mo se usa/.test(text)) return 'benefits';
     if (/joinhook|qu[eé] hace|qu[eé] es/.test(text)) return 'about';
     return 'general';
 }
@@ -31,27 +38,29 @@ function classifyIntent(value: string) {
 function responseFor(intent: string) {
     switch (intent) {
         case 'support':
-            return 'Para soporte a clientes, el canal recomendado es soporte@joinhook.cl. Si necesitas escalar el caso a una conversación directa, también puedes escribir a contacto@joinhook.cl.';
+            return 'Claro. Puedo ayudarte con dudas de uso, orientación inicial y pasos básicos de las herramientas. Si el caso necesita revisión humana, el canal de soporte es soporte@joinhook.cl y también puedes escribir a contacto@joinhook.cl.';
         case 'human':
-            return 'Si quieres hablar directamente con Francisco, escribe a contacto@joinhook.cl. Para una consulta comercial puedes usar ventas@joinhook.cl.';
+            return 'Por supuesto. Si quieres conversar directamente con Francisco, escribe a contacto@joinhook.cl. Para consultas de compra, cotización o servicios también puedes usar ventas@joinhook.cl.';
         case 'sales':
-            return 'La herramienta visible para compra es Control Gastronómico Express. La beta está enfocada en inventario, compras, mermas, stock mínimo, proveedores y respaldo PWA, con precio de lanzamiento de $4.990 CLP. Si necesitas otra solución, puedo derivarte a ventas@joinhook.cl.';
+            return 'Actualmente puedes conocer Control Gastronómico Express, una herramienta enfocada en inventario, compras, mermas, stock mínimo, proveedores y respaldo PWA. El precio de lanzamiento publicado es $4.990 CLP. Si me cuentas qué necesitas, puedo ayudarte a evaluar si esta herramienta te sirve o si conviene una solución diferente.';
         case 'cge':
-            return 'Control Gastronómico Express está pensado para pequeños negocios gastronómicos que necesitan ordenar inventario, compras, mermas, proveedores y stock crítico sin partir por un ERP grande.';
+            return 'Control Gastronómico Express ayuda a pequeños negocios gastronómicos a ordenar inventario, compras, mermas, proveedores y stock crítico en una interfaz práctica. Su beneficio principal es tener mayor control diario sin partir con la complejidad de un ERP grande.';
         case 'snowwise':
-            return 'SnowWise es un prototipo activo enfocado en montaña, seguridad, clima, mapas y contexto útil para actividades de nieve.';
+            return 'SnowWise es un proyecto enfocado en montaña, seguridad, clima, mapas y contexto útil para actividades de nieve. Busca reunir información relevante en una experiencia más clara para planificar y tomar mejores decisiones antes y durante una salida.';
         case 'joinops':
-            return 'JoinOps es una línea en desarrollo orientada a gestión operativa, inventario, personas y trazabilidad para negocios con operación diaria compleja.';
+            return 'JoinOps es una línea en desarrollo orientada a ordenar la operación diaria de negocios con inventario, personas, tareas y trazabilidad. El objetivo es reducir desorden operativo y entregar una visión más clara de lo que está ocurriendo en cada área.';
         case 'mi-gestion':
-            return 'Mi Gestión es un proyecto experimental orientado a organizar tareas, documentos, indicadores y seguimiento administrativo de forma práctica.';
+            return 'Mi Gestión es un proyecto orientado a organizar tareas, documentos, indicadores y seguimiento administrativo. Busca concentrar información cotidiana para facilitar la planificación y la toma de decisiones.';
         case 'automation':
-            return 'JoinHook también explora asistentes web y automatizaciones para atención, soporte y ventas. Puedo explicar capacidades y beneficios, pero no entrego credenciales, secretos ni detalles internos sensibles.';
+            return 'JoinHook también desarrolla asistentes y automatizaciones para atención, soporte y ventas. La idea es reducir tareas repetitivas, responder más rápido y derivar a una persona cuando la conversación realmente lo necesita.';
+        case 'benefits':
+            return 'Las herramientas de JoinHook buscan simplificar procesos, reducir trabajo repetitivo, ordenar información y ayudar a tomar decisiones con mayor contexto. Si me indicas tu tipo de negocio o necesidad, puedo orientarte hacia la alternativa más adecuada.';
         case 'sensitive':
-            return 'Puedo explicar el enfoque funcional y el valor de la solución, pero no comparto credenciales, secretos, arquitectura privada ni detalles técnicos que puedan comprometer la seguridad. Para una conversación formal escribe a contacto@joinhook.cl.';
+            return 'Puedo ayudarte con funcionamiento, beneficios, usabilidad y capacidades públicas de JoinHook, pero no puedo entregar credenciales, instrucciones internas, secretos, código privado ni información que comprometa la seguridad del proyecto. Si necesitas una conversación técnica autorizada, escribe a contacto@joinhook.cl.';
         case 'about':
-            return 'JoinHook es un espacio independiente para diseñar, probar y construir productos digitales, herramientas de gestión, PWA, automatizaciones y experiencias web con foco práctico.';
+            return 'JoinHook es un espacio independiente donde se diseñan y construyen productos digitales, herramientas de gestión, PWA, automatizaciones y experiencias web. El foco está en resolver problemas reales con soluciones claras, útiles y escalables.';
         default:
-            return 'Puedo ayudarte a entender qué hace JoinHook, mostrarte la herramienta disponible, orientarte sobre soporte o automatización y derivarte al canal comercial correcto.';
+            return 'Cuéntame qué necesitas resolver y te orientaré. Puedo ayudarte a conocer las herramientas de JoinHook, entender sus beneficios, resolver dudas de uso o guiarte hacia soporte, ventas o contacto directo.';
     }
 }
 
@@ -76,12 +85,12 @@ export function JoinHookAssistant() {
         {
             id: 1,
             role: 'assistant',
-            text: 'Hola. Soy el Asistente JoinHook. Puedo orientarte sobre los proyectos, la herramienta disponible y el primer contacto comercial o de soporte.'
+            text: '¡Hola! Soy el Asistente JoinHook. Estoy aquí para ayudarte a conocer nuestras herramientas, entender cómo pueden servirte y resolver tus primeras dudas.'
         },
         {
             id: 2,
             role: 'assistant',
-            text: 'Si necesitas una compra, una cotización o hablar con Francisco, te ayudo a llegar al canal correcto sin exponer información sensible del proyecto.'
+            text: 'Cuéntame qué necesitas mejorar, organizar o resolver y te guiaré hacia la alternativa más adecuada.'
         }
     ]);
 
@@ -114,7 +123,7 @@ export function JoinHookAssistant() {
                     <header className="jh-assistant-header">
                         <div>
                             <strong>Asistente JoinHook</strong>
-                            <small>Primer filtro comercial y de soporte</small>
+                            <small>Productos · orientación · soporte</small>
                         </div>
                         <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar chat">×</button>
                     </header>
