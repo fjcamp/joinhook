@@ -15,6 +15,10 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 8. Ningún producto se entrega por una señal del navegador: el backend valida firma, consulta la orden y verifica monto, referencia y estado.
 9. Los archivos digitales permanecen fuera de `public_html` y se entregan con entitlement + token hasheado, expirable y limitado.
 10. Nombre comercial completo: **Control Gastronómico Express**; nombre corto: **Control Express**; código técnico: `JH-GASTRO-EXPRESS-FOUNDERS`. No introducir la sigla CGE como identificador nuevo.
+11. La clave de idempotencia se genera y persiste antes del request al proveedor. Un mismo intento nunca cambia de clave.
+12. Una falla ambigua de red/proveedor no autoriza un segundo pago: la orden queda en verificación hasta aclarar el estado.
+13. Existe kill switch server-side independiente: `JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false` bloquea nuevos cobros aunque el frontend se habilite por error.
+14. El máximo de descargas se aplica por compra/entitlement y no puede reiniciarse generando tokens adicionales.
 
 ## Desarrollo asociado
 
@@ -28,6 +32,17 @@ Registro de continuidad para retomar futuras conversaciones sin repetir decision
 - `src/lib/control-plane/registry.ts`.
 - `src/lib/commerce/provider.ts`.
 - `src/lib/commerce/domain-events.ts`.
+
+## Hardening ejecutado
+
+- Retry único para errores transitorios de Mercado Pago con la **misma** `X-Idempotency-Key`.
+- Rechazo definitivo y resultado ambiguo se tratan de forma distinta.
+- Estado `verification_pending` protege al comprador ante respuestas inciertas y le indica que no repita el pago.
+- Webhook principal acotado al tópico Order y persistencia mínima de metadata; no se guarda el body completo por defecto.
+- Preview de token antes de consumir descarga para no gastar allowance cuando el archivo privado falta o no se puede abrir.
+- Consumo atómico del allowance tanto a nivel token como entitlement.
+- Auditoría de IP solo con HMAC y sal privada; si la sal no existe, no se guarda hash de IP.
+- Catálogo central es la fuente de verdad del precio mostrado en checkout y del monto validado por backend.
 
 ## Autorización operativa vigente
 
