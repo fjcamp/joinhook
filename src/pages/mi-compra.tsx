@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 type PurchaseStatus = {
   orderCode: string;
   status: string;
+  verificationRequired?: boolean;
   buyerEmail?: string;
   product?: { code: string; name: string };
   access?: { downloadUrl: string; expiresAt: string };
@@ -26,6 +27,7 @@ export default function MyPurchase() {
     }
     let cancelled = false;
     let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const check = async () => {
       attempts += 1;
       try {
@@ -42,15 +44,27 @@ export default function MyPurchase() {
           setMessage('Pago verificado. Tu producto está listo.');
           return;
         }
+        if (data.verificationRequired || data.status === 'verification_pending') {
+          setMessage('La operación necesita verificación adicional. Por seguridad no realices un segundo pago. Conserva tu código de compra y contacta a soporte@joinhook.cl; revisaremos la transacción antes de liberar o repetir cualquier cobro.');
+          return;
+        }
+        if (data.status === 'failed') {
+          setMessage('Mercado Pago confirmó que esta orden no fue creada correctamente. No se realizó ninguna entrega. Puedes volver al producto e iniciar un nuevo intento de pago.');
+          return;
+        }
         setMessage('El pago todavía está pendiente de confirmación. Estamos consultando nuevamente…');
-        if (attempts < 8) setTimeout(check, 3000);
+        if (attempts < 8) timer = setTimeout(check, 3000);
+        else setMessage('La confirmación está demorando más de lo esperado. No vuelvas a pagar. Conserva tu código de compra y contacta a soporte@joinhook.cl.');
       } catch (error) {
         console.error(error);
         if (!cancelled) setMessage('No pudimos verificar la compra en este momento. No vuelvas a pagar; intenta actualizar la página o contacta soporte@joinhook.cl.');
       }
     };
     void check();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   }, [router.isReady, orderCode]);
 
   return <>
@@ -68,9 +82,9 @@ export default function MyPurchase() {
           {orderCode && <p><strong>Código de compra:</strong> {orderCode}</p>}
           {status?.product?.name && <p><strong>Producto:</strong> {status.product.name}</p>}
           {status?.buyerEmail && <p><strong>Comprador:</strong> {status.buyerEmail}</p>}
-          {status?.status && <p><strong>Estado:</strong> {status.status === 'paid' ? 'Pagado y verificado' : status.status}</p>}
+          {status?.status && <p><strong>Estado:</strong> {status.status === 'paid' ? 'Pagado y verificado' : status.status === 'verification_pending' ? 'Verificación adicional' : status.status}</p>}
           {status?.access?.downloadUrl && <div className="jh-actions" style={{ marginTop: 22 }}><a className="jh-button jh-button-primary" href={status.access.downloadUrl}>Obtener producto</a></div>}
-          {status?.access?.expiresAt && <small>El acceso temporal vence el {new Date(status.access.expiresAt).toLocaleString('es-CL')} y tiene un límite de usos.</small>}
+          {status?.access?.expiresAt && <small>El acceso temporal vence el {new Date(status.access.expiresAt).toLocaleString('es-CL')} y tiene un límite global de descargas asociado a la compra.</small>}
         </div>
       </section>
     </main>
