@@ -21,21 +21,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!valid) return res.status(401).json({ error: 'invalid_signature' });
 
   const providerOrderId = Array.isArray(dataId) ? dataId[0] : dataId;
+  const topic = String(req.body?.type || req.query.type || '').toLowerCase();
   const eventId = req.body?.id != null ? String(req.body.id) : null;
   const eventType = String(req.body?.action || req.body?.type || 'mercadopago.webhook');
 
+  // This endpoint is deliberately scoped to the primary Orders topic. Optional
+  // claims/chargebacks/fraud topics will use dedicated handlers so their resource
+  // IDs can never be confused with an order ID.
+  if (topic && topic !== 'order') {
+    return res.status(202).json({ received: true, ignored: true });
+  }
+  if (!providerOrderId) return res.status(400).json({ error: 'missing_order_id' });
+
   try {
+    // Store only the fields required for audit/idempotency. Do not persist the
+    // complete provider body by default; Commerce can always re-fetch the order.
     await recordPaymentEvent({
-      providerOrderId: providerOrderId || null,
+      providerOrderId,
       eventType,
       providerEventId: eventId,
-      payload: req.body ?? {},
+      payload: {
+        type: req.body?.type ?? null,
+        action: req.body?.action ?? null,
+        api_version: req.body?.api_version ?? null,
+        live_mode: req.body?.live_mode ?? null,
+        date_created: req.body?.date_created ?? null,
+      },
     });
 
-    if (providerOrderId) {
-      await fulfillMercadoPagoOrder(providerOrderId);
-    }
-
+    await fulfillMercadoPagoOrder(providerOrderId);
     return res.status(200).json({ received: true });
   } catch (error) {
     console.error('[commerce/webhook/mercadopago]', error);
