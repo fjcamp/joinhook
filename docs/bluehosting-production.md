@@ -30,6 +30,8 @@ joinhook-bluehosting-production
   ↓
 BlueHosting Passenger + sincronización document root
   ↓
+validación de routing Apache/Passenger
+  ↓
 smoke test real
 ```
 
@@ -52,10 +54,14 @@ Esto es obligatorio porque Passenger ejecuta Next.js fuera del document root y A
 4. Reemplazar el contenido operativo de `/home/joinhook/joinhook-production` por el nuevo runtime del artifact.
 5. Copiar el **contenido** de `document-root-assets/` dentro de `/home/joinhook/public_html/`.
 6. No crear accidentalmente `_next/static/static`.
-7. Reiniciar la aplicación `joinhook.cl` en Setup Node.js App.
-8. Abrir `production-passenger.log`; Next.js debe quedar `Ready` sin crash.
-9. Abrir `joinhook.cl` con recarga forzada.
-10. En DevTools → Network verificar que una URL real `/_next/static/chunks/<hash>.js` responde `200`, no `404`/HTML.
+7. Revisar `/home/joinhook/public_html/.htaccess`:
+   - el bloque CloudLinux Passenger debe permanecer intacto;
+   - las reglas de rewrite de WordPress no deben seguir interceptando rutas Next.js si JoinHook ya es la aplicación principal.
+8. Reiniciar la aplicación `joinhook.cl` en Setup Node.js App.
+9. Abrir `production-passenger.log`; Next.js debe quedar `Ready` sin crash.
+10. Abrir `joinhook.cl` con recarga forzada.
+11. En DevTools → Network verificar que una URL real `/_next/static/chunks/<hash>.js` responde `200`, no `404`/HTML.
+12. Ejecutar rutas internas y verificar no solo el status, sino también que el HTML/branding corresponda a JoinHook y no al WordPress legado.
 
 ## Smoke test mínimo
 
@@ -91,21 +97,41 @@ Si la Home carga contenido pero aparece sin diseño, consultar primero:
 
 El patrón conocido es `/_next/static/...` → `404` con `Content-Type: text/html`. No recompilar ni reinstalar dependencias antes de verificar el mirror del document root.
 
+## Incidente conocido: rutas internas muestran WordPress
+
+Si `/` funciona pero una ruta interna como:
+
+```text
+/herramientas/control-gastronomico-express
+```
+
+muestra `No Results Found`, `Hello world!`, `Recent Posts` o cualquier branding del WordPress antiguo, consultar:
+
+`docs/knowledge-base/incidents/JH-OPS-002-wordpress-intercepts-next-routes.md`
+
+No reconstruir Next.js: si la ruta existe en el build y CI la prueba correctamente, revisar primero `public_html/.htaccess` y desactivar las reglas de rewrite de WordPress manteniendo intacta la configuración Passenger.
+
 ## WordPress legado
 
-Mientras exista necesidad de rollback, no eliminar de inmediato los archivos antiguos de WordPress en `public_html`. Una vez cerrada la validación y respaldado el sitio anterior:
+Mientras exista necesidad de rollback, no eliminar de inmediato los archivos antiguos de WordPress en `public_html`.
 
-- retirar el runtime/archivos WordPress que ya no sean necesarios;
-- conservar el respaldo fuera de `public_html`;
-- simplificar `.htaccess` sin tocar el bloque CloudLinux Passenger;
-- revisar que ninguna regla WordPress intercepte rutas Next.js.
+**Importante:** conservar los archivos de rollback no significa mantener activo su router.
+
+Mientras Next.js sea la aplicación pública principal:
+
+- respaldar `.htaccess` antes de editarlo;
+- desactivar el bloque de rewrite WordPress si intercepta rutas no físicas;
+- conservar intacto el bloque CloudLinux Passenger;
+- mantener los archivos WordPress hasta completar la validación y el backup;
+- retirar posteriormente el legado fuera de `public_html` cuando Launch Gate esté cerrado.
 
 ## Rollback
 
 1. Conservar el runtime anterior de `joinhook-production`.
 2. Conservar el mirror anterior de `_next/static` si se necesita reversión exacta.
-3. Si el despliegue falla, restaurar runtime + document-root assets del mismo build.
-4. Reiniciar Passenger.
-5. Repetir smoke test.
+3. Conservar copia de `.htaccess` antes de cambiar el routing.
+4. Si el despliegue falla, restaurar runtime + document-root assets del mismo build y, si corresponde, el `.htaccess` respaldado.
+5. Reiniciar Passenger.
+6. Repetir smoke test.
 
 Nunca mezclar runtime de un commit con `_next/static` de otro commit: los hashes deben corresponder al mismo build.
