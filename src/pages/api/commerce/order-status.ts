@@ -19,7 +19,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let order = await findOrderByCode(orderCode);
     if (!order || !validateOrderClaim(order, claimToken)) return res.status(404).json({ error: 'order_not_found' });
 
-    if (order.status === 'pending' && order.provider_order_id) {
+    // Re-fetch the authoritative provider state on purchase access, not only
+    // while pending. This catches later refunds/partial refunds/chargebacks and
+    // revokes delivery before a fresh token is issued.
+    if (order.provider_order_id) {
       await fulfillMercadoPagoOrder(order.provider_order_id);
       order = await findOrderByCode(orderCode);
       if (!order) return res.status(404).json({ error: 'order_not_found' });
