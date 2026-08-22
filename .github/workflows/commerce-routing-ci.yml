@@ -71,7 +71,7 @@ jobs:
 
       - name: Verify server-side payment kill switch
         run: |
-          code=$(curl --silent --output /tmp/create-order.json --write-out '%{http_code}' \
+          code=$(curl --location --silent --output /tmp/create-order.json --write-out '%{http_code}' \
             --request POST \
             --header 'Content-Type: application/json' \
             --data '{}' \
