@@ -27,9 +27,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!product) return res.status(409).json({ error: 'product_not_available' });
 
     if (order.status !== 'paid') {
+      const verificationRequired = order.status === 'pending' && Boolean(order.idempotency_key) && !order.provider_order_id;
       return res.status(200).json({
         orderCode: order.order_code,
-        status: order.status,
+        status: verificationRequired ? 'verification_pending' : order.status,
+        verificationRequired,
         product: { code: product.code, name: product.name },
       });
     }
