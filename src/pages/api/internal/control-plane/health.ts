@@ -6,6 +6,13 @@ function configured(name: string) {
   return Boolean(process.env[name]?.trim());
 }
 
+function commerceDatabaseConfigured() {
+  return configured('JOINHOOK_COMMERCE_SUPABASE_URL') && (
+    configured('JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY')
+    || configured('JOINHOOK_COMMERCE_SUPABASE_SERVICE_ROLE_KEY')
+  );
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -19,7 +26,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const configChecks = [
-    ['database', configured('JOINHOOK_COMMERCE_SUPABASE_URL') && configured('JOINHOOK_COMMERCE_SUPABASE_SERVICE_ROLE_KEY')],
+    ['database', commerceDatabaseConfigured()],
     ['mercadopago', configured('MERCADOPAGO_ACCESS_TOKEN') && configured('MERCADOPAGO_WEBHOOK_SECRET')],
     ['delivery', configured('JOINHOOK_DOWNLOAD_TOKEN_SECRET') && configured('JOINHOOK_GASTRO_EXPRESS_PRIVATE_FILE')],
   ] as const;
