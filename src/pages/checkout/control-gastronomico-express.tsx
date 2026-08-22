@@ -64,11 +64,14 @@ export default function ControlExpressCheckout() {
             const response = await fetch('/api/commerce/create-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
               body: JSON.stringify(payload),
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data?.error || 'payment_failed');
-            sessionStorage.setItem(`jh-commerce-claim:${data.orderCode}`, data.claimToken);
+            // The purchase claim is delivered as an HttpOnly same-site cookie by
+            // the backend, so sensitive entitlement credentials never live in
+            // localStorage/sessionStorage or client-visible JSON.
             await router.push(`/mi-compra?order=${encodeURIComponent(data.orderCode)}`);
           } catch (error) {
             console.error(error);
