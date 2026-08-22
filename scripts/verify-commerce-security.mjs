@@ -85,12 +85,22 @@ requireContains('src/lib/commerce/fulfillment.ts', [
   'fulfillment.blocked_local_hold',
 ]);
 
+requireContains('src/lib/commerce/config.ts', [
+  'JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY',
+  "kind: modernSecret ? ('modern_secret' as const) : ('legacy_service_role' as const)",
+]);
+
 requireContains('src/lib/commerce/store.ts', [
   'resolution=ignore-duplicates',
   'revokeEntitlementByOrder',
   'findOrderByProviderPaymentId',
   'partially_refunded',
   'charged_back',
+  'apikey: store.serverKey',
+  "store.serverKeyKind === 'legacy_service_role'",
+]);
+requireAbsent('src/lib/commerce/store.ts', [
+  "Authorization: `Bearer ${store.serverKey}`,
 ]);
 requireAbsent('src/lib/commerce/store.ts', [
   "commerce_entitlements?on_conflict=order_id', {\n    method: 'POST',\n    headers: restHeaders('return=representation,resolution=merge-duplicates')",
@@ -110,6 +120,7 @@ requireContains('docs/commerce/schema.sql', [
 requireContains('.env.commerce.example', [
   'NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED=false',
   'JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false',
+  'JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY=sb_secret_SERVER_ONLY_HERE',
 ]);
 
 console.log('Commerce security/reliability invariants verified.');
