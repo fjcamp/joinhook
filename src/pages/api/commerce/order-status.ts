@@ -41,8 +41,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const entitlement = await createEntitlement(order.id, order.product_code, order.buyer_email);
     if (!entitlement?.id) throw new Error('Entitlement missing');
-    const download = await createDownloadToken({ entitlementId: entitlement.id });
+    if (entitlement.status !== 'active') {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json({
+        orderCode: order.order_code,
+        status: 'access_revoked',
+        buyerEmail: order.buyer_email,
+        product: { code: product.code, name: product.name },
+      });
+    }
 
+    const download = await createDownloadToken({ entitlementId: entitlement.id });
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({
       orderCode: order.order_code,
