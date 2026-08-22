@@ -39,6 +39,14 @@ export type CommerceOrderRecord = {
   paid_at: string | null;
 };
 
+type DownloadGrant = {
+  token_id: string;
+  order_id: string;
+  product_code: string;
+  buyer_email: string;
+  remaining_uses: number;
+};
+
 function hashSecret(value: string) {
   const { delivery } = commerceConfig();
   return crypto.createHmac('sha256', delivery.tokenSecret).update(value).digest('hex');
@@ -142,10 +150,17 @@ export async function recordPaymentEvent(input: {
 }
 
 export async function createEntitlement(orderId: string, productCode: string, buyerEmail: string) {
+  const { delivery } = commerceConfig();
   const rows = await rest<Array<{ id: string }>>('commerce_entitlements?on_conflict=order_id', {
     method: 'POST',
     headers: restHeaders('return=representation,resolution=merge-duplicates'),
-    body: JSON.stringify({ order_id: orderId, product_code: productCode, buyer_email: buyerEmail.toLowerCase(), status: 'active' }),
+    body: JSON.stringify({
+      order_id: orderId,
+      product_code: productCode,
+      buyer_email: buyerEmail.toLowerCase(),
+      status: 'active',
+      max_downloads: delivery.defaultMaxDownloads,
+    }),
   });
   return rows[0] ?? null;
 }
@@ -168,23 +183,25 @@ export async function createDownloadToken(input: { entitlementId: string }) {
   return { rawToken, tokenId: rows[0]?.id ?? null, expiresAt };
 }
 
-export async function consumeDownloadToken(rawToken: string) {
+async function downloadTokenRpc(functionName: 'preview_commerce_download_token' | 'consume_commerce_download_token', rawToken: string) {
   const { store } = commerceConfig();
   const tokenHash = hashSecret(rawToken);
-  const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/consume_commerce_download_token`, {
+  const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/${functionName}`, {
     method: 'POST',
     headers: restHeaders(),
     body: JSON.stringify({ p_token_hash: tokenHash }),
   });
-  const rows = (await response.json().catch(() => [])) as Array<{
-    token_id: string;
-    order_id: string;
-    product_code: string;
-    buyer_email: string;
-    remaining_uses: number;
-  }>;
-  if (!response.ok) throw new Error(`Commerce token RPC error ${response.status}`);
+  const rows = (await response.json().catch(() => [])) as DownloadGrant[];
+  if (!response.ok) throw new Error(`Commerce token RPC ${functionName} error ${response.status}`);
   return rows[0] ?? null;
+}
+
+export async function previewDownloadToken(rawToken: string) {
+  return downloadTokenRpc('preview_commerce_download_token', rawToken);
+}
+
+export async function consumeDownloadToken(rawToken: string) {
+  return downloadTokenRpc('consume_commerce_download_token', rawToken);
 }
 
 export async function recordDownloadEvent(input: {
