@@ -15,15 +15,33 @@ Separar estrictamente pruebas y producción.
 Nunca guardar valores reales en GitHub.
 
 ```bash
+# Frontend público
 NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED=false
 NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=
+
+# Entorno
+JOINHOOK_COMMERCE_ENV=test
+JOINHOOK_SITE_URL=https://joinhook.cl
+
+# Mercado Pago — SERVER ONLY
 MERCADOPAGO_ACCESS_TOKEN=
 MERCADOPAGO_WEBHOOK_SECRET=
+
+# Base dedicada JoinHook Commerce — SERVER ONLY
 JOINHOOK_COMMERCE_SUPABASE_URL=
 JOINHOOK_COMMERCE_SUPABASE_SERVICE_ROLE_KEY=
-JOINHOOK_COMMERCE_TOKEN_SECRET=
-JOINHOOK_COMMERCE_PRIVATE_PRODUCT_ROOT=
+
+# Fulfillment — SERVER ONLY
+JOINHOOK_DOWNLOAD_TOKEN_SECRET=
+JOINHOOK_DOWNLOAD_IP_HASH_SALT=
+JOINHOOK_DOWNLOAD_TTL_HOURS=72
+JOINHOOK_DOWNLOAD_MAX_USES=3
+
+# Artefacto privado fuera de public_html y fuera del repositorio
+JOINHOOK_GASTRO_EXPRESS_PRIVATE_FILE=/home/joinhook/private-products/control-express/control-gastronomico-express.zip
 ```
+
+La referencia canónica de variables es `.env.commerce.example`.
 
 ## Webhook
 
@@ -75,6 +93,14 @@ Antes de otorgar entitlement:
 8. crear/recuperar entitlement;
 9. emitir token de descarga limitado.
 
+## Política de descarga segura
+
+El límite efectivo es por **compra/entitlement**, no solo por token. Aunque se emita un token nuevo, no se reinicia el número total de descargas disponibles.
+
+El endpoint hace un preview del token, abre/verifica el artefacto privado y **recién después** consume atómicamente un uso. Así una falla de almacenamiento no debe gastar una descarga del cliente.
+
+`JOINHOOK_DOWNLOAD_IP_HASH_SALT` es opcional para auditoría seudonimizada; si no existe, no se guarda hash de IP. Nunca usar una sal pública/predecible.
+
 ## Pruebas obligatorias
 
 ### Pago
@@ -102,11 +128,12 @@ Antes de otorgar entitlement:
 - token válido;
 - token inválido;
 - token expirado;
-- máximo de descargas alcanzado;
+- máximo global de descargas alcanzado aunque existan varios tokens;
 - dos descargas concurrentes en el último uso;
 - entitlement revocado;
-- archivo inexistente;
-- traversal de ruta (`../`) bloqueado.
+- archivo inexistente/no legible sin consumir allowance;
+- traversal de ruta (`../`) bloqueado;
+- auditoría fallida sin impedir una descarga ya autorizada.
 
 ### Postventa
 Antes de producción agregar pruebas de:
