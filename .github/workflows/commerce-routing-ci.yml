@@ -45,9 +45,7 @@ jobs:
           npm run start -- -p 3011 > /tmp/joinhook-commerce-routing.log 2>&1 &
           echo $! > /tmp/joinhook-commerce-routing.pid
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:3011/ > /dev/null; then
-              exit 0
-            fi
+            if curl -fsS http://127.0.0.1:3011/ > /dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/joinhook-commerce-routing.log
@@ -69,25 +67,29 @@ jobs:
           grep -Fq 'Checkout JoinHook · Mercado Pago' /tmp/embedded-checkout.html
           grep -Fq 'Control Gastronómico Express' /tmp/embedded-checkout.html
 
-      - name: Verify registered Mercado Pago webhook route exists
+      - name: Verify Mercado Pago webhook routes and trailing slash behavior
         run: |
           for path in \
-            /api/commerce/mercadopago/webhook \
-            /api/commerce/webhooks/mercadopago; do
+            /api/commerce/mercadopago/webhook/ \
+            /api/commerce/webhooks/mercadopago/; do
             code=$(curl --silent --output /tmp/webhook-route.txt --write-out '%{http_code}' "http://127.0.0.1:3011$path")
             if [ "$code" != "405" ]; then
-              echo "Expected GET $path to resolve to the POST-only handler with 405, got $code"
+              echo "Expected GET $path to reach the POST-only handler with 405, got $code"
               cat /tmp/webhook-route.txt || true
               exit 1
             fi
           done
 
+          # trailingSlash=true intentionally canonicalizes the no-slash form.
+          code=$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:3011/api/commerce/mercadopago/webhook)
+          test "$code" = '308'
+          final=$(curl --location --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:3011/api/commerce/mercadopago/webhook)
+          test "$final" = '405'
+
       - name: Verify server-side payment kill switch
         run: |
           code=$(curl --location --silent --output /tmp/create-order.json --write-out '%{http_code}' \
-            --request POST \
-            --header 'Content-Type: application/json' \
-            --data '{}' \
+            --request POST --header 'Content-Type: application/json' --data '{}' \
             http://127.0.0.1:3011/api/commerce/create-order)
           if [ "$code" != "503" ]; then
             echo "Expected 503 while JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false, got $code"
@@ -99,6 +101,4 @@ jobs:
       - name: Stop QA server
         if: always()
         run: |
-          if [ -f /tmp/joinhook-commerce-routing.pid ]; then
-            kill "$(cat /tmp/joinhook-commerce-routing.pid)" || true
-          fi
+          if [ -f /tmp/joinhook-commerce-routing.pid ]; then kill "$(cat /tmp/joinhook-commerce-routing.pid)" || true; fi
