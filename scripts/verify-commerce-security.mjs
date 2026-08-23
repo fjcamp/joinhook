@@ -118,6 +118,7 @@ requireContains('src/lib/commerce/store.ts', [
   "? { Authorization: `Bearer ${store.serverKey}` }",
   'rotateOrderClaim',
   'consumeRecoveryTokenHash',
+  'p_order_code: orderCode',
 ]);
 requireAbsent('src/lib/commerce/store.ts', [
   'store.serviceRoleKey',
@@ -149,7 +150,7 @@ requireAbsent('src/pages/api/commerce/recovery/request.ts', [
 ]);
 
 requireContains('src/pages/api/commerce/recovery/claim.ts', [
-  'consumeRecoveryTokenHash',
+  'consumeRecoveryTokenHash(hashRecoveryToken(rawToken), expectedOrderCode)',
   'rotateOrderClaim',
   'serializeOrderClaimCookie',
 ]);
@@ -169,9 +170,11 @@ requireContains('docs/commerce/migrations/2026-08-23-commerce-purchase-recovery.
   'commerce_recovery_requests',
   'commerce_recovery_tokens',
   'consume_commerce_recovery_token',
+  'p_order_code text',
+  'o.order_code = p_order_code',
   'commerce_recovery_requests_deny_clients',
   'commerce_recovery_tokens_deny_clients',
-  'revoke all on function public.consume_commerce_recovery_token(text) from public, anon, authenticated',
+  'revoke all on function public.consume_commerce_recovery_token(text, text) from public, anon, authenticated',
 ]);
 
 requireContains('.env.commerce.example', [
