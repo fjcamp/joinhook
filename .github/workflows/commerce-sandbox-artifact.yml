@@ -23,8 +23,6 @@ jobs:
       JOINHOOK_DEPLOY_TARGET: production
       NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_ENABLED: 'true'
       NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
-      # Embedded Commerce is deliberately not enabled at build time. The new
-      # runtime public-config endpoint reads the cPanel switch after deployment.
       JOINHOOK_COMMERCE_CHECKOUT_ENABLED: 'false'
       JOINHOOK_COMMERCE_ACCEPT_PAYMENTS: 'false'
     steps:
@@ -56,9 +54,7 @@ jobs:
           npm run start -- -p 3020 > /tmp/joinhook-commerce-sandbox.log 2>&1 &
           echo $! > /tmp/joinhook-commerce-sandbox.pid
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:3020/ > /dev/null; then
-              exit 0
-            fi
+            if curl -fsS http://127.0.0.1:3020/ > /dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/joinhook-commerce-sandbox.log
@@ -75,22 +71,24 @@ jobs:
           curl --location --fail --silent --show-error http://127.0.0.1:3020/herramientas/control-gastronomico-express > /tmp/product.html
           grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/product.html
 
-          # The configured Mercado Pago URL must exist in this artifact. GET is
-          # intentionally rejected because the provider uses POST.
-          code=$(curl --silent --output /tmp/webhook.txt --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/mercadopago/webhook)
+          # trailingSlash=true makes the slash form canonical. Mercado Pago should
+          # be configured with this exact URL to avoid relying on provider redirect behavior.
+          code=$(curl --silent --output /tmp/webhook.txt --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/mercadopago/webhook/)
           test "$code" = '405'
 
-          code=$(curl --silent --output /tmp/webhook-internal.txt --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/webhooks/mercadopago)
+          code=$(curl --silent --output /tmp/webhook-internal.txt --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/webhooks/mercadopago/)
           test "$code" = '405'
 
-          # Server-side payment creation must remain blocked in the artifact QA environment.
-          code=$(curl --silent --output /tmp/create-order.json --write-out '%{http_code}' \
+          redirect=$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/mercadopago/webhook)
+          test "$redirect" = '308'
+
+          code=$(curl --location --silent --output /tmp/create-order.json --write-out '%{http_code}' \
             --request POST --header 'Content-Type: application/json' --data '{}' \
             http://127.0.0.1:3020/api/commerce/create-order)
           test "$code" = '503'
           grep -Fq 'commerce_payments_disabled' /tmp/create-order.json
 
-          curl --fail --silent --show-error http://127.0.0.1:3020/api/commerce/public-config > /tmp/public-config.json
+          curl --fail --silent --show-error http://127.0.0.1:3020/api/commerce/public-config/ > /tmp/public-config.json
           grep -Fq '"enabled":false' /tmp/public-config.json
 
       - name: Package BlueHosting runtime and document-root mirror
@@ -113,6 +111,7 @@ jobs:
           Runtime destination: /home/joinhook/joinhook-production
           Document root mirror: document-root-assets/ -> /home/joinhook/public_html/
           Startup file: server.js
+          Canonical TEST Webhook URL: https://joinhook.cl/api/commerce/mercadopago/webhook/
           External Mercado Pago Link remains the rendered fallback.
           Embedded Commerce is controlled at runtime by cPanel variables.
           Do not run next build on BlueHosting.
@@ -129,16 +128,11 @@ jobs:
           PORT=3021 HOSTNAME=127.0.0.1 NODE_ENV=production node deploy-commerce-sandbox/server.js > /tmp/joinhook-commerce-package.log 2>&1 &
           echo $! > /tmp/joinhook-commerce-package.pid
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:3021/ > /dev/null; then
-              break
-            fi
-            if [ "$i" = 30 ]; then
-              cat /tmp/joinhook-commerce-package.log
-              exit 1
-            fi
+            if curl -fsS http://127.0.0.1:3021/ > /dev/null; then break; fi
+            if [ "$i" = 30 ]; then cat /tmp/joinhook-commerce-package.log; exit 1; fi
             sleep 1
           done
-          code=$(curl --silent --output /tmp/package-webhook.txt --write-out '%{http_code}' http://127.0.0.1:3021/api/commerce/mercadopago/webhook)
+          code=$(curl --silent --output /tmp/package-webhook.txt --write-out '%{http_code}' http://127.0.0.1:3021/api/commerce/mercadopago/webhook/)
           test "$code" = '405'
 
       - name: Stop QA servers
