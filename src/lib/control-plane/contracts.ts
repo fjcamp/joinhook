@@ -71,6 +71,31 @@ export type DomainEventEnvelope<TData extends Record<string, unknown> = Record<s
   data: TData;
 };
 
+export type DataClassification = 'public' | 'internal' | 'confidential' | 'sensitive';
+export type DataPassDirection = 'read-only' | 'event-only' | 'command';
+export type DataPassTransport = 'https-api' | 'webhook' | 'event-bus' | 'queue';
+
+/**
+ * Explicit contract for moving a minimal, approved subset of data between two
+ * JoinHook products/services. The absence of a field from `fields` means deny.
+ */
+export type DataPassContractV1 = {
+  contractVersion: 1;
+  id: string;
+  source: ProductId;
+  consumer: ProductId;
+  purpose: string;
+  dataClassification: DataClassification;
+  fields: readonly string[];
+  transport: DataPassTransport;
+  direction: DataPassDirection;
+  retention: string;
+  authScope: string;
+  audit: string;
+  revocation: string;
+  legalBasisOrPolicy?: string | null;
+};
+
 /**
  * Contract implemented by product-specific read adapters.
  * It intentionally exposes only aggregated/control-plane data and never raw tables.
