@@ -61,6 +61,51 @@ Preferencias de integración:
 6. scopes mínimos y rotación independiente;
 7. staging y producción completamente separados.
 
+## Pases de datos entre proyectos y microservicios
+
+Todo intercambio de datos se diseña explícitamente por producto o microservicio. No existe un bus de datos con acceso general ni una credencial transversal que permita leer todas las bases.
+
+Cada **Data Pass** debe definir como mínimo:
+
+- `source`: servicio propietario del dato;
+- `consumer`: servicio autorizado a consumirlo;
+- `purpose`: finalidad operacional o analítica;
+- `contract_version`: versión del contrato;
+- `data_classification`: pública, interna, confidencial o sensible;
+- `fields`: campos exactos permitidos;
+- `transport`: API HTTPS, webhook/evento, cola u otro mecanismo aprobado;
+- `direction`: read-only, event-only o comando autorizado;
+- `retention`: cuánto tiempo puede persistir el consumidor la copia derivada;
+- `legal_basis_or_policy`: regla de privacidad/compliance aplicable cuando corresponda;
+- `auth_scope`: credencial y alcance mínimo;
+- `audit`: cómo se registra el acceso o transferencia;
+- `revocation`: cómo se corta el pase sin romper al servicio propietario.
+
+Reglas:
+
+1. **Default deny:** si un campo no está declarado en el Data Pass, no se transfiere.
+2. **Minimización:** preferir agregados y referencias opacas antes que datos personales.
+3. **No DB-to-DB directo** entre productos como mecanismo ordinario; usar APIs/eventos versionados.
+4. **No replicar secretos** ni credenciales dentro de eventos o payloads funcionales.
+5. **Correlación controlada:** usar `correlation_id`, `customer_ref` u otros identificadores opacos; evitar exponer IDs internos innecesarios.
+6. **Idempotencia:** eventos y comandos reintentables deben soportar procesamiento repetido sin duplicar efectos.
+7. **Trazabilidad:** productor y consumidor deben poder reconstruir cuándo, por qué y bajo qué versión se movió la información.
+8. **Entornos separados:** un pase de staging nunca usa credenciales ni datos productivos por defecto.
+9. **Revocación independiente:** cortar acceso de un consumidor no debe requerir rotar secretos de todos los productos.
+10. **Contratos antes que conveniencia:** nuevos microservicios no obtienen acceso amplio por estar dentro del ecosistema JoinHook.
+
+Ejemplos iniciales:
+
+`SnowWise -> JoinHook Control Plane`: Health, versión, incidencias y métricas agregadas; read-only.
+
+`SnowWise -> JoinHook Commerce`: solicitud de creación de orden/entitlement; nunca acceso a tablas de Commerce.
+
+`JoinHook Commerce -> Revenue Intelligence`: eventos de funnel, pago aprobado, reembolso y entrega con referencias opacas; sin tarjeta, CVV ni secretos.
+
+`JoinOps -> JoinHook Control Plane`: salud, versión, integraciones y métricas operacionales agregadas; sin exponer inventario o RR.HH. detallado salvo contrato específico.
+
+`Plataforma Regional -> microproducto`: consultas de conocimiento por API/RAG con fuente, vigencia y territorio; el microproducto no obtiene acceso directo al repositorio completo.
+
 ## Modelo de eventos
 
 Ejemplo:
