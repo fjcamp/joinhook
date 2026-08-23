@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { commerceConfig } from '@/lib/commerce/config';
+import { commerceMercadoPagoConfig } from '@/lib/commerce/config';
 import {
   findOrderByProviderPaymentId,
   markOrderPostSaleState,
@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end();
   }
 
-  const { mercadopago } = commerceConfig();
+  const mercadopago = commerceMercadoPagoConfig();
   const queryDataId = firstString(req.query['data.id']);
   const bodyDataId = req.body?.data?.id != null ? String(req.body.data.id) : undefined;
   const dataId = queryDataId || bodyDataId;
@@ -44,10 +44,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Fraud notifications can contain payment_id directly. Claims/chargebacks
-    // may not; in those cases we preserve a minimal unmatched audit record and
-    // rely on the primary Orders webhook/reconciliation until their resource
-    // APIs are integrated. Never confuse claim/chargeback resource IDs with an
-    // Orders API id.
+    // may not; in those cases preserve a minimal unmatched audit record and rely
+    // on the primary Orders webhook/reconciliation until those resource APIs are
+    // integrated. Never reinterpret claim/chargeback resource IDs as Order IDs.
     const order = paymentId ? await findOrderByProviderPaymentId(paymentId) : null;
 
     if (order) {
@@ -82,8 +81,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Mercado Pago requires a fast 200/201 acknowledgement. In particular,
-    // fraud-alert notifications do not use the normal retry behavior.
+    // Mercado Pago requires a fast acknowledgement. Fraud-alert notifications in
+    // particular should not wait for unrelated delivery/recovery configuration.
     return res.status(200).json({ received: true, held: Boolean(order) });
   } catch (error) {
     console.error('[commerce/webhook/mercadopago-optional]', error);
