@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { commerceConfig } from '@/lib/commerce/config';
+import { commerceMercadoPagoConfig } from '@/lib/commerce/config';
 import { fulfillMercadoPagoOrder } from '@/lib/commerce/fulfillment';
 import { recordPaymentEvent } from '@/lib/commerce/store';
 import { validateMercadoPagoWebhookSignature } from '@/lib/commerce/webhook-signature';
@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end();
   }
 
-  const { mercadopago } = commerceConfig();
+  const mercadopago = commerceMercadoPagoConfig();
   const dataId = req.query['data.id'] ?? (req.body?.data?.id ? String(req.body.data.id) : undefined);
   const valid = validateMercadoPagoWebhookSignature({
     xSignature: req.headers['x-signature'],
@@ -26,15 +26,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const eventType = String(req.body?.action || req.body?.type || 'mercadopago.webhook');
 
   // This endpoint is deliberately scoped to the primary Orders topic. Optional
-  // claims/chargebacks/fraud topics will use dedicated handlers so their resource
-  // IDs can never be confused with an order ID.
+  // claims/chargebacks/fraud topics use dedicated handlers so their resource IDs
+  // can never be confused with an order ID.
   if (topic && topic !== 'order') {
     return res.status(202).json({ received: true, ignored: true });
   }
   if (!providerOrderId) return res.status(400).json({ error: 'missing_order_id' });
 
   try {
-    // Store only the fields required for audit/idempotency. Do not persist the
+    // Store only fields required for audit/idempotency. Do not persist the
     // complete provider body by default; Commerce can always re-fetch the order.
     await recordPaymentEvent({
       providerOrderId,
