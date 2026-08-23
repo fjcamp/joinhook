@@ -18,7 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'recovery_not_found' });
     }
 
-    const grant = await consumeRecoveryTokenHash(hashRecoveryToken(rawToken));
+    // Bind the one-time token consumption atomically to the expected order code.
+    // A token presented with a different order code is not consumed.
+    const grant = await consumeRecoveryTokenHash(hashRecoveryToken(rawToken), expectedOrderCode);
     if (!grant || grant.order_code !== expectedOrderCode) {
       return res.status(404).json({ error: 'recovery_not_found' });
     }
