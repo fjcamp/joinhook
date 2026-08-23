@@ -93,5 +93,15 @@ El usuario autorizó continuar con gestión de desarrollo, documentación y resp
 - automatización completa del flujo de devolución/cancelación ante fraude, una vez verificada en sandbox;
 - formalización tributaria antes de cobros productivos.
 
+## Arquitectura de subdominios de producto — 2026-08-23
+
+Se adopta como dirección de producto mantener `joinhook.cl` como portada corporativa, presentación, marketing, captación y acceso al portafolio. Los productos que tengan interfaz propia podrán publicarse en subdominios independientes cuando ello mejore aislamiento, despliegue y experiencia de usuario.
+
+- SnowWise: objetivo público `https://snowwise.joinhook.cl` como MVP/PWA.
+- JoinOps: candidato futuro `https://joinops.joinhook.cl`.
+- Cada producto conserva base, secretos, runtime y ciclo de despliegue propios.
+- JoinHook central observa/coordina mediante contratos y Data Pass explícitos, no mediante acceso indiscriminado DB-to-DB.
+- Para SnowWise se creó el Issue #9 en `fjcamp/snowwise` y se verificó que la app web ya dispone de manifest PWA, iconos, `offline.html`, `public/sw.js` y scripts de despliegue Cloudflare/vinext. Antes del cambio público se auditarán instalabilidad, actualización, caché/offline, GPS/meteo, orígenes Supabase y rollback.
+
 ## Registro paralelo
 Existe copia de continuidad en Google Drive dentro de `joinhook/Registro_Maestro_Gestion/Conversaciones_y_Decisiones/` con el título `RMDC-2026-08-22-JoinHook-Commerce-y-Arquitectura-Federada`.
