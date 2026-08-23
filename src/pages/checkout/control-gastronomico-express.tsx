@@ -17,25 +17,54 @@ type CardBrickFormData = {
 
 type CardBrickAdditionalData = { paymentTypeId?: string };
 
+type RuntimeCommerceConfig = {
+  enabled: boolean;
+  environment: 'test' | 'production';
+  publicKey: string;
+};
+
 declare global {
   interface Window {
     MercadoPago?: new (publicKey: string) => { bricks: () => { create: (name: string, container: string, settings: unknown) => Promise<{ unmount: () => void }> } };
   }
 }
 
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '';
-const COMMERCE_ENABLED = process.env.NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED === 'true';
-
 export default function ControlExpressCheckout() {
   const router = useRouter();
   const controller = useRef<{ unmount: () => void } | null>(null);
   const [sdkReady, setSdkReady] = useState(false);
+  const [runtimeConfig, setRuntimeConfig] = useState<RuntimeCommerceConfig | null>(null);
+  const [configFailed, setConfigFailed] = useState(false);
   const [message, setMessage] = useState('Preparando pago seguro…');
 
   useEffect(() => {
-    if (!sdkReady || !PUBLIC_KEY || !COMMERCE_ENABLED || !window.MercadoPago) return;
     let active = true;
-    const mp = new window.MercadoPago(PUBLIC_KEY);
+    fetch('/api/commerce/public-config', { credentials: 'same-origin', cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`commerce_public_config_${response.status}`);
+        return response.json() as Promise<RuntimeCommerceConfig>;
+      })
+      .then((config) => {
+        if (!active) return;
+        setRuntimeConfig(config);
+        setConfigFailed(false);
+      })
+      .catch((error) => {
+        console.error('[commerce/public-config]', error);
+        if (!active) return;
+        setConfigFailed(true);
+        setMessage('El checkout seguro no está disponible temporalmente.');
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    const publicKey = runtimeConfig?.publicKey || '';
+    const commerceEnabled = runtimeConfig?.enabled === true;
+    if (!sdkReady || !publicKey || !commerceEnabled || !window.MercadoPago) return;
+
+    let active = true;
+    const mp = new window.MercadoPago(publicKey);
     const builder = mp.bricks();
     const settings = {
       initialization: { amount: GASTRO_EXPRESS_PRODUCT.amount },
@@ -95,9 +124,9 @@ export default function ControlExpressCheckout() {
       controller.current?.unmount();
       controller.current = null;
     };
-  }, [router, sdkReady]);
+  }, [router, runtimeConfig, sdkReady]);
 
-  const configured = Boolean(PUBLIC_KEY && COMMERCE_ENABLED);
+  const configured = Boolean(runtimeConfig?.publicKey && runtimeConfig.enabled);
   const formattedAmount = new Intl.NumberFormat('es-CL', { style: 'currency', currency: GASTRO_EXPRESS_PRODUCT.currency, maximumFractionDigits: 0 }).format(GASTRO_EXPRESS_PRODUCT.amount);
 
   return (
@@ -119,13 +148,17 @@ export default function ControlExpressCheckout() {
             <p>Pack fundador · <strong>{formattedAmount}</strong>. Los datos de tarjeta son capturados y tokenizados por Mercado Pago; JoinHook no almacena número de tarjeta ni CVV.</p>
           </div>
           <div className="jh-surface" style={{ padding: 'clamp(18px,4vw,34px)', borderRadius: 28 }}>
-            {!configured ? (
+            {!runtimeConfig && !configFailed ? (
+              <div><h2>Preparando checkout seguro</h2><p>Validando la configuración de prueba de JoinHook Commerce…</p></div>
+            ) : !configured ? (
               <div>
                 <h2>Integración en preparación</h2>
-                <p>El checkout API todavía está en modo de desarrollo. El Link de Pago actual permanece como respaldo hasta completar credenciales de prueba, QA y formalización para producción.</p>
+                <p>El checkout API todavía está deshabilitado. El Link de Pago actual permanece como respaldo hasta completar sandbox, QA y formalización para producción.</p>
+                {configFailed && <p aria-live="polite">No pudimos consultar la configuración del checkout en este momento.</p>}
               </div>
             ) : (
               <>
+                {runtimeConfig?.environment === 'test' && <p style={{ marginBottom: 16 }}><strong>Entorno de prueba:</strong> no utilices tarjetas reales.</p>}
                 <div id="cardPaymentBrick_container" />
                 {message && <p aria-live="polite" style={{ marginTop: 14 }}>{message}</p>}
               </>
