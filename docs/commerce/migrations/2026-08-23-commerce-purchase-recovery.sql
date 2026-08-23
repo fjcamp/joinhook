@@ -29,12 +29,31 @@ create index if not exists commerce_recovery_tokens_order_idx
   on public.commerce_recovery_tokens (order_id);
 create index if not exists commerce_recovery_tokens_expires_idx
   on public.commerce_recovery_tokens (expires_at);
+create index if not exists commerce_recovery_tokens_active_idx
+  on public.commerce_recovery_tokens (expires_at)
+  where used_at is null and revoked_at is null;
 
 alter table public.commerce_recovery_requests enable row level security;
 alter table public.commerce_recovery_tokens enable row level security;
 
 revoke all on table public.commerce_recovery_requests from public, anon, authenticated;
 revoke all on table public.commerce_recovery_tokens from public, anon, authenticated;
+
+drop policy if exists commerce_recovery_requests_deny_clients on public.commerce_recovery_requests;
+create policy commerce_recovery_requests_deny_clients
+  on public.commerce_recovery_requests
+  for all
+  to anon, authenticated
+  using (false)
+  with check (false);
+
+drop policy if exists commerce_recovery_tokens_deny_clients on public.commerce_recovery_tokens;
+create policy commerce_recovery_tokens_deny_clients
+  on public.commerce_recovery_tokens
+  for all
+  to anon, authenticated
+  using (false)
+  with check (false);
 
 create or replace function public.consume_commerce_recovery_token(p_token_hash text)
 returns table (
