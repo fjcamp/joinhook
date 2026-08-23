@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import { commerceConfig } from './config';
+import { commerceDeliveryConfig, commerceStoreConfig } from './config';
 
 function restHeaders(prefer?: string) {
-  const { store } = commerceConfig();
+  const store = commerceStoreConfig();
   return {
     apikey: store.serverKey,
     // Modern sb_secret_* keys are API keys, not JWTs. Sending them as Bearer
@@ -17,7 +17,7 @@ function restHeaders(prefer?: string) {
 }
 
 async function rest<T>(path: string, init: RequestInit = {}) {
-  const { store } = commerceConfig();
+  const store = commerceStoreConfig();
   const response = await fetch(`${store.supabaseUrl}/rest/v1/${path}`, {
     ...init,
     headers: { ...restHeaders(), ...(init.headers || {}) },
@@ -67,8 +67,15 @@ type DownloadGrant = {
   remaining_uses: number;
 };
 
+export type RecoveryGrant = {
+  token_id: string;
+  order_id: string;
+  order_code: string;
+  buyer_email: string;
+};
+
 function hashSecret(value: string) {
-  const { delivery } = commerceConfig();
+  const delivery = commerceDeliveryConfig();
   return crypto.createHmac('sha256', delivery.tokenSecret).update(value).digest('hex');
 }
 
@@ -151,6 +158,17 @@ export function validateOrderClaim(order: CommerceOrderRecord, rawClaimToken: st
   return safeEqualText(order.claim_token_hash, hashSecret(rawClaimToken));
 }
 
+export async function rotateOrderClaim(orderId: string) {
+  const rawClaimToken = crypto.randomBytes(32).toString('base64url');
+  const rows = await rest<Array<{ order_code: string }>>(`commerce_orders?id=eq.${encodeURIComponent(orderId)}`, {
+    method: 'PATCH',
+    headers: restHeaders('return=representation'),
+    body: JSON.stringify({ claim_token_hash: hashSecret(rawClaimToken), updated_at: new Date().toISOString() }),
+  });
+  if (!rows[0]?.order_code) throw new Error('Order claim could not be rotated');
+  return { orderCode: rows[0].order_code, claimToken: rawClaimToken };
+}
+
 export async function markOrderPaid(input: { orderId: string; providerPaymentId?: string | null }) {
   await rest(`commerce_orders?id=eq.${encodeURIComponent(input.orderId)}&status=in.(pending,review)`, {
     method: 'PATCH',
@@ -200,7 +218,7 @@ export async function recordPaymentEvent(input: {
 }
 
 export async function createEntitlement(orderId: string, productCode: string, buyerEmail: string) {
-  const { delivery } = commerceConfig();
+  const delivery = commerceDeliveryConfig();
   const inserted = await rest<EntitlementRecord[]>('commerce_entitlements?on_conflict=order_id', {
     method: 'POST',
     headers: restHeaders('return=representation,resolution=ignore-duplicates'),
@@ -229,7 +247,7 @@ export async function revokeEntitlementByOrder(orderId: string) {
 }
 
 export async function createDownloadToken(input: { entitlementId: string }) {
-  const { delivery } = commerceConfig();
+  const delivery = commerceDeliveryConfig();
   const rawToken = crypto.randomBytes(32).toString('base64url');
   const tokenHash = hashSecret(rawToken);
   const expiresAt = new Date(Date.now() + delivery.defaultTtlHours * 60 * 60 * 1000).toISOString();
@@ -247,7 +265,7 @@ export async function createDownloadToken(input: { entitlementId: string }) {
 }
 
 async function downloadTokenRpc(functionName: 'preview_commerce_download_token' | 'consume_commerce_download_token', rawToken: string) {
-  const { store } = commerceConfig();
+  const store = commerceStoreConfig();
   const tokenHash = hashSecret(rawToken);
   const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/${functionName}`, {
     method: 'POST',
@@ -283,4 +301,69 @@ export async function recordDownloadEvent(input: {
       ip_hash: input.ipHash || null,
     }),
   });
+}
+
+export async function recordRecoveryRequest(input: {
+  requestKeyHash: string;
+  orderId?: string | null;
+  matched: boolean;
+  deliveryStatus: 'not_attempted' | 'delivered' | 'failed';
+}) {
+  await rest('commerce_recovery_requests', {
+    method: 'POST',
+    headers: restHeaders('return=minimal'),
+    body: JSON.stringify({
+      request_key_hash: input.requestKeyHash,
+      order_id: input.orderId || null,
+      matched: input.matched,
+      delivery_status: input.deliveryStatus,
+    }),
+  });
+}
+
+export async function countRecentRecoveryRequests(requestKeyHash: string) {
+  const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const rows = await rest<Array<{ id: string }>>(
+    `commerce_recovery_requests?request_key_hash=eq.${encodeURIComponent(requestKeyHash)}&created_at=gte.${encodeURIComponent(since)}&select=id`,
+    { headers: restHeaders('count=exact') },
+  );
+  return rows.length;
+}
+
+export async function createRecoveryToken(input: {
+  orderId: string;
+  tokenHash: string;
+  expiresAt: string;
+}) {
+  const rows = await rest<Array<{ id: string }>>('commerce_recovery_tokens', {
+    method: 'POST',
+    headers: restHeaders('return=representation'),
+    body: JSON.stringify({
+      order_id: input.orderId,
+      token_hash: input.tokenHash,
+      expires_at: input.expiresAt,
+    }),
+  });
+  if (!rows[0]?.id) throw new Error('Recovery token was not persisted');
+  return rows[0].id;
+}
+
+export async function revokeRecoveryToken(tokenId: string) {
+  await rest(`commerce_recovery_tokens?id=eq.${encodeURIComponent(tokenId)}&used_at=is.null`, {
+    method: 'PATCH',
+    headers: restHeaders('return=minimal'),
+    body: JSON.stringify({ revoked_at: new Date().toISOString() }),
+  });
+}
+
+export async function consumeRecoveryTokenHash(tokenHash: string) {
+  const store = commerceStoreConfig();
+  const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/consume_commerce_recovery_token`, {
+    method: 'POST',
+    headers: restHeaders(),
+    body: JSON.stringify({ p_token_hash: tokenHash }),
+  });
+  const rows = (await response.json().catch(() => [])) as RecoveryGrant[];
+  if (!response.ok) throw new Error(`Commerce recovery RPC error ${response.status}`);
+  return rows[0] ?? null;
 }
