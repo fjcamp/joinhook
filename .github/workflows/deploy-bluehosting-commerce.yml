@@ -63,10 +63,10 @@ jobs:
             sleep 1
           done
 
-          code=$(curl --silent --output /tmp/webhook.txt --write-out '%{http_code}' http://127.0.0.1:3030/api/commerce/mercadopago/webhook)
+          code=$(curl --silent --output /tmp/webhook.txt --write-out '%{http_code}' http://127.0.0.1:3030/api/commerce/mercadopago/webhook/)
           test "$code" = '405'
 
-          code=$(curl --silent --output /tmp/create-order.txt --write-out '%{http_code}' \
+          code=$(curl --location --silent --output /tmp/create-order.txt --write-out '%{http_code}' \
             --request POST --header 'Content-Type: application/json' --data '{}' \
             http://127.0.0.1:3030/api/commerce/create-order)
           test "$code" = '503'
@@ -90,6 +90,7 @@ jobs:
           Runtime: Node.js 20.20.2
           Runtime destination: /home/joinhook/joinhook-production
           Document root: /home/joinhook/public_html
+          Canonical TEST Webhook URL: https://joinhook.cl/api/commerce/mercadopago/webhook/
           Payment kill switch is expected to remain disabled in cPanel until deliberate TEST payment QA.
           EOF
 
@@ -145,7 +146,6 @@ jobs:
           fi
           mv "$NEW" "$APP"
 
-          # JH-OPS-001: browser assets must come from the exact active build.
           rm -rf "$DOC/_next/static"
           mkdir -p "$DOC/_next"
           cp -a "$APP/document-root-assets/_next/static" "$DOC/_next/static"
@@ -160,10 +160,8 @@ jobs:
         run: |
           for i in {1..20}; do
             home=$(curl --silent --output /tmp/home.html --write-out '%{http_code}' https://joinhook.cl/ || true)
-            webhook=$(curl --silent --output /tmp/webhook-live.txt --write-out '%{http_code}' https://joinhook.cl/api/commerce/mercadopago/webhook || true)
-            if [ "$home" = '200' ] && [ "$webhook" = '405' ]; then
-              exit 0
-            fi
+            webhook=$(curl --silent --output /tmp/webhook-live.txt --write-out '%{http_code}' https://joinhook.cl/api/commerce/mercadopago/webhook/ || true)
+            if [ "$home" = '200' ] && [ "$webhook" = '405' ]; then exit 0; fi
             sleep 3
           done
           echo 'Production smoke test failed'
