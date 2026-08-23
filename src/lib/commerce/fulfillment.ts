@@ -1,3 +1,4 @@
+import { recordCommerceDomainEvent } from './event-log';
 import { getCommerceProduct } from './catalog';
 import { classifyMercadoPagoOrder, getMercadoPagoOrder } from './mercadopago';
 import {
@@ -10,6 +11,12 @@ import {
 } from './store';
 
 const LOCAL_ACCESS_HOLD_STATES = new Set(['review', 'refunded', 'partially_refunded', 'charged_back']);
+
+function postSaleDomainEventType(disposition: string) {
+  if (disposition === 'refunded' || disposition === 'partially_refunded') return 'commerce.refund.completed' as const;
+  if (disposition === 'charged_back') return 'commerce.chargeback.received' as const;
+  return 'commerce.delivery.revoked' as const;
+}
 
 export async function fulfillMercadoPagoOrder(providerOrderId: string) {
   const localOrder = await findOrderByProviderOrderId(providerOrderId);
@@ -42,6 +49,17 @@ export async function fulfillMercadoPagoOrder(providerOrderId: string) {
         provider_status_detail: remoteOrder.status_detail ?? null,
       },
     });
+    await recordCommerceDomainEvent({
+      type: postSaleDomainEventType(disposition),
+      dedupeKey: `${postSaleDomainEventType(disposition)}:${localOrder.id}:${disposition}`,
+      correlationId: localOrder.order_code,
+      subjectId: localOrder.id,
+      data: {
+        productCode: localOrder.product_code,
+        state: disposition,
+        provider: 'mercadopago',
+      },
+    }).catch((eventError) => console.error('[commerce/fulfillment] post-sale domain event failed', eventError));
     return {
       status: disposition,
       orderCode: localOrder.order_code,
@@ -75,6 +93,19 @@ export async function fulfillMercadoPagoOrder(providerOrderId: string) {
     await markOrderPaid({ orderId: localOrder.id, providerPaymentId });
   }
 
+  await recordCommerceDomainEvent({
+    type: 'commerce.order.paid',
+    dedupeKey: `commerce.order.paid:${localOrder.id}`,
+    correlationId: localOrder.order_code,
+    subjectId: localOrder.id,
+    data: {
+      productCode: localOrder.product_code,
+      amount: localOrder.amount,
+      currency: localOrder.currency,
+      provider: 'mercadopago',
+    },
+  }).catch((eventError) => console.error('[commerce/fulfillment] paid domain event failed', eventError));
+
   const entitlement = await createEntitlement(localOrder.id, localOrder.product_code, localOrder.buyer_email);
   if (!entitlement?.id) throw new Error('Entitlement could not be created');
   if (entitlement.status !== 'active') {
@@ -99,6 +130,17 @@ export async function fulfillMercadoPagoOrder(providerOrderId: string) {
     eventType: 'fulfillment.entitlement_granted',
     payload: { product_code: localOrder.product_code, entitlement_id: entitlement.id },
   });
+
+  await recordCommerceDomainEvent({
+    type: 'commerce.entitlement.granted',
+    dedupeKey: `commerce.entitlement.granted:${entitlement.id}`,
+    correlationId: localOrder.order_code,
+    subjectId: localOrder.id,
+    data: {
+      productCode: localOrder.product_code,
+      entitlementId: entitlement.id,
+    },
+  }).catch((eventError) => console.error('[commerce/fulfillment] entitlement domain event failed', eventError));
 
   return {
     status: 'paid' as const,
