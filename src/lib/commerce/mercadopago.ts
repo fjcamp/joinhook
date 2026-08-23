@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { commerceConfig } from './config';
+import { commerceMercadoPagoConfig } from './config';
 
 const MP_API = 'https://api.mercadopago.com';
 
@@ -33,7 +33,7 @@ export type MercadoPagoOrderDisposition =
   | 'charged_back';
 
 async function mpRequest<T>(path: string, init: RequestInit = {}) {
-  const { mercadopago } = commerceConfig();
+  const mercadopago = commerceMercadoPagoConfig();
   const response = await fetch(`${MP_API}${path}`, {
     ...init,
     signal: init.signal ?? AbortSignal.timeout(15_000),
