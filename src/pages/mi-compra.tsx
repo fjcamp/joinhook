@@ -31,9 +31,16 @@ export default function MyPurchase() {
   const orderCode = typeof router.query.order === 'string' ? router.query.order : '';
   const [status, setStatus] = useState<PurchaseStatus | null>(null);
   const [message, setMessage] = useState('Verificando la compra con Mercado Pago…');
+  const [needsRecovery, setNeedsRecovery] = useState(false);
 
   useEffect(() => {
-    if (!router.isReady || !orderCode) return;
+    if (!router.isReady) return;
+    if (!orderCode) {
+      setNeedsRecovery(true);
+      setMessage('Ingresa desde tu código de compra o utiliza la recuperación segura para restablecer el acceso.');
+      return;
+    }
+
     let cancelled = false;
     let attempts = 0;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -46,9 +53,15 @@ export default function MyPurchase() {
           credentials: 'same-origin',
           body: JSON.stringify({ orderCode }),
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data?.error || 'status_failed');
+        const data = await response.json().catch(() => ({}));
         if (cancelled) return;
+        if (response.status === 404) {
+          setNeedsRecovery(true);
+          setMessage('Este navegador no tiene una credencial válida para consultar esa compra. Si eres el comprador, puedes recuperar el acceso de forma segura con tu código y correo.');
+          return;
+        }
+        if (!response.ok) throw new Error(data?.error || 'status_failed');
+        setNeedsRecovery(false);
         setStatus(data);
         if (data.status === 'paid') {
           setMessage('Pago verificado. Tu producto está listo.');
@@ -75,7 +88,7 @@ export default function MyPurchase() {
         else setMessage('La confirmación está demorando más de lo esperado. No vuelvas a pagar. Conserva tu código de compra y contacta a soporte@joinhook.cl.');
       } catch (error) {
         console.error(error);
-        if (!cancelled) setMessage('No pudimos verificar la compra en este navegador. Si ya pagaste, no vuelvas a pagar. Conserva el código de compra y contacta a soporte@joinhook.cl para recuperar el acceso.');
+        if (!cancelled) setMessage('No pudimos verificar la compra en este momento. Si ya pagaste, no vuelvas a pagar. Conserva el código de compra e intenta nuevamente o contacta a soporte@joinhook.cl.');
       }
     };
     void check();
@@ -102,6 +115,7 @@ export default function MyPurchase() {
           {status?.buyerEmail && <p><strong>Comprador:</strong> {status.buyerEmail}</p>}
           {status?.status && <p><strong>Estado:</strong> {displayStatus(status.status)}</p>}
           {status?.access?.downloadUrl && <div className="jh-actions" style={{ marginTop: 22 }}><a className="jh-button jh-button-primary" href={status.access.downloadUrl}>Obtener producto</a></div>}
+          {needsRecovery && <div className="jh-actions" style={{ marginTop: 22 }}><Link className="jh-button jh-button-primary" href="/recuperar-compra">Recuperar mi compra</Link></div>}
           {status?.access?.expiresAt && <small>El acceso temporal vence el {new Date(status.access.expiresAt).toLocaleString('es-CL')} y tiene un límite global de descargas asociado a la compra.</small>}
         </div>
       </section>
