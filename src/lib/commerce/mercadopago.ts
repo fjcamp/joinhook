@@ -20,6 +20,27 @@ export type MercadoPagoOrderResponse = {
   [key: string]: unknown;
 };
 
+export type MercadoPagoClaimResponse = {
+  id: string | number;
+  resource_id?: string | number;
+  resource?: string;
+  status?: string;
+  stage?: string;
+  type?: string;
+  reason_id?: string;
+  last_updated?: string;
+  [key: string]: unknown;
+};
+
+export type MercadoPagoChargebackResponse = {
+  id: string | number;
+  status?: string;
+  amount?: number | string;
+  currency?: string;
+  payments?: Array<string | number | { id?: string | number; payment_id?: string | number }>;
+  [key: string]: unknown;
+};
+
 export type MercadoPagoApiError = Error & { status?: number; payload?: unknown };
 
 export type MercadoPagoOrderDisposition =
@@ -129,9 +150,6 @@ export async function createMercadoPagoCardOrder(input: {
     const order = await createOnce();
     return { order, idempotencyKey };
   } catch (error) {
-    // A retry with the SAME idempotency key is safe for transient/ambiguous
-    // transport/provider failures and reduces the chance of leaving a buyer in
-    // an uncertain state. Never generate a second key for the same attempt.
     if (!isTransientMercadoPagoError(error)) throw error;
     await wait(300);
     const order = await createOnce();
@@ -141,6 +159,23 @@ export async function createMercadoPagoCardOrder(input: {
 
 export async function getMercadoPagoOrder(orderId: string) {
   return mpRequest<MercadoPagoOrderResponse>(`/v1/orders/${encodeURIComponent(orderId)}`, { method: 'GET' });
+}
+
+export async function getMercadoPagoClaim(claimId: string) {
+  return mpRequest<MercadoPagoClaimResponse>(`/post-purchase/v1/claims/${encodeURIComponent(claimId)}`, { method: 'GET' });
+}
+
+export async function getMercadoPagoChargeback(chargebackId: string) {
+  return mpRequest<MercadoPagoChargebackResponse>(`/v1/chargebacks/${encodeURIComponent(chargebackId)}`, { method: 'GET' });
+}
+
+export function extractChargebackPaymentIds(chargeback: MercadoPagoChargebackResponse) {
+  const ids = (chargeback.payments || []).flatMap((payment) => {
+    if (typeof payment === 'string' || typeof payment === 'number') return [String(payment)];
+    const value = payment.payment_id ?? payment.id;
+    return value == null ? [] : [String(value)];
+  });
+  return [...new Set(ids.filter(Boolean))];
 }
 
 /**
@@ -159,8 +194,6 @@ export function classifyMercadoPagoOrder(order: MercadoPagoOrderResponse): Merca
   if (status === 'canceled' || status === 'cancelled' || status === 'expired') return 'cancelled';
   if (status === 'created' || status === 'processing' || status === 'action_required') return 'pending';
 
-  // A processed order with a new/unknown status_detail, or any future status we
-  // do not understand, must be reviewed instead of being fulfilled.
   return 'review';
 }
 
