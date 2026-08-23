@@ -55,7 +55,15 @@ create policy commerce_recovery_tokens_deny_clients
   using (false)
   with check (false);
 
-create or replace function public.consume_commerce_recovery_token(p_token_hash text)
+-- The expected order code participates in the same atomic UPDATE that consumes
+-- the token. Presenting a valid token with a different order code does not burn
+-- the token and cannot recover another purchase.
+drop function if exists public.consume_commerce_recovery_token(text);
+
+create or replace function public.consume_commerce_recovery_token(
+  p_token_hash text,
+  p_order_code text
+)
 returns table (
   token_id uuid,
   order_id uuid,
@@ -68,20 +76,18 @@ set search_path = public
 as $$
 begin
   return query
-  with consumed as (
-    update public.commerce_recovery_tokens t
-    set used_at = now()
-    where t.token_hash = p_token_hash
-      and t.used_at is null
-      and t.revoked_at is null
-      and t.expires_at > now()
-    returning t.id, t.order_id
-  )
-  select c.id, o.id, o.order_code, o.buyer_email
-  from consumed c
-  join public.commerce_orders o on o.id = c.order_id;
+  update public.commerce_recovery_tokens t
+  set used_at = now()
+  from public.commerce_orders o
+  where t.token_hash = p_token_hash
+    and t.order_id = o.id
+    and o.order_code = p_order_code
+    and t.used_at is null
+    and t.revoked_at is null
+    and t.expires_at > now()
+  returning t.id, t.order_id, o.order_code, o.buyer_email;
 end;
 $$;
 
-revoke all on function public.consume_commerce_recovery_token(text) from public, anon, authenticated;
-grant execute on function public.consume_commerce_recovery_token(text) to service_role;
+revoke all on function public.consume_commerce_recovery_token(text, text) from public, anon, authenticated;
+grant execute on function public.consume_commerce_recovery_token(text, text) to service_role;
