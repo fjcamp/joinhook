@@ -13,6 +13,12 @@ function commerceDatabaseConfigured() {
   );
 }
 
+function recoveryConfigured() {
+  return configured('JOINHOOK_RECOVERY_TOKEN_SECRET')
+    && configured('JOINHOOK_TRANSACTIONAL_EMAIL_WEBHOOK_URL')
+    && configured('JOINHOOK_TRANSACTIONAL_EMAIL_WEBHOOK_SECRET');
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -29,9 +35,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     ['database', commerceDatabaseConfigured()],
     ['mercadopago', configured('MERCADOPAGO_ACCESS_TOKEN') && configured('MERCADOPAGO_WEBHOOK_SECRET')],
     ['delivery', configured('JOINHOOK_DOWNLOAD_TOKEN_SECRET') && configured('JOINHOOK_GASTRO_EXPRESS_PRIVATE_FILE')],
+    ['recovery', recoveryConfigured()],
   ] as const;
 
   const state = configChecks.every(([, ok]) => ok) ? 'healthy' : 'degraded';
+  const checkoutEnabled = process.env.JOINHOOK_COMMERCE_CHECKOUT_ENABLED === 'true'
+    || process.env.NEXT_PUBLIC_JOINHOOK_COMMERCE_ENABLED === 'true';
+  const paymentsEnabled = process.env.JOINHOOK_COMMERCE_ACCEPT_PAYMENTS === 'true';
+
   const snapshot: ProductHealthSnapshot = {
     contractVersion: 1,
     productId: 'joinhook-commerce',
@@ -42,9 +53,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     checks: [
       ...configChecks.map(([key, ok]) => ({ key, state: ok ? 'healthy' as const : 'degraded' as const })),
       {
+        key: 'checkout-ui',
+        state: checkoutEnabled ? 'healthy' : 'unknown',
+        message: checkoutEnabled ? 'enabled' : 'disabled-by-policy',
+      },
+      {
         key: 'accepting-payments',
-        state: process.env.JOINHOOK_COMMERCE_ACCEPT_PAYMENTS === 'true' ? 'healthy' : 'unknown',
-        message: process.env.JOINHOOK_COMMERCE_ACCEPT_PAYMENTS === 'true' ? 'enabled' : 'disabled-by-policy',
+        state: paymentsEnabled ? 'healthy' : 'unknown',
+        message: paymentsEnabled ? 'enabled' : 'disabled-by-policy',
       },
     ],
   };
