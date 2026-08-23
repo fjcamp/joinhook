@@ -26,8 +26,13 @@ jobs:
       JOINHOOK_COMMERCE_CHECKOUT_ENABLED: 'false'
       JOINHOOK_COMMERCE_ACCEPT_PAYMENTS: 'false'
     steps:
-      - name: Checkout
+      - name: Checkout exact artifact source
         uses: actions/checkout@v6
+        with:
+          # pull_request normally checks out GitHub's synthetic merge ref. The
+          # deployable artifact must instead be traceable to the exact PR head.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -92,7 +97,12 @@ jobs:
           grep -Fq '"enabled":false' /tmp/public-config.json
 
       - name: Package BlueHosting runtime and document-root mirror
+        shell: bash
         run: |
+          set -euo pipefail
+          source_sha=$(git rev-parse HEAD)
+          build_id=$(cat .next/BUILD_ID)
+
           rm -rf deploy-commerce-sandbox
           mkdir -p deploy-commerce-sandbox/.next
           cp -a .next/standalone/. deploy-commerce-sandbox/
@@ -105,7 +115,9 @@ jobs:
 
           cat > deploy-commerce-sandbox/DEPLOYMENT.txt <<EOF
           JoinHook Commerce sandbox-capable production-like artifact
-          Source commit: $GITHUB_SHA
+          Source commit: $source_sha
+          CI event SHA: $GITHUB_SHA
+          Next build ID: $build_id
           Built by: GitHub Actions / Commerce Sandbox Artifact
           Runtime: Node.js 20.20.2
           Runtime destination: /home/joinhook/joinhook-production
@@ -117,9 +129,30 @@ jobs:
           Do not run next build on BlueHosting.
           EOF
 
+          cat > deploy-commerce-sandbox/RELEASE-METADATA.json <<EOF
+          {
+            "product": "joinhook-commerce",
+            "sourceCommit": "$source_sha",
+            "ciEventSha": "$GITHUB_SHA",
+            "nextBuildId": "$build_id",
+            "node": "20.20.2",
+            "paymentsEnabledAtBuild": false,
+            "checkoutEnabledAtBuild": false
+          }
+          EOF
+
+          (
+            cd deploy-commerce-sandbox
+            sha256sum server.js package.json DEPLOYMENT.txt RELEASE-METADATA.json .next/BUILD_ID > SHA256SUMS.txt
+          )
+
           test -f deploy-commerce-sandbox/server.js
           test -d deploy-commerce-sandbox/.next/static
           test -d deploy-commerce-sandbox/document-root-assets/_next/static
+          test -f deploy-commerce-sandbox/RELEASE-METADATA.json
+          test -f deploy-commerce-sandbox/SHA256SUMS.txt
+          grep -Fq "$source_sha" deploy-commerce-sandbox/DEPLOYMENT.txt
+          grep -Fq "\"sourceCommit\": \"$source_sha\"" deploy-commerce-sandbox/RELEASE-METADATA.json
           diff -qr .next/static deploy-commerce-sandbox/document-root-assets/_next/static
           diff -qr public deploy-commerce-sandbox/document-root-assets --exclude=_next
 
