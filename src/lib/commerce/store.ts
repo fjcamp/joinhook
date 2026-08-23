@@ -356,12 +356,12 @@ export async function revokeRecoveryToken(tokenId: string) {
   });
 }
 
-export async function consumeRecoveryTokenHash(tokenHash: string) {
+export async function consumeRecoveryTokenHash(tokenHash: string, orderCode: string) {
   const store = commerceStoreConfig();
   const response = await fetch(`${store.supabaseUrl}/rest/v1/rpc/consume_commerce_recovery_token`, {
     method: 'POST',
     headers: restHeaders(),
-    body: JSON.stringify({ p_token_hash: tokenHash }),
+    body: JSON.stringify({ p_token_hash: tokenHash, p_order_code: orderCode }),
   });
   const rows = (await response.json().catch(() => [])) as RecoveryGrant[];
   if (!response.ok) throw new Error(`Commerce recovery RPC error ${response.status}`);
