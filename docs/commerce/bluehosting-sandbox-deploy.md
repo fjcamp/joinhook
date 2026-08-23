@@ -34,27 +34,25 @@ Este paquete está diseñado específicamente para probar Commerce sobre el domi
 - `document-root-assets/` con los assets exactos del mismo build;
 - Link de Pago externo renderizado como fallback.
 
-### Último artifact verificado antes del despliegue
+### Regla de verificación del artifact
 
-La inspección local del artifact generado por el run `32654081211` comprobó:
+No se fija un artifact id o digest permanente en este documento, porque cada nuevo commit del PR puede generar un paquete nuevo. Inmediatamente antes del despliegue se debe verificar el artifact asociado al **head exacto aprobado** y registrar esa evidencia en el PR/registro de despliegue.
 
-- artifact id `9496978321`;
-- nombre `joinhook-commerce-sandbox-productionlike`;
-- tamaño `28,522,336` bytes;
-- digest GitHub `sha256:cac40c7df6c481e95e59666000f1c0a07c9d6c965e4b37dfc781f50ed9f30905`;
-- workflow head `280e5c5845d7ba6474c27648b1eabbb4bd8aa964`;
-- sin archivos `.env*`;
-- sin coincidencias de patrones de credenciales `sb_secret_`, `APP_USR-`, `TEST-`, `MERCADOPAGO_ACCESS_TOKEN=` o `JOINHOOK_COMMERCE_SUPABASE_SECRET_KEY=`.
+La inspección previa debe comprobar como mínimo:
 
-Smoke local production-like con pagos desactivados:
+- artifact name `joinhook-commerce-sandbox-productionlike`;
+- workflow head igual al commit que se va a desplegar;
+- digest SHA-256 informado por GitHub Actions;
+- presencia de `.next`, `node_modules`, `server.js`, `package.json`, `public` y `document-root-assets`;
+- ausencia de archivos `.env*` y credenciales reales;
+- smoke local production-like con `JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false`:
+  - `/` → 200;
+  - `/api/commerce/health/` → 200;
+  - `/api/commerce/mercadopago/webhook/` por GET → 405;
+  - `/api/commerce/webhooks/mercadopago/` por GET → 405;
+  - `/checkout/control-gastronomico-express/` → 200.
 
-- `/` → 200;
-- `/api/commerce/health/` → 200;
-- `/api/commerce/mercadopago/webhook/` por GET → 405;
-- `/api/commerce/webhooks/mercadopago/` por GET → 405;
-- `/checkout/control-gastronomico-express/` → 200.
-
-Si se genera un artifact posterior, se debe volver a verificar su SHA/head/digest y no asumir que los valores anteriores siguen siendo los vigentes.
+Si cambia el head, el artifact anterior deja de ser el candidato de despliegue aunque su smoke haya sido exitoso.
 
 ## Destinos BlueHosting
 
@@ -77,7 +75,7 @@ No ejecutar `next build` en BlueHosting.
 5. No copiar `document-root-assets/_next/static` como `_next/static/static`; el destino final debe ser `/home/joinhook/public_html/_next/static/...`.
 6. Mantener la configuración Passenger existente en `.htaccess`; no reintroducir el antiguo bloque de rewrite WordPress.
 7. Confirmar en cPanel que `JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false` antes del restart.
-8. Reiniciar la aplicación Node/Passenger desde cPanel.
+8. Reiniciar la aplicación Node/Passenger desde cPanel. Si se automatiza sin UI, cPanel documenta el mecanismo Passenger `tmp/restart.txt`; no asumirlo hasta validar permisos del canal usado.
 9. Verificar home, CSS/JS, assets públicos y `/api/commerce/health/`.
 10. Recién después validar las rutas Webhook.
 
@@ -142,4 +140,6 @@ Credenciales/controles recomendados para automatización:
 - backup + rollback atómico;
 - smoke test Webhook, health y `/_next/static` antes de declarar éxito.
 
-Hasta que ese acceso exista y sea probado, el deploy de cPanel sigue siendo el único paso manual del pipeline.
+Fallback si BlueHosting no ofrece SSH: evaluar FTPS/TLS con cuenta dedicada y alcance mínimo. La viabilidad depende de que el hosting permita escritura en runtime + document root y que `tmp/restart.txt` active Passenger en esta configuración. No usar la contraseña principal de cPanel como credencial de CI.
+
+Hasta que uno de esos canales exista y sea probado, el deploy de cPanel sigue siendo el único paso manual del pipeline.
