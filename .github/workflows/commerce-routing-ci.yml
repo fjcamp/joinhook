@@ -69,6 +69,19 @@ jobs:
           grep -Fq 'Checkout JoinHook · Mercado Pago' /tmp/embedded-checkout.html
           grep -Fq 'Control Gastronómico Express' /tmp/embedded-checkout.html
 
+      - name: Verify registered Mercado Pago webhook route exists
+        run: |
+          for path in \
+            /api/commerce/mercadopago/webhook \
+            /api/commerce/webhooks/mercadopago; do
+            code=$(curl --silent --output /tmp/webhook-route.txt --write-out '%{http_code}' "http://127.0.0.1:3011$path")
+            if [ "$code" != "405" ]; then
+              echo "Expected GET $path to resolve to the POST-only handler with 405, got $code"
+              cat /tmp/webhook-route.txt || true
+              exit 1
+            fi
+          done
+
       - name: Verify server-side payment kill switch
         run: |
           code=$(curl --location --silent --output /tmp/create-order.json --write-out '%{http_code}' \
