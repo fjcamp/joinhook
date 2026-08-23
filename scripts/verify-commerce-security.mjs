@@ -24,6 +24,7 @@ requireContains('src/pages/api/commerce/create-order.ts', [
   'serializeOrderClaimCookie',
   'newIdempotencyKey()',
   "status: 'verification_pending'",
+  "type: 'commerce.order.created'",
 ]);
 requireAbsent('src/pages/api/commerce/create-order.ts', [
   'claimToken: localOrder.claimToken',
@@ -55,6 +56,8 @@ requireContains('src/pages/api/commerce/download.ts', [
   'previewDownloadToken(token)',
   'consumeDownloadToken(token)',
   'fs.openSync',
+  "type: 'commerce.download.completed'",
+  "res.once('finish'",
 ]);
 
 requireContains('src/pages/api/commerce/webhooks/mercadopago.ts', [
@@ -96,6 +99,8 @@ requireContains('src/lib/commerce/fulfillment.ts', [
   'classifyMercadoPagoOrder',
   'revokeEntitlementByOrder',
   'fulfillment.blocked_local_hold',
+  "type: 'commerce.order.paid'",
+  "type: 'commerce.entitlement.granted'",
 ]);
 
 requireContains('src/lib/commerce/config.ts', [
@@ -155,6 +160,27 @@ requireContains('src/pages/api/commerce/recovery/claim.ts', [
   'serializeOrderClaimCookie',
 ]);
 
+requireContains('src/lib/commerce/event-log.ts', [
+  'dedupe_key',
+  'resolution=ignore-duplicates',
+  "sourceProduct: 'joinhook-commerce'",
+  'listCommerceDomainEvents',
+]);
+requireAbsent('src/lib/commerce/event-log.ts', [
+  'buyer_email',
+  'buyerEmail',
+  'cardToken',
+  'accessToken',
+  'webhookSecret',
+]);
+
+requireContains('src/pages/api/internal/control-plane/events.ts', [
+  'authorizeControlPlaneBearer',
+  'JOINHOOK_CP_COMMERCE_TOKEN',
+  'listCommerceDomainEvents',
+  "Cache-Control', 'no-store'",
+]);
+
 requireContains('docs/commerce/schema.sql', [
   'idempotency_key text not null unique',
   'max_downloads integer not null',
@@ -175,6 +201,13 @@ requireContains('docs/commerce/migrations/2026-08-23-commerce-purchase-recovery.
   'commerce_recovery_requests_deny_clients',
   'commerce_recovery_tokens_deny_clients',
   'revoke all on function public.consume_commerce_recovery_token(text, text) from public, anon, authenticated',
+]);
+
+requireContains('docs/commerce/migrations/2026-08-23-commerce-domain-events.sql', [
+  'commerce_domain_events',
+  'dedupe_key text not null unique',
+  'commerce_domain_events_deny_clients',
+  'revoke all on table public.commerce_domain_events from public, anon, authenticated',
 ]);
 
 requireContains('.env.commerce.example', [
