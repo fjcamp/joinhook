@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCommerceProduct } from '@/lib/commerce/catalog';
 import { commerceAcceptsPayments } from '@/lib/commerce/config';
+import { recordCommerceDomainEvent } from '@/lib/commerce/event-log';
 import {
   createMercadoPagoCardOrder,
   isDefiniteMercadoPagoRejection,
@@ -63,6 +64,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       currency: product.currency,
       idempotencyKey,
     });
+
+    await recordCommerceDomainEvent({
+      type: 'commerce.order.created',
+      dedupeKey: `commerce.order.created:${localOrder.order.id}`,
+      correlationId: localOrder.order.order_code,
+      subjectId: localOrder.order.id,
+      data: {
+        productCode: product.code,
+        amount: product.amount,
+        currency: product.currency,
+        provider: 'mercadopago',
+      },
+    }).catch((eventError) => console.error('[commerce/create-order] domain event failed', eventError));
 
     try {
       const { order } = await createMercadoPagoCardOrder({
