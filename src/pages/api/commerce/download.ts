@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { GASTRO_EXPRESS_PRODUCT_CODE } from '@/lib/commerce/catalog';
+import { recordCommerceDomainEvent } from '@/lib/commerce/event-log';
 import { consumeDownloadToken, previewDownloadToken, recordDownloadEvent } from '@/lib/commerce/store';
 
 function privateProductPath(productCode: string) {
@@ -83,6 +84,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Download-Remaining', String(Math.max(0, grant.remaining_uses)));
+
+    // A domain event is emitted only when Node has finished writing the HTTP
+    // response, not merely when allowance was consumed. It carries no IP, UA,
+    // buyer email or raw token and is deduplicated per token/use transition.
+    res.once('finish', () => {
+      void recordCommerceDomainEvent({
+        type: 'commerce.download.completed',
+        dedupeKey: `commerce.download.completed:${grant.token_id}:${grant.remaining_uses}`,
+        correlationId: grant.order_id,
+        subjectId: grant.order_id,
+        data: {
+          productCode: grant.product_code,
+          remainingUses: Math.max(0, grant.remaining_uses),
+        },
+      }).catch((error) => console.error('[commerce/download] domain event failed', error));
+    });
 
     const stream = fs.createReadStream(/* turbopackIgnore: true */ filePath, { fd, autoClose: true });
     fd = null; // ownership transferred to the stream
