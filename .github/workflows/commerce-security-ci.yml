@@ -9,6 +9,7 @@ on:
       - 'src/pages/api/commerce/**'
       - 'src/pages/checkout/**'
       - 'src/pages/mi-compra.tsx'
+      - 'src/pages/recuperar-compra.tsx'
       - 'docs/commerce/**'
       - '.env.commerce.example'
       - 'scripts/verify-commerce-security.mjs'
