@@ -10,8 +10,12 @@ on:
       - 'src/pages/checkout/**'
       - 'src/lib/commerce/**'
       - 'src/lib/control-plane/**'
+      - 'docs/commerce/**'
+      - 'docs/bluehosting-production.md'
+      - 'docs/knowledge-base/incidents/**'
       - 'next.config.js'
       - '.github/workflows/commerce-sandbox-artifact.yml'
+      - '.github/workflows/deploy-bluehosting-commerce.yml'
 
 permissions:
   contents: read
