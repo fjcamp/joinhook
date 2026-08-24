@@ -112,6 +112,7 @@ jobs:
           cp -a .next/standalone/. deploy-commerce-sandbox/
           cp -a .next/static deploy-commerce-sandbox/.next/static
           cp -a public deploy-commerce-sandbox/public
+          cp docs/commerce/manual-bluehosting-commerce-deploy.md deploy-commerce-sandbox/MANUAL-DEPLOY.md
 
           mkdir -p deploy-commerce-sandbox/document-root-assets/_next
           cp -a .next/static deploy-commerce-sandbox/document-root-assets/_next/static
@@ -127,6 +128,7 @@ jobs:
           Runtime destination: /home/joinhook/joinhook-production
           Document root mirror: document-root-assets/ -> /home/joinhook/public_html/
           Startup file: server.js
+          Manual cPanel fallback: MANUAL-DEPLOY.md
           Canonical TEST Webhook URL: https://joinhook.cl/api/commerce/mercadopago/webhook/
           External Mercado Pago Link remains the rendered fallback.
           Embedded Commerce is controlled at runtime by cPanel variables.
@@ -147,16 +149,20 @@ jobs:
 
           (
             cd deploy-commerce-sandbox
-            sha256sum server.js package.json DEPLOYMENT.txt RELEASE-METADATA.json .next/BUILD_ID > SHA256SUMS.txt
+            sha256sum server.js package.json DEPLOYMENT.txt RELEASE-METADATA.json MANUAL-DEPLOY.md .next/BUILD_ID > SHA256SUMS.txt
           )
 
           test -f deploy-commerce-sandbox/server.js
           test -d deploy-commerce-sandbox/.next/static
           test -d deploy-commerce-sandbox/document-root-assets/_next/static
           test -f deploy-commerce-sandbox/RELEASE-METADATA.json
+          test -f deploy-commerce-sandbox/MANUAL-DEPLOY.md
           test -f deploy-commerce-sandbox/SHA256SUMS.txt
           grep -Fq "$source_sha" deploy-commerce-sandbox/DEPLOYMENT.txt
           grep -Fq "\"sourceCommit\": \"$source_sha\"" deploy-commerce-sandbox/RELEASE-METADATA.json
+          grep -Fq 'JH-OPS-001' deploy-commerce-sandbox/MANUAL-DEPLOY.md
+          grep -Fq 'JH-OPS-002' deploy-commerce-sandbox/MANUAL-DEPLOY.md
+          grep -Fq 'JH-OPS-003' deploy-commerce-sandbox/MANUAL-DEPLOY.md
           diff -qr .next/static deploy-commerce-sandbox/document-root-assets/_next/static
           diff -qr public deploy-commerce-sandbox/document-root-assets --exclude=_next
 
