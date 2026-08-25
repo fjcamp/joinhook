@@ -1,0 +1,48 @@
+import type { LocalDashboard } from './types';
+
+export interface LocalDataGateway {
+  getDashboard(): Promise<LocalDashboard>;
+}
+
+const demoDashboard: LocalDashboard = {
+  location: { lat: -41.3195, lng: -72.9854, label: 'Puerto Varas' },
+  weather: {
+    temperatureC: 14,
+    condition: 'Parcialmente nublado',
+    outdoorStatus: 'Apto para actividades exteriores',
+    observedAt: new Date().toISOString(),
+  },
+  rating: 4.9,
+  ratingSource: 'Comunidad local',
+  business: {
+    id: 'taller-austral',
+    name: 'Taller Austral',
+    category: 'Artesanía',
+    city: 'Puerto Varas',
+    distanceMeters: 350,
+    openNow: true,
+    verification: 'verified',
+    summary: 'Piezas locales, experiencias y catálogo en un espacio comercial dinámico.',
+    catalog: [
+      { id: 'taza', category: 'Popular', name: 'Taza de cerámica', priceLabel: '$12.000', featured: true },
+      { id: 'vela', category: 'Patagonia', name: 'Vela artesanal', priceLabel: '$9.500' },
+      { id: 'manta', category: 'Textil', name: 'Manta local', priceLabel: '$45.000' },
+      { id: 'cuaderno', category: 'Cuero', name: 'Cuaderno', priceLabel: '$15.000' },
+      { id: 'taller', category: 'Experiencia', name: 'Taller breve', priceLabel: 'Reservar' },
+    ],
+  },
+  signals: [
+    { id: 'offer-1', kind: 'offer', title: '15% DCTO.', summary: 'Visible hoy · patrocinado claramente identificado', sponsored: true },
+    { id: 'editorial-1', kind: 'editorial', title: 'Editorial local', summary: 'Medios regionales y periodismo local con fuente y derechos definidos.' },
+    { id: 'tourism-1', kind: 'tourism', title: 'Agencia de turismo', summary: 'Excursiones · contacto · idiomas · registro consultable', verification: 'verified' },
+    { id: 'community-1', kind: 'community', title: 'Turismo de pueblos originarios', summary: 'Espacio gestionado por sus anfitriones, con identidad y contenidos sujetos a consentimiento.' },
+  ],
+};
+
+export class DemoLocalDataGateway implements LocalDataGateway {
+  async getDashboard(): Promise<LocalDashboard> {
+    return demoDashboard;
+  }
+}
+
+export const localDataGateway: LocalDataGateway = new DemoLocalDataGateway();
