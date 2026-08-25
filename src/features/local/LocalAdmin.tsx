@@ -1,10 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import styles from './LocalAdmin.module.css';
-import { adminMutation, loadSupabaseDashboard } from './supabaseGateway';
+import { adminMutation, loadSupabaseDashboard, loginLocalAdmin } from './supabaseGateway';
 import type { LocalDashboard } from './types';
 
 export function LocalAdmin() {
-  const [token, setToken] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [signedInAs, setSignedInAs] = useState('');
   const [dashboard, setDashboard] = useState<LocalDashboard | null>(null);
   const [status, setStatus] = useState('Cargando estado público…');
   const [busy, setBusy] = useState(false);
@@ -30,13 +33,34 @@ export function LocalAdmin() {
 
   useEffect(() => { void refresh(); }, []);
 
-  async function submitBusiness(event: FormEvent) {
+  async function signIn(event: FormEvent) {
     event.preventDefault();
-    if (!token) return setStatus('Ingresa el token administrativo del entorno');
     setBusy(true);
     try {
-      await adminMutation(token, { entity: 'business', action: 'create', data: business });
-      setStatus('Comercio guardado correctamente');
+      const session = await loginLocalAdmin(email.trim(), password);
+      setAccessToken(session.accessToken);
+      setSignedInAs(session.user.email || 'usuario autenticado');
+      setPassword('');
+      setStatus('Sesión autenticada. Los permisos se validan en servidor.');
+    } catch {
+      setStatus('No fue posible iniciar sesión');
+    } finally { setBusy(false); }
+  }
+
+  function signOut() {
+    setAccessToken('');
+    setSignedInAs('');
+    setPassword('');
+    setStatus('Sesión cerrada');
+  }
+
+  async function submitBusiness(event: FormEvent) {
+    event.preventDefault();
+    if (!accessToken) return setStatus('Inicia sesión con una cuenta autorizada');
+    setBusy(true);
+    try {
+      const result = await adminMutation(accessToken, { entity: 'business', action: 'create', data: business });
+      setStatus(`Comercio guardado · rol ${result.actor?.role || 'autorizado'}`);
       setBusiness((current) => ({ ...current, slug: '', name: '', category: '', summary: '' }));
       await refresh();
     } catch (error) {
@@ -46,11 +70,11 @@ export function LocalAdmin() {
 
   async function submitSignal(event: FormEvent) {
     event.preventDefault();
-    if (!token) return setStatus('Ingresa el token administrativo del entorno');
+    if (!accessToken) return setStatus('Inicia sesión con una cuenta autorizada');
     setBusy(true);
     try {
-      await adminMutation(token, { entity: 'signal', action: 'create', data: signal });
-      setStatus('Señal territorial guardada correctamente');
+      const result = await adminMutation(accessToken, { entity: 'signal', action: 'create', data: signal });
+      setStatus(`Señal guardada · rol ${result.actor?.role || 'autorizado'}`);
       setSignal((current) => ({ ...current, title: '', summary: '', sourceUrl: '' }));
       await refresh();
     } catch (error) {
@@ -68,11 +92,16 @@ export function LocalAdmin() {
 
         <article className={styles.card}>
           <h2>Acceso administrativo</h2>
-          <div className={styles.field}>
-            <label htmlFor="local-admin-token">Token del entorno</label>
-            <input id="local-admin-token" type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} placeholder="No se guarda en el navegador" />
-          </div>
-          <p className={styles.muted}>Este acceso es bootstrap. La siguiente capa sustituirá el token compartido por Supabase Auth + roles. La service-role key nunca se expone aquí.</p>
+          {accessToken ? (
+            <div className={styles.actions}><span className={styles.muted}>Sesión: {signedInAs}</span><button type="button" className={`${styles.button} ${styles.secondary}`} onClick={signOut}>Cerrar sesión</button></div>
+          ) : (
+            <form className={styles.form} onSubmit={signIn}>
+              <div className={styles.field}><label htmlFor="local-admin-email">Correo</label><input id="local-admin-email" type="email" autoComplete="username" required value={email} onChange={(e)=>setEmail(e.target.value)} /></div>
+              <div className={styles.field}><label htmlFor="local-admin-password">Contraseña</label><input id="local-admin-password" type="password" autoComplete="current-password" required value={password} onChange={(e)=>setPassword(e.target.value)} /></div>
+              <div className={`${styles.actions} ${styles.full}`}><button className={styles.button} disabled={busy}>Iniciar sesión</button></div>
+            </form>
+          )}
+          <p className={styles.muted}>Autenticación mediante Supabase Auth. La autorización se resuelve en servidor con roles admin, editor, moderator o viewer. Las credenciales de servicio nunca se envían al navegador.</p>
         </article>
 
         <section className={styles.grid}>
@@ -87,7 +116,7 @@ export function LocalAdmin() {
               <div className={styles.field}><label>Verificación</label><select value={business.verification} onChange={(e)=>setBusiness({...business,verification:e.target.value})}><option value="pending">Pendiente</option><option value="community">Comunidad</option><option value="verified">Verificado</option></select></div>
               <div className={styles.field}><label>Estado</label><select value={business.status} onChange={(e)=>setBusiness({...business,status:e.target.value})}><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
               <label className={styles.muted}><input type="checkbox" checked={business.openNow} onChange={(e)=>setBusiness({...business,openNow:e.target.checked})} /> Abierto ahora</label>
-              <div className={`${styles.actions} ${styles.full}`}><button className={styles.button} disabled={busy}>Guardar comercio</button></div>
+              <div className={`${styles.actions} ${styles.full}`}><button className={styles.button} disabled={busy || !accessToken}>Guardar comercio</button></div>
             </div>
           </form>
 
@@ -102,7 +131,7 @@ export function LocalAdmin() {
               <div className={styles.field}><label>Verificación</label><select value={signal.verification} onChange={(e)=>setSignal({...signal,verification:e.target.value})}><option value="pending">Pendiente</option><option value="community">Comunidad</option><option value="verified">Verificado</option></select></div>
               <div className={styles.field}><label>Estado</label><select value={signal.status} onChange={(e)=>setSignal({...signal,status:e.target.value})}><option value="draft">Borrador</option><option value="published">Publicado</option><option value="archived">Archivado</option></select></div>
               <label className={styles.muted}><input type="checkbox" checked={signal.sponsored} onChange={(e)=>setSignal({...signal,sponsored:e.target.checked})} /> Contenido patrocinado</label>
-              <div className={`${styles.actions} ${styles.full}`}><button className={styles.button} disabled={busy}>Guardar señal</button></div>
+              <div className={`${styles.actions} ${styles.full}`}><button className={styles.button} disabled={busy || !accessToken}>Guardar señal</button></div>
             </div>
           </form>
         </section>
