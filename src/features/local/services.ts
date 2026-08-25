@@ -11,6 +11,7 @@ const demoDashboard: LocalDashboard = {
     condition: 'Parcialmente nublado',
     outdoorStatus: 'Apto para actividades exteriores',
     observedAt: new Date().toISOString(),
+    source: 'Datos de contingencia',
   },
   rating: 4.9,
   ratingSource: 'Comunidad local',
@@ -23,6 +24,8 @@ const demoDashboard: LocalDashboard = {
     openNow: true,
     verification: 'verified',
     summary: 'Piezas locales, experiencias y catálogo en un espacio comercial dinámico.',
+    directionsUrl: 'https://www.google.com/maps/search/?api=1&query=Puerto+Varas+Chile',
+    contactUrl: 'https://wa.me/',
     catalog: [
       { id: 'taza', category: 'Popular', name: 'Taza de cerámica', priceLabel: '$12.000', featured: true },
       { id: 'vela', category: 'Patagonia', name: 'Vela artesanal', priceLabel: '$9.500' },
@@ -32,16 +35,16 @@ const demoDashboard: LocalDashboard = {
     ],
   },
   signals: [
-    { id: 'offer-1', kind: 'offer', title: '15% DCTO.', summary: 'Visible hoy · patrocinado claramente identificado', sponsored: true },
-    { id: 'editorial-1', kind: 'editorial', title: 'Editorial local', summary: 'Medios regionales y periodismo local con fuente y derechos definidos.' },
-    { id: 'tourism-1', kind: 'tourism', title: 'Agencia de turismo', summary: 'Excursiones · contacto · idiomas · registro consultable', verification: 'verified' },
-    { id: 'community-1', kind: 'community', title: 'Turismo de pueblos originarios', summary: 'Espacio gestionado por sus anfitriones, con identidad y contenidos sujetos a consentimiento.' },
+    { id: 'offer-1', kind: 'offer', title: '15% DCTO.', summary: 'Visible hoy · patrocinado claramente identificado', sponsored: true, sourceLabel: 'Promoción del comercio' },
+    { id: 'editorial-1', kind: 'editorial', title: 'Editorial local', summary: 'Medios regionales y periodismo local con fuente y derechos definidos.', sourceLabel: 'Contenido editorial' },
+    { id: 'tourism-1', kind: 'tourism', title: 'Agencia de turismo', summary: 'Excursiones · contacto · idiomas · registro consultable', verification: 'verified', sourceLabel: 'Operador verificado' },
+    { id: 'community-1', kind: 'community', title: 'Turismo de pueblos originarios', summary: 'Espacio gestionado por sus anfitriones, con identidad y contenidos sujetos a consentimiento.', verification: 'community', sourceLabel: 'Comunidad anfitriona' },
   ],
 };
 
 export class DemoLocalDataGateway implements LocalDataGateway {
   async getDashboard(): Promise<LocalDashboard> {
-    return demoDashboard;
+    return structuredClone(demoDashboard);
   }
 }
 
