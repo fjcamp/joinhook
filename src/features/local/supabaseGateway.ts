@@ -37,12 +37,29 @@ export type AdminCatalogInput = Pick<CatalogItem, 'category' | 'name' | 'priceLa
   status?: 'draft' | 'published' | 'archived';
 };
 
-export async function adminMutation(token: string, payload: unknown) {
+export type LocalAdminSession = {
+  accessToken: string;
+  expiresIn: number;
+  user: { id?: string; email?: string };
+};
+
+export async function loginLocalAdmin(email: string, password: string): Promise<LocalAdminSession> {
+  const response = await fetch('/api/local/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body?.error || `auth ${response.status}`);
+  return body as LocalAdminSession;
+}
+
+export async function adminMutation(accessToken: string, payload: unknown) {
   const response = await fetch('/api/local/admin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify(payload),
   });
