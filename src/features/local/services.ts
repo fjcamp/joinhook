@@ -1,4 +1,5 @@
 import type { LocalDashboard } from './types';
+import { loadSupabaseDashboard } from './supabaseGateway';
 
 export interface LocalDataGateway {
   getDashboard(): Promise<LocalDashboard>;
@@ -42,10 +43,14 @@ const demoDashboard: LocalDashboard = {
   ],
 };
 
-export class DemoLocalDataGateway implements LocalDataGateway {
+export class HybridLocalDataGateway implements LocalDataGateway {
   async getDashboard(): Promise<LocalDashboard> {
-    return structuredClone(demoDashboard);
+    try {
+      return await loadSupabaseDashboard();
+    } catch {
+      return structuredClone(demoDashboard);
+    }
   }
 }
 
-export const localDataGateway: LocalDataGateway = new DemoLocalDataGateway();
+export const localDataGateway: LocalDataGateway = new HybridLocalDataGateway();
