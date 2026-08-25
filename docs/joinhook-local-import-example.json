@@ -1,0 +1,16 @@
+{
+  "businesses": [
+    {
+      "slug": "ejemplo-local",
+      "name": "Ejemplo Local",
+      "category": "Gastronomía",
+      "city": "Puerto Varas",
+      "region": "Los Lagos",
+      "summary": "Registro de ejemplo para preparar un lote de carga.",
+      "status": "draft",
+      "verification": "pending"
+    }
+  ],
+  "catalog": [],
+  "signals": []
+}
