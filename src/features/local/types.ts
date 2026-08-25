@@ -46,6 +46,17 @@ export type LocalBusiness = {
   contactUrl?: string;
 };
 
+export type BusinessDiscoveryItem = {
+  id: string;
+  name: string;
+  category: string;
+  city: string;
+  summary: string;
+  openNow: boolean;
+  verification: VerificationState;
+  distanceMeters: number | null;
+};
+
 export type LocalSignal = {
   id: string;
   kind: 'offer' | 'editorial' | 'tourism' | 'community' | 'event';
