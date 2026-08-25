@@ -1,4 +1,13 @@
 export type VerificationState = 'verified' | 'community' | 'pending';
+export type RuntimeStatus = 'loading' | 'ready' | 'stale' | 'degraded' | 'error';
+export type LocationPermission = 'unknown' | 'granted' | 'denied' | 'unavailable';
+
+export type RuntimeState = {
+  status: RuntimeStatus;
+  online: boolean;
+  locationPermission: LocationPermission;
+  lastUpdated: string | null;
+};
 
 export type GeoPoint = {
   lat: number;
@@ -11,6 +20,8 @@ export type WeatherSnapshot = {
   condition: string;
   outdoorStatus: string;
   observedAt: string;
+  source?: string;
+  windKmh?: number;
 };
 
 export type CatalogItem = {
@@ -31,6 +42,8 @@ export type LocalBusiness = {
   verification: VerificationState;
   summary: string;
   catalog: CatalogItem[];
+  directionsUrl?: string;
+  contactUrl?: string;
 };
 
 export type LocalSignal = {
@@ -40,6 +53,7 @@ export type LocalSignal = {
   summary: string;
   sponsored?: boolean;
   verification?: VerificationState;
+  sourceLabel?: string;
 };
 
 export type LocalDashboard = {
@@ -49,4 +63,5 @@ export type LocalDashboard = {
   ratingSource: string;
   business: LocalBusiness;
   signals: LocalSignal[];
+  updatedAt?: string;
 };
