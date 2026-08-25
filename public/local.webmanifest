@@ -1,0 +1,12 @@
+{
+  "name": "JoinHook Local",
+  "short_name": "JoinHook Local",
+  "description": "Descubrimiento territorial de comercio, turismo, cultura y comunidad.",
+  "start_url": "/local",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#061218",
+  "theme_color": "#0B2028",
+  "lang": "es-CL",
+  "orientation": "any"
+}
