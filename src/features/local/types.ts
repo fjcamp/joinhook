@@ -48,7 +48,7 @@ export type LocalBusiness = {
 
 export type LocalSignal = {
   id: string;
-  kind: 'offer' | 'editorial' | 'tourism' | 'community';
+  kind: 'offer' | 'editorial' | 'tourism' | 'community' | 'event';
   title: string;
   summary: string;
   sponsored?: boolean;
