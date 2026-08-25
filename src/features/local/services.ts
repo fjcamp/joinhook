@@ -2,31 +2,17 @@ import type { LocalDashboard } from './types';
 import { loadSupabaseDashboard } from './supabaseGateway';
 
 export interface LocalDataGateway {
-  getDashboard(): Promise<LocalDashboard>;
+  getDashboard(businessId?: string): Promise<LocalDashboard>;
 }
 
 const demoDashboard: LocalDashboard = {
   location: { lat: -41.3195, lng: -72.9854, label: 'Puerto Varas' },
-  weather: {
-    temperatureC: 14,
-    condition: 'Parcialmente nublado',
-    outdoorStatus: 'Apto para actividades exteriores',
-    observedAt: new Date().toISOString(),
-    source: 'Datos de contingencia',
-  },
+  weather: { temperatureC: 14, condition: 'Parcialmente nublado', outdoorStatus: 'Apto para actividades exteriores', observedAt: new Date().toISOString(), source: 'Datos de contingencia' },
   rating: 4.9,
   ratingSource: 'Comunidad local',
   business: {
-    id: 'taller-austral',
-    name: 'Taller Austral',
-    category: 'Artesanía',
-    city: 'Puerto Varas',
-    distanceMeters: 350,
-    openNow: true,
-    verification: 'verified',
-    summary: 'Piezas locales, experiencias y catálogo en un espacio comercial dinámico.',
-    directionsUrl: 'https://www.google.com/maps/search/?api=1&query=Puerto+Varas+Chile',
-    contactUrl: 'https://wa.me/',
+    id: 'taller-austral', name: 'Taller Austral', category: 'Artesanía', city: 'Puerto Varas', distanceMeters: 350, openNow: true, verification: 'verified',
+    summary: 'Piezas locales, experiencias y catálogo en un espacio comercial dinámico.', directionsUrl: 'https://www.google.com/maps/search/?api=1&query=Puerto+Varas+Chile', contactUrl: 'https://wa.me/',
     catalog: [
       { id: 'taza', category: 'Popular', name: 'Taza de cerámica', priceLabel: '$12.000', featured: true },
       { id: 'vela', category: 'Patagonia', name: 'Vela artesanal', priceLabel: '$9.500' },
@@ -44,12 +30,9 @@ const demoDashboard: LocalDashboard = {
 };
 
 export class HybridLocalDataGateway implements LocalDataGateway {
-  async getDashboard(): Promise<LocalDashboard> {
-    try {
-      return await loadSupabaseDashboard();
-    } catch {
-      return structuredClone(demoDashboard);
-    }
+  async getDashboard(businessId?: string): Promise<LocalDashboard> {
+    try { return await loadSupabaseDashboard(undefined, businessId); }
+    catch { return structuredClone(demoDashboard); }
   }
 }
 
