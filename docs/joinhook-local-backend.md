@@ -30,20 +30,21 @@ No exponer la service-role key ni el setup token con prefijo `NEXT_PUBLIC_`.
 - `GET /api/local/dashboard`: agrega y sanitiza contenido publicado.
 - `POST /api/local/auth`: inicio de sesión mediante Supabase Auth.
 - `POST /api/local/admin`: mutaciones autorizadas por usuario y rol.
+- `GET|POST|PATCH /api/local/users`: listado, alta y cambio de rol/estado de operadores; exige rol `admin`.
 - `POST /api/local/setup-admin`: bootstrap del primer administrador; deja de operar automáticamente cuando ya existe un rol.
 
 ## Roles
 
-- `admin`: control completo del dominio Local.
+- `admin`: control completo del dominio Local y gestión de operadores.
 - `editor`: creación y edición de comercios, catálogo y señales.
 - `moderator`: modificación de señales para tareas de moderación.
 - `viewer`: acceso administrativo de solo lectura; no puede ejecutar mutaciones.
 
-Cada llamada administrativa valida el JWT contra Supabase Auth y luego consulta `local_user_roles` en servidor. Las mutaciones generan un registro en `local_moderation_log` con usuario, entidad y acción.
+Cada llamada administrativa valida el JWT contra Supabase Auth y luego consulta `local_user_roles` en servidor. Las mutaciones de contenido generan un registro en `local_moderation_log` con usuario, entidad y acción. La API de operadores impide que un administrador desactive o rebaje su propio acceso admin accidentalmente.
 
 ## Inicialización segura
 
-El proyecto comienza sin usuarios Auth. Para crear el primer administrador se configura `LOCAL_ADMIN_SETUP_TOKEN` en el entorno y se invoca una vez `/api/local/setup-admin` con correo, contraseña robusta y ese secreto. El endpoint rechaza nuevas inicializaciones una vez que existe cualquier rol. Después conviene rotar o retirar `LOCAL_ADMIN_SETUP_TOKEN` del entorno.
+El proyecto comienza sin usuarios Auth. Para crear el primer administrador se configura `LOCAL_ADMIN_SETUP_TOKEN` en el entorno y se invoca una vez `/api/local/setup-admin` con correo, contraseña robusta y ese secreto. El endpoint rechaza nuevas inicializaciones una vez que existe cualquier rol. Después se debe rotar o retirar `LOCAL_ADMIN_SETUP_TOKEN` del entorno. A partir de entonces el administrador puede crear operadores y asignar roles mediante `/api/local/users`.
 
 ## Degradación
 
