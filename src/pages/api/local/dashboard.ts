@@ -7,7 +7,7 @@ type BusinessRow = {
   whatsapp_url: string | null; directions_url: string | null; website_url: string | null; updated_at: string;
 };
 type CatalogRow = { id: string; category: string; name: string; price_label: string; featured: boolean; sort_order: number };
-type SignalRow = { id: string; kind: 'offer'|'editorial'|'tourism'|'community'; title: string; summary: string; sponsored: boolean; verification: VerificationState | null; source_url: string | null; updated_at: string };
+type SignalRow = { id: string; kind: 'offer'|'editorial'|'tourism'|'community'|'event'; title: string; summary: string; sponsored: boolean; verification: VerificationState | null; source_url: string | null; updated_at: string };
 
 function config() {
   const url = process.env.LOCAL_SUPABASE_URL || process.env.NEXT_PUBLIC_LOCAL_SUPABASE_URL;
