@@ -16,6 +16,7 @@ import '../css/cge-pwa.css';
 import '../css/cge-launch.css';
 import '../css/theme-modes.css';
 import '../css/cge-navigation-v1.css';
+import '../css/cge-fixed-controls.css';
 
 const themeBootstrap = `
 (function () {
