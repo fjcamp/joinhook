@@ -162,6 +162,7 @@
         padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
         border: 0;
         border-top: 1px solid var(--cge-line);
+        border-radius: 0;
         background: color-mix(in srgb, var(--cge-bg) 90%, transparent);
         box-shadow: 0 -12px 32px rgba(65, 62, 55, .12);
         backdrop-filter: blur(22px);
@@ -176,7 +177,7 @@
 
     .cge-sidebar nav {
         display: grid;
-        grid-template-columns: repeat(6, minmax(58px, 1fr));
+        grid-template-columns: repeat(6, minmax(48px, 1fr));
         gap: 3px;
         padding: 0;
         overflow-x: auto;
@@ -190,11 +191,13 @@
 
     .cge-sidebar nav button,
     .cge-sidebar nav button:nth-child(5),
-    .cge-sidebar nav button:nth-child(6) {
-        min-width: 58px;
+    .cge-sidebar nav button:nth-child(6),
+    .cge-sidebar nav button:nth-child(n+5) {
+        display: flex;
+        min-width: 48px;
         min-height: 60px;
         margin: 0;
-        padding: 7px 4px 6px;
+        padding: 7px 3px 6px;
         border: 1px solid transparent;
         border-radius: 14px;
         flex-direction: column;
@@ -214,11 +217,11 @@
     }
 
     .cge-sidebar nav button strong {
-        max-width: 66px;
+        max-width: 58px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: .53rem;
+        font-size: .5rem;
         line-height: 1.1;
     }
 
@@ -246,7 +249,7 @@
     .cge-topbar {
         top: 8px;
         margin-bottom: 14px;
-        padding: 9px 10px;
+        padding: 9px 54px 9px 10px;
         border-color: rgba(82, 88, 81, .08);
         background: color-mix(in srgb, var(--cge-bg) 88%, transparent);
         box-shadow: 0 8px 24px rgba(95, 86, 72, .08);
@@ -261,17 +264,31 @@
         gap: 7px;
     }
 
-    .cge-business {
-        max-width: 145px;
-        padding: 6px 9px;
-    }
-
-    .cge-business input {
-        width: 126px;
-        font-size: .64rem;
-    }
-
+    .cge-business,
     .cge-avatar {
+        display: none;
+    }
+
+    /* En CGE el tema queda en el encabezado, nunca encima de la navegación. */
+    .jh-theme-toggle.is-compact {
+        top: 17px;
+        right: 18px;
+        bottom: auto;
+        left: auto;
+        min-height: 38px;
+        width: 38px;
+        padding: 3px;
+        border-radius: 13px;
+        justify-content: center;
+    }
+
+    .jh-theme-toggle.is-compact .jh-theme-toggle-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+    }
+
+    .jh-theme-toggle.is-compact .jh-theme-toggle-copy {
         display: none;
     }
 
@@ -307,7 +324,25 @@
     }
 
     .cge-pwa-status {
-        bottom: calc(88px + env(safe-area-inset-bottom));
+        bottom: calc(78px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 360px) {
+    .cge-sidebar nav {
+        grid-template-columns: repeat(6, minmax(44px, 1fr));
+    }
+
+    .cge-sidebar nav button,
+    .cge-sidebar nav button:nth-child(5),
+    .cge-sidebar nav button:nth-child(6),
+    .cge-sidebar nav button:nth-child(n+5) {
+        min-width: 44px;
+    }
+
+    .cge-sidebar nav button strong {
+        max-width: 48px;
+        font-size: .47rem;
     }
 }
 
