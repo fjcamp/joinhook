@@ -5,10 +5,10 @@ const projects = [
     {
         key: 'joinops',
         name: 'JoinOps',
-        stage: 'MVP en desarrollo',
+        stage: 'EN DESARROLLO',
         eyebrow: 'Operaciones · Gestión · Gastronomía',
         description:
-            'Un sistema modular que estoy construyendo para ordenar inventario, producción, personas y operación diaria sin perder trazabilidad.',
+            'ERP operacional modular para ordenar inventario, producción, personas, compras y operación diaria con trazabilidad y una arquitectura preparada para crecer por etapas.',
         tags: ['Inventario', 'Operaciones', 'RR.HH.', 'PWA'],
         metric: 'Arquitectura modular',
         accent: '#6e7cff',
@@ -19,12 +19,12 @@ const projects = [
     {
         key: 'snowwise',
         name: 'SnowWise',
-        stage: 'Prototipo activo',
+        stage: 'EN CONSTRUCCIÓN',
         eyebrow: 'Montaña · Seguridad · Clima',
         description:
-            'Una experiencia para planificar actividades de nieve y montaña combinando clima, mapas, seguridad, destinos y contexto útil en un solo lugar.',
+            'Plataforma para planificar actividades de nieve y montaña combinando meteorología, mapas, destinos, seguridad, equipamiento y contexto útil en una sola experiencia.',
         tags: ['Weather', 'GPS', 'Maps', 'Safety'],
-        metric: 'Diseño inmersivo',
+        metric: 'Producto insignia',
         accent: '#32d7e8',
         glow: 'rgba(50, 215, 232, .28)',
         cover: '/project-covers/snowwise-cover.svg',
@@ -33,10 +33,10 @@ const projects = [
     {
         key: 'mi-gestion',
         name: 'Mi Gestión',
-        stage: 'Explorando y probando',
+        stage: 'EXPERIMENTAL',
         eyebrow: 'Organización · Datos · Decisiones',
         description:
-            'Mi espacio experimental para convertir tareas, documentos, indicadores y seguimiento cotidiano en una experiencia administrativa más clara.',
+            'Herramienta administrativa para reunir tareas, agenda, operaciones, equipo, proveedores, documentos, indicadores y seguimiento cotidiano en un solo espacio.',
         tags: ['Dashboard', 'Procesos', 'Datos', 'Offline'],
         metric: 'Gestión práctica',
         accent: '#58e2a3',
@@ -49,23 +49,23 @@ const projects = [
 const capabilities = [
     {
         index: '01',
-        title: 'Web y PWA',
-        text: 'Experiencias rápidas, responsive y pensadas para crecer sin empezar de cero cada vez.'
+        title: 'Desarrollo Web & PWA',
+        text: 'Sitios, aplicaciones web y experiencias instalables, responsive y preparadas para evolucionar sin rehacer todo desde cero.'
     },
     {
         index: '02',
-        title: 'Sistemas de gestión',
-        text: 'Interfaces y flujos que transforman procesos desordenados en herramientas más entendibles.'
+        title: 'Sistemas & Automatización',
+        text: 'Flujos, paneles y automatizaciones que ayudan a ordenar procesos, conectar información y reducir trabajo repetitivo manteniendo control humano.'
     },
     {
         index: '03',
-        title: 'Automatización',
-        text: 'Exploro cómo conectar tareas, datos e IA para reducir trabajo repetitivo sin perder control humano.'
+        title: 'UX/UI & Diseño',
+        text: 'Interfaces claras, accesibles y coherentes, diseñadas para que la tecnología sea útil antes que decorativa.'
     },
     {
         index: '04',
-        title: 'Diseño de producto',
-        text: 'Prototipo, pruebo y refino experiencias digitales combinando utilidad, estética y contexto real.'
+        title: 'Ideas & Prototipos',
+        text: 'Investigación, validación y prototipado para convertir una necesidad real en una solución que se pueda probar, medir y mejorar.'
     }
 ];
 
@@ -97,18 +97,18 @@ export default function Home() {
     return (
         <>
             <Head>
-                <title>JoinHook — ideas, productos y experiencias digitales</title>
+                <title>JoinHook — Ideas reales, productos digitales</title>
                 <meta
                     name="description"
-                    content="Soy Francisco, creador independiente detrás de JoinHook. Diseño, investigo y construyo productos digitales, sistemas de gestión, PWA y experimentos de interfaz."
+                    content="Diseño, investigo y construyo soluciones digitales que convierten problemas reales en herramientas útiles. Desarrollo web y PWA, sistemas, automatización, UX/UI y prototipos."
                 />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#f3f0e8" />
                 <link rel="canonical" href="https://joinhook.cl/" />
-                <meta property="og:title" content="JoinHook — ideas, productos y experiencias digitales" />
+                <meta property="og:title" content="JoinHook — Ideas reales, productos digitales" />
                 <meta
                     property="og:description"
-                    content="Un espacio independiente para construir, probar y compartir ideas digitales con visión práctica y creativa."
+                    content="Soluciones digitales que convierten problemas reales en herramientas útiles. Proyectos, productos y servicios construidos con criterio, transparencia y visión de futuro."
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://joinhook.cl/" />
@@ -117,11 +117,15 @@ export default function Home() {
                     dangerouslySetInnerHTML={{
                         __html: JSON.stringify({
                             '@context': 'https://schema.org',
-                            '@type': 'Person',
-                            name: 'Francisco Javier Campos',
+                            '@type': 'WebSite',
+                            name: 'JoinHook',
                             url: 'https://joinhook.cl/',
                             description:
-                                'Creador independiente detrás de JoinHook. Diseño y desarrollo de productos digitales, sistemas de gestión y experiencias web.'
+                                'Espacio de Francisco Javier Campos para investigar, diseñar y construir productos digitales, sistemas de gestión, aplicaciones web y PWA.',
+                            author: {
+                                '@type': 'Person',
+                                name: 'Francisco Javier Campos'
+                            }
                         })
                     }}
                 />
@@ -134,33 +138,36 @@ export default function Home() {
                         <span>JoinHook</span>
                     </a>
                     <nav className="jh-nav" aria-label="Navegación principal">
+                        <a href="#inicio">Inicio</a>
                         <a href="#proyectos">Proyectos</a>
                         <a href="#herramientas">Herramientas</a>
                         <a href="#lab">Lab</a>
-                        <a href="#sobre-mi">Sobre mí</a>
+                        <a href="#blog">Blog</a>
+                        <a href="#contacto">Contacto</a>
                     </nav>
-                    <a className="jh-header-cta" href="mailto:info@joinhook.cl?subject=Conversemos%20sobre%20un%20proyecto">Conversemos</a>
+                    <a className="jh-header-cta" href="mailto:info@joinhook.cl?subject=Hablemos%20sobre%20un%20proyecto">Hablemos</a>
                 </header>
 
                 <section className="jh-hero" id="inicio">
                     <div className="jh-hero-copy">
-                        <div className="jh-kicker"><span className="jh-status-dot" /> Creador independiente · Chile</div>
+                        <div className="jh-kicker"><span className="jh-status-dot" /> Hola, soy Francisco</div>
                         <h1>
-                            Ideas digitales con <span>criterio, movimiento y propósito.</span>
+                            Ideas reales, <span>productos digitales.</span>
                         </h1>
                         <p className="jh-hero-lead">
-                            Hola, soy Francisco. JoinHook es mi espacio para investigar, diseñar y construir productos digitales que intentan resolver problemas reales de una forma más clara y humana.
+                            Diseño, investigo y construyo soluciones digitales que convierten problemas reales en herramientas útiles. JoinHook es mi espacio para explorar, crear y compartir proyectos con visión de futuro.
                         </p>
                         <div className="jh-actions">
                             <a className="jh-button jh-button-primary" href="#proyectos">
-                                Explorar lo que construyo <ArrowIcon />
+                                Explorar proyectos <ArrowIcon />
                             </a>
-                            <a className="jh-button jh-button-soft" href="#herramientas">Ver herramienta disponible</a>
+                            <a className="jh-button jh-button-soft" href="#contacto">Conversemos</a>
                         </div>
-                        <div className="jh-hero-footnotes" aria-label="Principios de trabajo">
-                            <span>Aprender haciendo</span>
-                            <span>Diseñar con intención</span>
-                            <span>Construir de forma abierta</span>
+                        <div className="jh-hero-footnotes" aria-label="Áreas de trabajo">
+                            <span>Desarrollo Web & PWA</span>
+                            <span>Sistemas & Automatización</span>
+                            <span>UX/UI & Diseño</span>
+                            <span>Ideas & Prototipos</span>
                         </div>
                     </div>
 
@@ -175,27 +182,27 @@ export default function Home() {
                             </div>
                             <div className="jh-workspace-grid">
                                 <article className="jh-mini-card jh-mini-main">
-                                    <div className="jh-mini-label">Ahora mismo</div>
-                                    <h3>Construyendo ideas en público</h3>
-                                    <p>Producto, experiencia, código y aprendizaje en el mismo proceso.</p>
+                                    <div className="jh-mini-label">JoinHook</div>
+                                    <h3>Grandes proyectos comienzan con una buena idea.</h3>
+                                    <p>Investigar, diseñar, construir, operar y mejorar con evidencia y trazabilidad.</p>
                                     <div className="jh-mini-chart" aria-hidden="true">
                                         <i /><i /><i /><i /><i /><i />
                                     </div>
                                 </article>
                                 <article className="jh-mini-card">
                                     <span className="jh-chip jh-chip-blue">JoinOps</span>
-                                    <strong>Sistema</strong>
+                                    <strong>EN DESARROLLO</strong>
                                     <small>Operaciones y gestión</small>
                                 </article>
                                 <article className="jh-mini-card">
                                     <span className="jh-chip jh-chip-cyan">SnowWise</span>
-                                    <strong>Experiencia</strong>
-                                    <small>Montaña y seguridad</small>
+                                    <strong>EN CONSTRUCCIÓN</strong>
+                                    <small>Montaña, clima y seguridad</small>
                                 </article>
                                 <article className="jh-mini-card jh-mini-wide">
                                     <div>
-                                        <span className="jh-mini-label">Laboratorio</span>
-                                        <strong>Soft UI + interacción</strong>
+                                        <span className="jh-mini-label">JoinHook Lab</span>
+                                        <strong>Explorando nuevas ideas y tecnologías</strong>
                                     </div>
                                     <div className="jh-toggle-demo" aria-hidden="true"><span /></div>
                                 </article>
@@ -203,7 +210,7 @@ export default function Home() {
                         </div>
                         <div className="jh-floating-note jh-surface">
                             <span>✦</span>
-                            <div><small>En exploración</small><strong>Interfaces que se sienten vivas</strong></div>
+                            <div><small>En construcción</small><strong>Producto, diseño, sistemas y automatización</strong></div>
                         </div>
                     </div>
                 </section>
@@ -212,9 +219,9 @@ export default function Home() {
                     <div className="jh-section-heading">
                         <div>
                             <span className="jh-eyebrow">Qué hago</span>
-                            <h2 id="capabilities-title">Construyo mientras aprendo, pruebo y mejoro.</h2>
+                            <h2 id="capabilities-title">De una necesidad real a una solución digital útil.</h2>
                         </div>
-                        <p>No intento parecer una agencia enorme. Prefiero mostrar el proceso, las decisiones y el resultado.</p>
+                        <p>JoinHook trabaja desde la investigación y el entendimiento del problema hasta el prototipo, desarrollo, operación y mejora. Las capacidades disponibles, las que están en desarrollo y las propuestas futuras se comunican por separado.</p>
                     </div>
                     <div className="jh-capability-grid">
                         {capabilities.map((item) => (
@@ -242,7 +249,7 @@ export default function Home() {
                             </div>
                             <div className="jh-project-meta">
                                 <div><small>Enfoque</small><strong>{project.metric}</strong></div>
-                                <div><small>Estado</small><strong>{project.stage}</strong></div>
+                                <div><small>Disponibilidad</small><strong>Próximamente</strong></div>
                             </div>
                         </div>
 
@@ -280,7 +287,7 @@ export default function Home() {
                                             </div>
                                             <div className="jh-project-card-bottom">
                                                 <small>{item.stage}</small>
-                                                <span>Explorar</span>
+                                                <span>Próximamente</span>
                                             </div>
                                         </button>
                                     );
@@ -303,17 +310,17 @@ export default function Home() {
                 <section className="jh-section jh-product" id="herramientas" aria-labelledby="product-title">
                     <div className="jh-product-panel jh-surface">
                         <div className="jh-product-copy">
-                            <span className="jh-eyebrow">Primera herramienta comercial · beta disponible</span>
+                            <span className="jh-eyebrow">Herramienta disponible · BETA</span>
                             <h2 id="product-title">Control Gastronómico Express</h2>
                             <p>
-                                Ya puedes probar una primera versión funcional para pequeños negocios gastronómicos: inventario, compras, mermas, proveedores, stock mínimo, respaldo y PWA, sin partir por un ERP completo.
+                                Una herramienta enfocada en pequeños negocios gastronómicos para registrar y controlar inventario, compras, mermas, proveedores, stock mínimo y respaldos sin partir por un ERP completo.
                             </p>
                             <div className="jh-tags">
                                 <span>Inventario</span><span>Mermas</span><span>Compras</span><span>Dashboard</span><span>PWA</span>
                             </div>
                             <div className="jh-actions">
                                 <a className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Conocer y probar <ArrowIcon /></a>
-                                <span className="jh-product-status"><i /> Beta · $4.990 CLP lanzamiento</span>
+                                <span className="jh-product-status"><i /> BETA · disponible</span>
                             </div>
                         </div>
                         <div className="jh-product-dashboard">
@@ -334,24 +341,45 @@ export default function Home() {
 
                 <section className="jh-section jh-lab" id="lab" aria-labelledby="lab-title">
                     <div className="jh-section-heading">
-                        <div><span className="jh-eyebrow">JoinHook Lab</span><h2 id="lab-title">La web también será parte del portafolio.</h2></div>
-                        <p>Quiero que los componentes demuestren lo que puedo construir: tactilidad, profundidad, estados, interacción y movimiento sin sacrificar claridad.</p>
+                        <div><span className="jh-eyebrow">JoinHook Lab</span><h2 id="lab-title">Explorar, probar y convertir aprendizaje en producto.</h2></div>
+                        <p>El laboratorio reúne experimentos de interfaz, automatización, agentes, datos y nuevas tecnologías. Una prueba no se presenta como producto terminado: cada iniciativa mantiene su estado visible.</p>
                     </div>
                     <div className="jh-lab-grid">
                         <article className="jh-lab-card jh-surface">
-                            <small>Soft control</small>
+                            <small>Interacción</small>
                             <div className="jh-demo-buttons"><button>Acción</button><button className="pressed">Activo</button></div>
-                            <p>Relieve suave para acciones concretas, no como decoración indiscriminada.</p>
+                            <p>Profundidad, tactilidad y movimiento aplicados solo cuando mejoran la experiencia.</p>
                         </article>
                         <article className="jh-lab-card jh-surface">
-                            <small>Estados</small>
+                            <small>Estados transparentes</small>
                             <div className="jh-demo-status"><span className="green">Disponible</span><span className="blue">Beta</span><span className="amber">En desarrollo</span></div>
-                            <p>Los proyectos pueden ser ambiciosos sin fingir estar terminados.</p>
+                            <p>Disponible, beta, experimental y en desarrollo significan cosas distintas y se muestran como tales.</p>
                         </article>
                         <article className="jh-lab-card jh-surface">
                             <small>Datos</small>
                             <div className="jh-demo-ring"><span>72%</span></div>
-                            <p>Visualización compacta y legible, pensada para interfaces reales.</p>
+                            <p>Indicadores y visualización pensados para apoyar decisiones, no para decorar un panel.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section className="jh-section jh-lab" id="blog" aria-labelledby="blog-title">
+                    <div className="jh-section-heading">
+                        <div><span className="jh-eyebrow">Blog</span><h2 id="blog-title">Decisiones, aprendizaje y construcción en proceso.</h2></div>
+                        <p>Este espacio reunirá notas sobre desarrollo de producto, administración, automatización, experiencia de usuario, tecnología y lo aprendido mientras los proyectos avanzan.</p>
+                    </div>
+                    <div className="jh-lab-grid">
+                        <article className="jh-lab-card jh-surface">
+                            <small>Producto</small>
+                            <p>Cómo una necesidad se transforma en alcance, prototipo, métricas y una solución que pueda validarse.</p>
+                        </article>
+                        <article className="jh-lab-card jh-surface">
+                            <small>Tecnología</small>
+                            <p>Arquitectura, seguridad, despliegues, datos y automatización explicados desde proyectos reales.</p>
+                        </article>
+                        <article className="jh-lab-card jh-surface">
+                            <small>Próximamente</small>
+                            <p>La publicación del blog se habilitará de forma progresiva junto con el resto del ecosistema JoinHook.</p>
                         </article>
                     </div>
                 </section>
@@ -359,33 +387,33 @@ export default function Home() {
                 <section className="jh-section jh-about" id="sobre-mi" aria-labelledby="about-title">
                     <div className="jh-about-quote jh-surface">
                         <span>“</span>
-                        <p>No quiero construir una fachada de gran compañía. Quiero construir cosas buenas, aprender rápido y dejar que el trabajo hable.</p>
+                        <p>Construir con transparencia: mostrar lo que está disponible, lo que sigue en desarrollo y lo que todavía es una propuesta.</p>
                     </div>
                     <div className="jh-about-copy">
                         <span className="jh-eyebrow">Detrás de JoinHook</span>
-                        <h2 id="about-title">Una persona, varias disciplinas y una visión que todavía está creciendo.</h2>
+                        <h2 id="about-title">Un espacio independiente que conecta administración, tecnología, diseño y nuevos productos.</h2>
                         <p>
-                            Me interesa la intersección entre administración, tecnología, turismo, diseño y automatización. JoinHook es el lugar donde esas áreas pueden cruzarse, convertirse en prototipos y, cuando tienen sentido, crecer hasta convertirse en productos.
+                            Soy Francisco Javier Campos. JoinHook nace para convertir problemas y oportunidades reales en herramientas digitales útiles. El trabajo combina investigación, experiencia de usuario, desarrollo, automatización y gestión, manteniendo alcance, estados y capacidades comunicados con claridad.
                         </p>
                         <div className="jh-process">
-                            <span>Investigar</span><i>→</i><span>Entender</span><i>→</i><span>Probar</span><i>→</i><span>Construir</span><i>→</i><span>Mejorar</span>
+                            <span>Descubrir</span><i>→</i><span>Prototipar</span><i>→</i><span>Desarrollar</span><i>→</i><span>Operar</span><i>→</i><span>Medir</span>
                         </div>
                     </div>
                 </section>
 
                 <section className="jh-contact" id="contacto" aria-labelledby="contact-title">
-                    <span className="jh-eyebrow">Conversemos</span>
-                    <h2 id="contact-title">Si tienes un problema, una idea o quieres probar una herramienta, escríbeme.</h2>
-                    <p>Trabajo de forma independiente y prefiero entender primero el problema. Puedes contarme tu proyecto, pedirme información sobre Control Gastronómico Express o simplemente iniciar una conversación.</p>
+                    <span className="jh-eyebrow">Hablemos</span>
+                    <h2 id="contact-title">Cuéntame qué necesitas resolver.</h2>
+                    <p>Antes de proponer una solución, prefiero entender la necesidad, el contexto, los objetivos, las restricciones y el resultado esperado. Puedes consultar por un sitio web, una PWA, un sistema interno, automatización o alguno de los productos de JoinHook.</p>
                     <div className="jh-actions">
-                        <a className="jh-button jh-button-primary" href="mailto:info@joinhook.cl?subject=Conversemos%20desde%20JoinHook">Escribirme <ArrowIcon /></a>
-                        <a className="jh-button jh-button-soft" href="https://github.com/fjcamp" target="_blank" rel="noreferrer">Ver mi GitHub</a>
+                        <a className="jh-button jh-button-primary" href="mailto:info@joinhook.cl?subject=Hablemos%20desde%20JoinHook">Escribirme <ArrowIcon /></a>
+                        <a className="jh-button jh-button-soft" href="https://github.com/fjcamp" target="_blank" rel="noreferrer">Ver GitHub</a>
                     </div>
                 </section>
 
                 <footer className="jh-footer">
                     <a className="jh-brand" href="#inicio"><span className="jh-brand-mark">JH</span><span>JoinHook</span></a>
-                    <p>Un espacio independiente para diseñar, construir y aprender.</p>
+                    <p>Ideas reales, productos digitales.</p>
                     <span>© {new Date().getFullYear()} Francisco Javier Campos · <a href="/privacidad">Privacidad</a></span>
                 </footer>
             </main>
