@@ -23,9 +23,9 @@ function sign(value: string): string {
 }
 
 function safeEqual(left: string, right: string): boolean {
-  const a = Buffer.from(left);
-  const b = Buffer.from(right);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+  const leftBytes = Uint8Array.from(Buffer.from(left));
+  const rightBytes = Uint8Array.from(Buffer.from(right));
+  return leftBytes.byteLength === rightBytes.byteLength && crypto.timingSafeEqual(leftBytes, rightBytes);
 }
 
 export function validateOwnerAccessKey(value: unknown): boolean {
