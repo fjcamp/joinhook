@@ -1,0 +1,210 @@
+name: BlueHosting Commerce Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Escribe DEPLOY_COMMERCE_SANDBOX para confirmar el despliegue manual'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: joinhook-bluehosting-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ inputs.confirmation == 'DEPLOY_COMMERCE_SANDBOX' }}
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      JOINHOOK_DEPLOY_TARGET: production
+      NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_ENABLED: 'true'
+      NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
+      JOINHOOK_COMMERCE_CHECKOUT_ENABLED: 'false'
+      JOINHOOK_COMMERCE_ACCEPT_PAYMENTS: 'false'
+      SSH_HOST: ${{ secrets.BLUEHOSTING_SSH_HOST }}
+      SSH_PORT: ${{ secrets.BLUEHOSTING_SSH_PORT }}
+      SSH_USER: ${{ secrets.BLUEHOSTING_SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.BLUEHOSTING_SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.BLUEHOSTING_SSH_KNOWN_HOSTS }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.20.2
+          cache: npm
+
+      - name: Install, audit and lint
+        run: |
+          npm ci
+          npm audit --audit-level=high
+          npm audit --omit=dev --audit-level=high
+          npx eslint .
+
+      - name: Build production-like Commerce runtime
+        env:
+          NODE_ENV: production
+        run: npm run build
+
+      - name: Verify Commerce routes before packaging
+        run: |
+          npm run start -- -p 3030 > /tmp/joinhook-predeploy.log 2>&1 &
+          echo $! > /tmp/joinhook-predeploy.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3030/ > /dev/null; then break; fi
+            if [ "$i" = 30 ]; then cat /tmp/joinhook-predeploy.log; exit 1; fi
+            sleep 1
+          done
+
+          code=$(curl --silent --output /tmp/webhook.txt --write-out '%{http_code}' http://127.0.0.1:3030/api/commerce/mercadopago/webhook/)
+          test "$code" = '405'
+
+          code=$(curl --location --silent --output /tmp/create-order.txt --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' --data '{}' \
+            http://127.0.0.1:3030/api/commerce/create-order)
+          test "$code" = '503'
+          grep -Fq 'commerce_payments_disabled' /tmp/create-order.txt
+
+      - name: Package runtime and document-root assets
+        run: |
+          rm -rf deploy-bluehosting-commerce
+          mkdir -p deploy-bluehosting-commerce/.next
+          cp -a .next/standalone/. deploy-bluehosting-commerce/
+          cp -a .next/static deploy-bluehosting-commerce/.next/static
+          cp -a public deploy-bluehosting-commerce/public
+
+          mkdir -p deploy-bluehosting-commerce/document-root-assets/_next
+          cp -a .next/static deploy-bluehosting-commerce/document-root-assets/_next/static
+          cp -a public/. deploy-bluehosting-commerce/document-root-assets/
+
+          cat > deploy-bluehosting-commerce/DEPLOYMENT.txt <<EOF
+          JoinHook Commerce controlled sandbox deploy
+          Source commit: $GITHUB_SHA
+          Runtime: Node.js 20.20.2
+          Runtime destination: /home/joinhook/joinhook-production
+          Document root: /home/joinhook/public_html
+          Canonical TEST Webhook URL: https://joinhook.cl/api/commerce/mercadopago/webhook/
+          Payment kill switch is expected to remain disabled in cPanel until deliberate TEST payment QA.
+          EOF
+
+          test -f deploy-bluehosting-commerce/server.js
+          diff -qr .next/static deploy-bluehosting-commerce/document-root-assets/_next/static
+          diff -qr public deploy-bluehosting-commerce/document-root-assets --exclude=_next
+          tar -czf "/tmp/joinhook-commerce-${GITHUB_SHA}.tar.gz" -C deploy-bluehosting-commerce .
+
+      - name: Configure pinned SSH client
+        run: |
+          test -n "$SSH_HOST" || { echo 'Missing BLUEHOSTING_SSH_HOST'; exit 1; }
+          test -n "$SSH_USER" || { echo 'Missing BLUEHOSTING_SSH_USER'; exit 1; }
+          test -n "$SSH_PRIVATE_KEY" || { echo 'Missing BLUEHOSTING_SSH_PRIVATE_KEY'; exit 1; }
+          test -n "$SSH_KNOWN_HOSTS" || { echo 'Missing BLUEHOSTING_SSH_KNOWN_HOSTS'; exit 1; }
+          if [ -z "$SSH_PORT" ]; then echo 'SSH_PORT=22' >> "$GITHUB_ENV"; else echo "SSH_PORT=$SSH_PORT" >> "$GITHUB_ENV"; fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload release archive
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'mkdir -p /home/joinhook/releases'
+          scp -P "$SSH_PORT" "/tmp/joinhook-commerce-${GITHUB_SHA}.tar.gz" \
+            "$SSH_USER@$SSH_HOST:/home/joinhook/releases/incoming-${GITHUB_SHA}.tar.gz"
+
+      - name: Atomically switch Passenger runtime
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -euo pipefail
+          BASE=/home/joinhook
+          APP="$BASE/joinhook-production"
+          DOC="$BASE/public_html"
+          RELEASES="$BASE/releases"
+          ARCHIVE="$RELEASES/incoming-$SHA.tar.gz"
+          NEW="$RELEASES/release-$SHA"
+          TS=$(date -u +%Y%m%dT%H%M%SZ)
+          BACKUP="$RELEASES/rollback-$TS-$SHA"
+          MARKER="$RELEASES/rollback-target-$SHA.txt"
+
+          test -f "$ARCHIVE"
+          rm -rf "$NEW"
+          mkdir -p "$NEW"
+          tar -xzf "$ARCHIVE" -C "$NEW"
+          test -f "$NEW/server.js"
+          test -d "$NEW/.next/static"
+          test -d "$NEW/document-root-assets/_next/static"
+
+          if [ -d "$APP" ]; then
+            mv "$APP" "$BACKUP"
+            printf '%s\n' "$BACKUP" > "$MARKER"
+          fi
+          mv "$NEW" "$APP"
+
+          rm -rf "$DOC/_next/static"
+          mkdir -p "$DOC/_next"
+          cp -a "$APP/document-root-assets/_next/static" "$DOC/_next/static"
+          cp -a "$APP/document-root-assets/." "$DOC/"
+
+          mkdir -p "$APP/tmp"
+          touch "$APP/tmp/restart.txt"
+          rm -f "$ARCHIVE"
+          REMOTE
+
+      - name: Production smoke test
+        run: |
+          for i in {1..20}; do
+            home=$(curl --silent --output /tmp/home.html --write-out '%{http_code}' https://joinhook.cl/ || true)
+            webhook=$(curl --silent --output /tmp/webhook-live.txt --write-out '%{http_code}' https://joinhook.cl/api/commerce/mercadopago/webhook/ || true)
+            if [ "$home" = '200' ] && [ "$webhook" = '405' ]; then exit 0; fi
+            sleep 3
+          done
+          echo 'Production smoke test failed'
+          echo 'Home:' "$home" 'Webhook:' "$webhook"
+          exit 1
+
+      - name: Roll back runtime if smoke test fails
+        if: failure()
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -euo pipefail
+          BASE=/home/joinhook
+          APP="$BASE/joinhook-production"
+          DOC="$BASE/public_html"
+          RELEASES="$BASE/releases"
+          MARKER="$RELEASES/rollback-target-$SHA.txt"
+          FAILED="$RELEASES/failed-$SHA-$(date -u +%Y%m%dT%H%M%SZ)"
+
+          if [ ! -f "$MARKER" ]; then
+            echo 'No rollback marker found; refusing destructive rollback.'
+            exit 0
+          fi
+          BACKUP=$(cat "$MARKER")
+          test -d "$BACKUP"
+          if [ -d "$APP" ]; then mv "$APP" "$FAILED"; fi
+          mv "$BACKUP" "$APP"
+
+          rm -rf "$DOC/_next/static"
+          mkdir -p "$DOC/_next"
+          if [ -d "$APP/document-root-assets/_next/static" ]; then
+            cp -a "$APP/document-root-assets/_next/static" "$DOC/_next/static"
+            cp -a "$APP/document-root-assets/." "$DOC/"
+          else
+            cp -a "$APP/.next/static" "$DOC/_next/static"
+            cp -a "$APP/public/." "$DOC/"
+          fi
+          mkdir -p "$APP/tmp"
+          touch "$APP/tmp/restart.txt"
+          rm -f "$MARKER"
+          REMOTE
+
+      - name: Cleanup local server
+        if: always()
+        run: |
+          if [ -f /tmp/joinhook-predeploy.pid ]; then kill "$(cat /tmp/joinhook-predeploy.pid)" || true; fi
+          rm -f ~/.ssh/id_ed25519 || true

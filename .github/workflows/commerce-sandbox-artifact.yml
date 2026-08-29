@@ -1,0 +1,194 @@
+name: Commerce Sandbox Artifact
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/pages/api/commerce/**'
+      - 'src/pages/checkout/**'
+      - 'src/lib/commerce/**'
+      - 'src/lib/control-plane/**'
+      - 'docs/commerce/**'
+      - 'docs/bluehosting-production.md'
+      - 'docs/knowledge-base/incidents/**'
+      - 'next.config.js'
+      - '.github/workflows/commerce-sandbox-artifact.yml'
+      - '.github/workflows/deploy-bluehosting-commerce.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  productionlike-sandbox:
+    runs-on: ubuntu-latest
+    env:
+      JOINHOOK_DEPLOY_TARGET: production
+      NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_ENABLED: 'true'
+      NEXT_PUBLIC_CONTROL_EXPRESS_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
+      JOINHOOK_COMMERCE_CHECKOUT_ENABLED: 'false'
+      JOINHOOK_COMMERCE_ACCEPT_PAYMENTS: 'false'
+    steps:
+      - name: Checkout exact artifact source
+        uses: actions/checkout@v6
+        with:
+          # pull_request normally checks out GitHub's synthetic merge ref. The
+          # deployable artifact must instead be traceable to the exact PR head.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.20.2
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit and lint
+        run: |
+          npm audit --audit-level=high
+          npm audit --omit=dev --audit-level=high
+          npx eslint .
+
+      - name: Build production-like Commerce runtime
+        env:
+          NODE_ENV: production
+        run: npm run build
+
+      - name: Start build for route verification
+        run: |
+          npm run start -- -p 3020 > /tmp/joinhook-commerce-sandbox.log 2>&1 &
+          echo $! > /tmp/joinhook-commerce-sandbox.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3020/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/joinhook-commerce-sandbox.log
+          exit 1
+
+      - name: Verify production-like routing and safe defaults
+        run: |
+          curl --fail --silent --show-error --dump-header /tmp/root-headers.txt --output /dev/null http://127.0.0.1:3020/
+          if grep -qi '^x-robots-tag:' /tmp/root-headers.txt; then
+            echo 'Production-like Commerce artifact must not carry staging noindex headers'
+            exit 1
+          fi
+
+          curl --location --fail --silent --show-error http://127.0.0.1:3020/herramientas/control-gastronomico-express > /tmp/product.html
+          grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/product.html
+
+          # trailingSlash=true makes the slash form canonical. Mercado Pago should
+          # be configured with this exact URL to avoid relying on provider redirect behavior.
+          code=$(curl --silent --output /tmp/webhook.txt --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/mercadopago/webhook/)
+          test "$code" = '405'
+
+          code=$(curl --silent --output /tmp/webhook-internal.txt --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/webhooks/mercadopago/)
+          test "$code" = '405'
+
+          redirect=$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:3020/api/commerce/mercadopago/webhook)
+          test "$redirect" = '308'
+
+          code=$(curl --location --silent --output /tmp/create-order.json --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' --data '{}' \
+            http://127.0.0.1:3020/api/commerce/create-order)
+          test "$code" = '503'
+          grep -Fq 'commerce_payments_disabled' /tmp/create-order.json
+
+          curl --fail --silent --show-error http://127.0.0.1:3020/api/commerce/public-config/ > /tmp/public-config.json
+          grep -Fq '"enabled":false' /tmp/public-config.json
+
+      - name: Package BlueHosting runtime and document-root mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha=$(git rev-parse HEAD)
+          build_id=$(cat .next/BUILD_ID)
+
+          rm -rf deploy-commerce-sandbox
+          mkdir -p deploy-commerce-sandbox/.next
+          cp -a .next/standalone/. deploy-commerce-sandbox/
+          cp -a .next/static deploy-commerce-sandbox/.next/static
+          cp -a public deploy-commerce-sandbox/public
+          cp docs/commerce/manual-bluehosting-commerce-deploy.md deploy-commerce-sandbox/MANUAL-DEPLOY.md
+
+          mkdir -p deploy-commerce-sandbox/document-root-assets/_next
+          cp -a .next/static deploy-commerce-sandbox/document-root-assets/_next/static
+          cp -a public/. deploy-commerce-sandbox/document-root-assets/
+
+          cat > deploy-commerce-sandbox/DEPLOYMENT.txt <<EOF
+          JoinHook Commerce sandbox-capable production-like artifact
+          Source commit: $source_sha
+          CI event SHA: $GITHUB_SHA
+          Next build ID: $build_id
+          Built by: GitHub Actions / Commerce Sandbox Artifact
+          Runtime: Node.js 20.20.2
+          Runtime destination: /home/joinhook/joinhook-production
+          Document root mirror: document-root-assets/ -> /home/joinhook/public_html/
+          Startup file: server.js
+          Manual cPanel fallback: MANUAL-DEPLOY.md
+          Canonical TEST Webhook URL: https://joinhook.cl/api/commerce/mercadopago/webhook/
+          External Mercado Pago Link remains the rendered fallback.
+          Embedded Commerce is controlled at runtime by cPanel variables.
+          Do not run next build on BlueHosting.
+          EOF
+
+          cat > deploy-commerce-sandbox/RELEASE-METADATA.json <<EOF
+          {
+            "product": "joinhook-commerce",
+            "sourceCommit": "$source_sha",
+            "ciEventSha": "$GITHUB_SHA",
+            "nextBuildId": "$build_id",
+            "node": "20.20.2",
+            "paymentsEnabledAtBuild": false,
+            "checkoutEnabledAtBuild": false
+          }
+          EOF
+
+          (
+            cd deploy-commerce-sandbox
+            sha256sum server.js package.json DEPLOYMENT.txt RELEASE-METADATA.json MANUAL-DEPLOY.md .next/BUILD_ID > SHA256SUMS.txt
+          )
+
+          test -f deploy-commerce-sandbox/server.js
+          test -d deploy-commerce-sandbox/.next/static
+          test -d deploy-commerce-sandbox/document-root-assets/_next/static
+          test -f deploy-commerce-sandbox/RELEASE-METADATA.json
+          test -f deploy-commerce-sandbox/MANUAL-DEPLOY.md
+          test -f deploy-commerce-sandbox/SHA256SUMS.txt
+          grep -Fq "$source_sha" deploy-commerce-sandbox/DEPLOYMENT.txt
+          grep -Fq "\"sourceCommit\": \"$source_sha\"" deploy-commerce-sandbox/RELEASE-METADATA.json
+          grep -Fq 'JH-OPS-001' deploy-commerce-sandbox/MANUAL-DEPLOY.md
+          grep -Fq 'JH-OPS-002' deploy-commerce-sandbox/MANUAL-DEPLOY.md
+          grep -Fq 'JH-OPS-003' deploy-commerce-sandbox/MANUAL-DEPLOY.md
+          diff -qr .next/static deploy-commerce-sandbox/document-root-assets/_next/static
+          diff -qr public deploy-commerce-sandbox/document-root-assets --exclude=_next
+
+      - name: Smoke test packaged standalone runtime
+        run: |
+          PORT=3021 HOSTNAME=127.0.0.1 NODE_ENV=production node deploy-commerce-sandbox/server.js > /tmp/joinhook-commerce-package.log 2>&1 &
+          echo $! > /tmp/joinhook-commerce-package.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3021/ > /dev/null; then break; fi
+            if [ "$i" = 30 ]; then cat /tmp/joinhook-commerce-package.log; exit 1; fi
+            sleep 1
+          done
+          code=$(curl --silent --output /tmp/package-webhook.txt --write-out '%{http_code}' http://127.0.0.1:3021/api/commerce/mercadopago/webhook/)
+          test "$code" = '405'
+
+      - name: Stop QA servers
+        if: always()
+        run: |
+          if [ -f /tmp/joinhook-commerce-sandbox.pid ]; then kill "$(cat /tmp/joinhook-commerce-sandbox.pid)" || true; fi
+          if [ -f /tmp/joinhook-commerce-package.pid ]; then kill "$(cat /tmp/joinhook-commerce-package.pid)" || true; fi
+
+      - name: Upload Commerce sandbox artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: joinhook-commerce-sandbox-productionlike
+          path: deploy-commerce-sandbox
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
