@@ -1,0 +1,6 @@
+/* Posiciona los controles globales de CGE sin cubrir información operacional. */
+@media (min-width: 721px) {
+    .jh-theme-toggle.is-compact {
+        bottom: 88px;
+    }
+}

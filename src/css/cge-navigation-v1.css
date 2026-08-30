@@ -1,0 +1,357 @@
+/* Control Gastronómico Express — navegación operacional v1
+   Inspirada en patrones de back-office: dashboard como inicio, rail persistente
+   en escritorio y barra inferior para los flujos principales en móvil. */
+
+.cge-sidebar nav {
+    position: relative;
+    padding-top: 22px;
+}
+
+.cge-sidebar nav::before {
+    content: 'Operación diaria';
+    position: absolute;
+    top: 0;
+    left: 12px;
+    color: var(--cge-muted);
+    font-size: .5rem;
+    font-weight: 820;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: .82;
+}
+
+.cge-sidebar nav button {
+    position: relative;
+}
+
+.cge-sidebar nav button:nth-child(5) {
+    margin-top: 12px;
+    border-top-color: rgba(82, 88, 81, .09);
+}
+
+.cge-sidebar nav button:nth-child(6) {
+    margin-top: 4px;
+}
+
+.cge-sidebar nav button:focus-visible,
+.cge-btn:focus-visible,
+.cge-quick-grid > button:focus-visible,
+.cge-panel > header button:focus-visible {
+    outline: 3px solid rgba(114, 141, 120, .28);
+    outline-offset: 2px;
+}
+
+.cge-sidebar nav button.is-active {
+    transform: translateX(2px);
+}
+
+.cge-sidebar nav button.is-active::after {
+    content: '';
+    width: 4px;
+    height: 28px;
+    margin-left: auto;
+    border-radius: 999px;
+    background: var(--cge-sage);
+    box-shadow: 0 0 12px rgba(114, 141, 120, .32);
+}
+
+.cge-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.cge-topbar:hover,
+.cge-topbar:focus-within {
+    border-color: rgba(82, 88, 81, .08);
+    background: color-mix(in srgb, var(--cge-bg) 82%, transparent);
+    box-shadow: 0 10px 28px rgba(95, 86, 72, .08);
+    backdrop-filter: blur(18px);
+}
+
+.cge-welcome-actions .cge-btn,
+.cge-tool-actions .cge-btn {
+    min-width: 132px;
+}
+
+.cge-quick-grid > button {
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.cge-quick-grid > button:hover {
+    transform: translateY(-2px);
+    border-color: rgba(114, 141, 120, .18);
+}
+
+.cge-critical-list > button,
+.cge-suggestion-list > div,
+.cge-card-list > article {
+    transition: background .16s ease, transform .16s ease;
+}
+
+.cge-critical-list > button:hover,
+.cge-card-list > article:hover {
+    background: rgba(255, 255, 255, .18);
+}
+
+/* Tablet: el rail se vuelve compacto antes de pasar a navegación móvil. */
+@media (max-width: 1180px) and (min-width: 721px) {
+    .cge-app {
+        grid-template-columns: 92px minmax(0, 1fr);
+    }
+
+    .cge-sidebar {
+        padding-inline: 10px;
+    }
+
+    .cge-logo {
+        justify-content: center;
+        padding-inline: 0;
+    }
+
+    .cge-logo > div,
+    .cge-sidebar nav button > span,
+    .cge-sidebar-foot > div,
+    .cge-sidebar nav::before {
+        display: none;
+    }
+
+    .cge-sidebar nav {
+        padding-top: 0;
+    }
+
+    .cge-sidebar nav button {
+        min-height: 54px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .cge-sidebar nav button.is-active::after {
+        position: absolute;
+        right: 5px;
+    }
+
+    .cge-sidebar-foot {
+        justify-content: center;
+        padding: 14px 0;
+    }
+}
+
+/* Móvil: patrón de navegación inferior persistente para minimizar pasos. */
+@media (max-width: 720px) {
+    .cge-app {
+        display: block;
+        min-height: 100dvh;
+        padding-bottom: calc(82px + env(safe-area-inset-bottom));
+    }
+
+    .cge-main {
+        width: 100%;
+        padding: 12px 12px 118px;
+    }
+
+    .cge-sidebar {
+        position: fixed;
+        inset: auto 0 0 0;
+        width: auto;
+        height: auto;
+        padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+        border: 0;
+        border-top: 1px solid var(--cge-line);
+        border-radius: 0;
+        background: color-mix(in srgb, var(--cge-bg) 90%, transparent);
+        box-shadow: 0 -12px 32px rgba(65, 62, 55, .12);
+        backdrop-filter: blur(22px);
+        z-index: 70;
+    }
+
+    .cge-logo,
+    .cge-sidebar-foot,
+    .cge-sidebar nav::before {
+        display: none;
+    }
+
+    .cge-sidebar nav {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(48px, 1fr));
+        gap: 3px;
+        padding: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        overscroll-behavior-inline: contain;
+    }
+
+    .cge-sidebar nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cge-sidebar nav button,
+    .cge-sidebar nav button:nth-child(5),
+    .cge-sidebar nav button:nth-child(6),
+    .cge-sidebar nav button:nth-child(n+5) {
+        display: flex;
+        min-width: 48px;
+        min-height: 60px;
+        margin: 0;
+        padding: 7px 3px 6px;
+        border: 1px solid transparent;
+        border-radius: 14px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        text-align: center;
+    }
+
+    .cge-sidebar nav button .cge-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .cge-sidebar nav button > span {
+        display: block;
+        min-width: 0;
+    }
+
+    .cge-sidebar nav button strong {
+        max-width: 58px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: .5rem;
+        line-height: 1.1;
+    }
+
+    .cge-sidebar nav button small {
+        display: none;
+    }
+
+    .cge-sidebar nav button.is-active {
+        transform: none;
+        color: var(--cge-sage-deep);
+        background: linear-gradient(145deg, rgba(248,244,236,.96), rgba(226,221,210,.96));
+        box-shadow: 4px 4px 10px rgba(96, 88, 74, .11), -3px -3px 9px rgba(255,255,255,.62);
+    }
+
+    .cge-sidebar nav button.is-active::after {
+        position: absolute;
+        right: 50%;
+        bottom: 2px;
+        width: 22px;
+        height: 3px;
+        margin: 0;
+        transform: translateX(50%);
+    }
+
+    .cge-topbar {
+        top: 8px;
+        margin-bottom: 14px;
+        padding: 9px 54px 9px 10px;
+        border-color: rgba(82, 88, 81, .08);
+        background: color-mix(in srgb, var(--cge-bg) 88%, transparent);
+        box-shadow: 0 8px 24px rgba(95, 86, 72, .08);
+        backdrop-filter: blur(18px);
+    }
+
+    .cge-topbar h1 {
+        font-size: 1.35rem;
+    }
+
+    .cge-top-actions {
+        gap: 7px;
+    }
+
+    .cge-business,
+    .cge-avatar {
+        display: none;
+    }
+
+    /* En CGE el tema queda en el encabezado, nunca encima de la navegación. */
+    .jh-theme-toggle.is-compact {
+        top: 17px;
+        right: 18px;
+        bottom: auto;
+        left: auto;
+        min-height: 38px;
+        width: 38px;
+        padding: 3px;
+        border-radius: 13px;
+        justify-content: center;
+    }
+
+    .jh-theme-toggle.is-compact .jh-theme-toggle-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+    }
+
+    .jh-theme-toggle.is-compact .jh-theme-toggle-copy {
+        display: none;
+    }
+
+    .cge-welcome {
+        min-height: auto;
+        padding: 24px 20px;
+        border-radius: 23px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .cge-welcome h2 {
+        font-size: clamp(2rem, 11vw, 3rem);
+    }
+
+    .cge-welcome-actions,
+    .cge-tool-actions {
+        width: 100%;
+    }
+
+    .cge-welcome-actions .cge-btn,
+    .cge-tool-actions .cge-btn {
+        min-width: 0;
+        flex: 1 1 140px;
+    }
+
+    .cge-quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cge-quick-grid > button {
+        min-height: 76px;
+    }
+
+    .cge-pwa-status {
+        bottom: calc(78px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 360px) {
+    .cge-sidebar nav {
+        grid-template-columns: repeat(6, minmax(44px, 1fr));
+    }
+
+    .cge-sidebar nav button,
+    .cge-sidebar nav button:nth-child(5),
+    .cge-sidebar nav button:nth-child(6),
+    .cge-sidebar nav button:nth-child(n+5) {
+        min-width: 44px;
+    }
+
+    .cge-sidebar nav button strong {
+        max-width: 48px;
+        font-size: .47rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cge-sidebar nav button,
+    .cge-quick-grid > button,
+    .cge-critical-list > button,
+    .cge-card-list > article,
+    .cge-topbar {
+        transition: none;
+    }
+}
