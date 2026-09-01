@@ -2,6 +2,40 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { defaultConsent, readConsent, saveConsent, type ConsentState } from '@/lib/joinhook-web';
 
+const CONSENT_ID_KEY = 'joinhook.consent-id.v1';
+
+function getConsentId() {
+    if (typeof window === 'undefined') return '';
+    let id = window.localStorage.getItem(CONSENT_ID_KEY) || '';
+    if (id) return id;
+    id = typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : `jh-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
+    window.localStorage.setItem(CONSENT_ID_KEY, id);
+    return id;
+}
+
+async function auditConsent(consent: ConsentState) {
+    try {
+        const consentId = getConsentId();
+        if (!consentId || !consent.updatedAt) return;
+        await fetch('/api/privacy-consent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            keepalive: true,
+            body: JSON.stringify({
+                consentId,
+                updatedAt: consent.updatedAt,
+                analytics: consent.analytics,
+                marketing: consent.marketing,
+                preferences: consent.preferences
+            })
+        });
+    } catch {
+        // Consent remains valid locally even when optional audit persistence is unavailable.
+    }
+}
+
 function updateGoogleConsent(consent: ConsentState) {
     if (typeof window === 'undefined') return;
     const gtag = (window as Window & { dataLayer?: unknown[]; gtag?: (...args: unknown[]) => void }).gtag;
@@ -41,7 +75,7 @@ function loadCloudflare(token: string) {
     const script = document.createElement('script');
     script.defer = true;
     script.dataset.joinhookCfAnalytics = 'true';
-    script.src = 'https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5bab616c81581793175';
+    script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
     script.setAttribute('data-cf-beacon', JSON.stringify({ token }));
     document.head.appendChild(script);
 }
@@ -53,7 +87,6 @@ export function JoinHookPrivacyAnalytics() {
     const [customize, setCustomize] = useState(false);
     const ga4Id = process.env.NEXT_PUBLIC_GA4_ID || '';
     const cfToken = process.env.NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN || '';
-
     const hasDecision = useMemo(() => Boolean(consent.updatedAt), [consent.updatedAt]);
 
     useEffect(() => {
@@ -85,6 +118,7 @@ export function JoinHookPrivacyAnalytics() {
             const next = (event as CustomEvent<ConsentState>).detail;
             setConsent(next);
             updateGoogleConsent(next);
+            void auditConsent(next);
             if (next.analytics) {
                 loadGa4(ga4Id);
                 loadCloudflare(cfToken);
