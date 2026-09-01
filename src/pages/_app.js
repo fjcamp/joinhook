@@ -5,6 +5,7 @@ import { CGEPwaStatus } from '@/features/cge/pwa';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { JoinHookAssistant } from '@/components/JoinHookAssistant';
 import { JoinHookPrivacyAnalytics } from '@/components/JoinHookPrivacyAnalytics';
+import { JoinHookBehaviorAnalytics } from '@/components/JoinHookBehaviorAnalytics';
 import { JoinHookWhatsApp } from '@/components/JoinHookWhatsApp';
 import { JoinHookFooterNewsletter } from '@/components/JoinHookNewsletter';
 import { useEffect } from 'react';
@@ -81,6 +82,7 @@ export default function MyApp({ Component, pageProps }) {
             {isHome && <JoinHookAssistant />}
             {isPublicSite && <JoinHookWhatsApp />}
             {isPublicSite && <JoinHookPrivacyAnalytics />}
+            {isPublicSite && <JoinHookBehaviorAnalytics />}
             {isCGEApp && <CGEPwaStatus />}
         </>
     );
