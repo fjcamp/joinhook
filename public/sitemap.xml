@@ -17,5 +17,6 @@
   <url><loc>https://joinhook.cl/contacto/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://joinhook.cl/privacidad/</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
   <url><loc>https://joinhook.cl/cookies/</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://joinhook.cl/terminos/</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
   <url><loc>https://joinhook.cl/condiciones-beta/</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
 </urlset>
