@@ -4,6 +4,7 @@ import { generateGlobalCssVariables } from '@/utils/theme-style-utils';
 import { CGEPwaStatus } from '@/features/cge/pwa';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { JoinHookAssistant } from '@/components/JoinHookAssistant';
+import { JoinHookRuntime } from '@/components/JoinHookV3Runtime';
 import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
@@ -43,39 +44,22 @@ export default function MyApp({ Component, pageProps }) {
     const router = useRouter();
     const isCGEApp = router.pathname === '/app/control-gastronomico-express';
     const isHome = router.pathname === '/';
-
+    const isPublicJoinHook = !router.pathname.startsWith('/api/') && !router.pathname.startsWith('/local') && router.pathname !== '/agent-center';
     const cssVars = theme ? generateGlobalCssVariables(theme) : '';
 
-    useEffect(() => {
-        document.body.setAttribute('data-theme', page.colors || 'colors-a');
-    }, [page.colors]);
+    useEffect(() => { document.body.setAttribute('data-theme', page.colors || 'colors-a'); }, [page.colors]);
 
-    return (
-        <>
-            <Head>
-                <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
-                <link rel="icon" href={isCGEApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
-            </Head>
-            {isCGEApp && (
-                <Head>
-                    <link rel="manifest" href="/cge-manifest.webmanifest" />
-                    <meta name="application-name" content="Control Gastronómico Express" />
-                    <meta name="apple-mobile-web-app-capable" content="yes" />
-                    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-                    <meta name="apple-mobile-web-app-title" content="Control Gastro" />
-                    <meta name="mobile-web-app-capable" content="yes" />
-                    <meta name="theme-color" content="#728d78" />
-                </Head>
-            )}
-            <style jsx global>{`
-                :root {
-                    ${cssVars}
-                }
-            `}</style>
-            <Component {...pageProps} />
-            <ThemeToggle compact={isCGEApp} />
-            {isHome && <JoinHookAssistant />}
-            {isCGEApp && <CGEPwaStatus />}
-        </>
-    );
+    return <>
+        <Head>
+            <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+            <link rel="icon" href={isCGEApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
+        </Head>
+        {isCGEApp && <Head><link rel="manifest" href="/cge-manifest.webmanifest" /><meta name="application-name" content="Control Gastronómico Express" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="default" /><meta name="apple-mobile-web-app-title" content="Control Gastro" /><meta name="mobile-web-app-capable" content="yes" /><meta name="theme-color" content="#728d78" /></Head>}
+        <style jsx global>{`:root { ${cssVars} }`}</style>
+        <Component {...pageProps} />
+        {isPublicJoinHook && <JoinHookRuntime />}
+        <ThemeToggle compact={isCGEApp} />
+        {isHome && <JoinHookAssistant />}
+        {isCGEApp && <CGEPwaStatus />}
+    </>;
 }
