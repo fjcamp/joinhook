@@ -23,6 +23,7 @@ import '../css/joinhook-v3-base.css';
 import '../css/joinhook-v3-pages.css';
 import '../css/joinhook-v3-responsive.css';
 import '../css/joinhook-v3-growth.css';
+import '../css/joinhook-v3-fixes.css';
 
 const themeBootstrap = `
 (function () {
@@ -50,7 +51,6 @@ export default function MyApp({ Component, pageProps }) {
     const isHome = router.pathname === '/';
     const isInternal = router.pathname.startsWith('/local') || router.pathname.startsWith('/agent-center');
     const isPublicSite = !isCGEApp && !isInternal;
-
     const cssVars = theme ? generateGlobalCssVariables(theme) : '';
 
     useEffect(() => {
