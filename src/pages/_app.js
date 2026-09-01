@@ -15,6 +15,9 @@ import '../css/cge-v02.css';
 import '../css/cge-pwa.css';
 import '../css/cge-launch.css';
 import '../css/theme-modes.css';
+import '../css/joinhook-v3-base.css';
+import '../css/joinhook-v3-pages.css';
+import '../css/joinhook-v3-responsive.css';
 
 const themeBootstrap = `
 (function () {
@@ -25,9 +28,11 @@ const themeBootstrap = `
             : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-color-mode', mode);
         document.documentElement.style.colorScheme = mode;
+        document.documentElement.lang = 'es-CL';
     } catch (error) {
         document.documentElement.setAttribute('data-color-mode', 'light');
         document.documentElement.style.colorScheme = 'light';
+        document.documentElement.lang = 'es-CL';
     }
 })();
 `;
