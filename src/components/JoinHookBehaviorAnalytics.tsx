@@ -64,10 +64,37 @@ export function JoinHookBehaviorAnalytics() {
         }, { threshold: [0.45] }) : null;
         sections.forEach((section) => observer?.observe(section));
 
+        const videoCleanup: Array<() => void> = [];
+        document.querySelectorAll<HTMLVideoElement>('video').forEach((video, index) => {
+            const progress = new Set<number>();
+            const label = video.dataset.analyticsName || video.getAttribute('aria-label') || video.getAttribute('title') || `video-${index + 1}`;
+            const onPlay = () => trackJoinHookEvent('video_start', { video_title: label.slice(0, 100) });
+            const onTime = () => {
+                if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+                const percent = Math.round((video.currentTime / video.duration) * 100);
+                [25, 50, 75].forEach((threshold) => {
+                    if (percent >= threshold && !progress.has(threshold)) {
+                        progress.add(threshold);
+                        trackJoinHookEvent('video_progress', { video_title: label.slice(0, 100), video_percent: threshold });
+                    }
+                });
+            };
+            const onEnded = () => trackJoinHookEvent('video_complete', { video_title: label.slice(0, 100) });
+            video.addEventListener('play', onPlay);
+            video.addEventListener('timeupdate', onTime);
+            video.addEventListener('ended', onEnded);
+            videoCleanup.push(() => {
+                video.removeEventListener('play', onPlay);
+                video.removeEventListener('timeupdate', onTime);
+                video.removeEventListener('ended', onEnded);
+            });
+        });
+
         return () => {
             window.removeEventListener('scroll', onScroll);
             document.removeEventListener('click', clickHandler, true);
             observer?.disconnect();
+            videoCleanup.forEach((cleanup) => cleanup());
         };
     }, [router.asPath]);
 
