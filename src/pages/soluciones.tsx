@@ -1,0 +1,20 @@
+import { CTA, DashboardVisual, FounderStrip, IconBadge, PageShell, SectionTitle, SiteHead } from '@/components/JoinHookV3';
+
+const solutions = [
+    ['code','Desarrollo Web & PWA','Sitios y aplicaciones listas para crecer',['Sitios corporativos','Landing pages','PWA instalables','Experiencias responsive']],
+    ['gear','Sistemas & Automatización','Ordenar tareas e información',['Flujos operativos','Centralización de datos','Automatizaciones','Paneles de seguimiento']],
+    ['design','UX/UI & Diseño','Interfaces pensadas para el usuario',['Arquitectura de información','Diseño visual','Wireframes','Prototipos']],
+    ['rocket','Prototipos & Validación','Convertir una idea en una primera solución',['Descubrimiento','MVP','Pruebas tempranas','Iteración']]
+] as const;
+
+export default function Solutions() {
+    return <PageShell>
+        <SiteHead title="Soluciones digitales | Desarrollo web, PWA, sistemas y automatización | JoinHook" description="Servicios de JoinHook en desarrollo web y PWA, sistemas digitales, automatización, UX/UI, prototipos y validación para necesidades operativas reales." path="/soluciones" jsonLd={{'@type':'Service','@id':'https://joinhook.cl/soluciones/#service','provider':{'@id':'https://joinhook.cl/#organization'},'areaServed':'Chile','serviceType':['Desarrollo Web & PWA','Sistemas & Automatización','UX/UI & Diseño','Prototipos & Validación']}} />
+        <section className="jh3-hero"><div className="jh3-hero-copy"><span className="jh3-kicker">Soluciones</span><h1>Servicios digitales orientados a necesidades concretas.</h1><p>Acompañamos ideas, procesos y operaciones con diseño, desarrollo y herramientas digitales pensadas para ser útiles desde el primer uso.</p><div className="jh3-wave" /></div><DashboardVisual /></section>
+        <section className="jh3-section"><div className="jh3-grid-4">{solutions.map(([icon,title,subtitle,features]) => <article className="jh3-card jh3-card-lift jh3-solution-card" key={title}><IconBadge name={icon} /><h2>{title}</h2><p className="jh3-solution-subtitle">{subtitle}</p><ul>{features.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul></article>)}</div></section>
+        <section className="jh3-section"><SectionTitle title="Cómo trabajamos" /><div className="jh3-process">{[['people','Escuchar','Contexto, usuarios y objetivo real.'],['search','Analizar','Oportunidades, restricciones y evidencia.'],['target','Definir','Alcance, prioridades y criterios de éxito.'],['design','Diseñar','Flujos e interfaces claras.'],['code','Construir','Desarrollo, integración y pruebas.'],['refresh','Ajustar','Medición, iteración y mejora.']].map(([i,t,d]) => <article key={t} className="jh3-card jh3-process-card"><IconBadge name={i as 'people'} /><h3>{t}</h3><p>{d}</p></article>)}</div></section>
+        <section className="jh3-section"><SectionTitle title="En qué casos podemos aportar" /><div className="jh3-grid-3">{[['chart','Negocios que necesitan ordenar su operación','Unificar información, simplificar procesos y dar visibilidad para tomar mejores decisiones.'],['people','Equipos que quieren digitalizar procesos','Reducir tareas repetitivas, centralizar datos y mejorar coordinación con herramientas apropiadas.'],['lightbulb','Ideas que necesitan una primera versión funcional','Validar supuestos con un prototipo o MVP antes de ampliar el desarrollo.']].map(([i,t,d]) => <article className="jh3-card jh3-use-card" key={t}><IconBadge name={i as 'chart'} /><div><h3>{t}</h3><p>{d}</p></div></article>)}</div></section>
+        <section className="jh3-section"><div className="jh3-quote-panel jh3-card"><blockquote>“No partimos desde la tecnología buscando dónde usarla. Partimos desde el problema para decidir qué tecnología tiene sentido aplicar.”</blockquote><FounderStrip compact /></div></section>
+        <CTA title="Cuéntanos qué proceso quieres mejorar" text="La conversación inicial sirve para entender contexto, prioridades y el alcance que realmente tiene sentido." button="Solicitar conversación" />
+    </PageShell>;
+}
