@@ -61,5 +61,8 @@ export function JoinHookNewsletter({ compact = false }: { compact?: boolean }) {
 }
 
 export function JoinHookFooterNewsletter() {
-    return <div className="jh-newsletter-footer-wrap"><JoinHookNewsletter compact /></div>;
+    return <div className="jh-newsletter-footer-wrap">
+        <JoinHookNewsletter compact />
+        <nav className="jh-legal-links" aria-label="Información legal"><Link href="/privacidad">Privacidad</Link><Link href="/cookies">Cookies</Link><Link href="/terminos">Términos</Link></nav>
+    </div>;
 }
