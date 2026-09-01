@@ -4,6 +4,9 @@ import { generateGlobalCssVariables } from '@/utils/theme-style-utils';
 import { CGEPwaStatus } from '@/features/cge/pwa';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { JoinHookAssistant } from '@/components/JoinHookAssistant';
+import { JoinHookPrivacyAnalytics } from '@/components/JoinHookPrivacyAnalytics';
+import { JoinHookWhatsApp } from '@/components/JoinHookWhatsApp';
+import { JoinHookFooterNewsletter } from '@/components/JoinHookNewsletter';
 import { useEffect } from 'react';
 import '../css/main.css';
 import '../css/redesign.css';
@@ -18,6 +21,7 @@ import '../css/theme-modes.css';
 import '../css/joinhook-v3-base.css';
 import '../css/joinhook-v3-pages.css';
 import '../css/joinhook-v3-responsive.css';
+import '../css/joinhook-v3-growth.css';
 
 const themeBootstrap = `
 (function () {
@@ -43,6 +47,8 @@ export default function MyApp({ Component, pageProps }) {
     const router = useRouter();
     const isCGEApp = router.pathname === '/app/control-gastronomico-express';
     const isHome = router.pathname === '/';
+    const isInternal = router.pathname.startsWith('/local') || router.pathname.startsWith('/agent-center');
+    const isPublicSite = !isCGEApp && !isInternal;
 
     const cssVars = theme ? generateGlobalCssVariables(theme) : '';
 
@@ -55,6 +61,7 @@ export default function MyApp({ Component, pageProps }) {
             <Head>
                 <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
                 <link rel="icon" href={isCGEApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
+                {process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && <meta name="google-site-verification" content={process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION} />}
             </Head>
             {isCGEApp && (
                 <Head>
@@ -67,14 +74,13 @@ export default function MyApp({ Component, pageProps }) {
                     <meta name="theme-color" content="#728d78" />
                 </Head>
             )}
-            <style jsx global>{`
-                :root {
-                    ${cssVars}
-                }
-            `}</style>
+            <style jsx global>{`:root { ${cssVars} }`}</style>
             <Component {...pageProps} />
+            {isPublicSite && <JoinHookFooterNewsletter />}
             <ThemeToggle compact={isCGEApp} />
             {isHome && <JoinHookAssistant />}
+            {isPublicSite && <JoinHookWhatsApp />}
+            {isPublicSite && <JoinHookPrivacyAnalytics />}
             {isCGEApp && <CGEPwaStatus />}
         </>
     );
