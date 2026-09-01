@@ -1,64 +1,52 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { cleanText, clientKey, rateLimited, requestOriginAllowed, subscribeBrevoDoubleOptIn, validEmail, verifyTurnstile } from '@/utils/joinhook-server';
 
-const ALLOWED_INTENTS = new Set(['support', 'human', 'sales']);
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS = 6;
-const buckets = new Map<string, { count: number; resetAt: number }>();
-
-function clientKey(req: NextApiRequest) {
-    const forwarded = req.headers['x-forwarded-for'];
-    const ip = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(',')[0]?.trim();
-    return ip || req.socket.remoteAddress || 'unknown';
-}
-
-function rateLimited(key: string) {
-    const now = Date.now();
-    const bucket = buckets.get(key);
-    if (!bucket || bucket.resetAt <= now) {
-        buckets.set(key, { count: 1, resetAt: now + WINDOW_MS });
-        return false;
-    }
-    bucket.count += 1;
-    return bucket.count > MAX_REQUESTS;
-}
+const TOPICS = new Set(['desarrollo-web', 'software', 'automatizacion', 'producto-digital', 'mejora-proceso', 'otro']);
+const STAGES = new Set(['idea', 'definicion', 'desarrollo', 'existente', 'operacion']);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, code: 'method' }); }
+    if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) return res.status(415).json({ ok: false, code: 'content_type' });
+    if (!requestOriginAllowed(req)) return res.status(403).json({ ok: false, code: 'origin' });
+    const key = clientKey(req);
+    if (rateLimited(`contact:${key}`, 6)) return res.status(429).json({ ok: false, code: 'rate_limit' });
 
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', 'POST');
-        return res.status(405).json({ ok: false });
-    }
-    if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
-        return res.status(415).json({ ok: false });
-    }
-    const origin = String(req.headers.origin || '');
-    if (origin && origin !== 'https://joinhook.cl' && origin !== 'https://www.joinhook.cl' && process.env.NODE_ENV === 'production') {
-        return res.status(403).json({ ok: false });
-    }
-    if (rateLimited(clientKey(req))) return res.status(429).json({ ok: false });
+    const body = req.body || {};
+    if (body.website) return res.status(202).json({ ok: true, filtered: true });
+    const name = cleanText(body.name, 100);
+    const email = cleanText(body.email, 180).toLowerCase();
+    const phone = cleanText(body.phone, 40);
+    const company = cleanText(body.company, 140);
+    const topic = cleanText(body.topic, 50);
+    const stage = cleanText(body.stage, 50);
+    const message = cleanText(body.message, 1200);
+    const source = cleanText(body.source, 80) || 'joinhook-contact-page';
+    const newsletterOptIn = body.newsletterOptIn === true;
+    const privacyAccepted = body.privacyAccepted === true;
 
-    const { intent, message, source, website } = req.body || {};
-    if (website) return res.status(202).json({ ok: true });
-    if (!ALLOWED_INTENTS.has(intent) || typeof message !== 'string' || message.trim().length < 10 || message.length > 1200) {
-        return res.status(400).json({ ok: false });
-    }
+    if (name.length < 2 || !validEmail(email) || message.length < 10 || !TOPICS.has(topic) || !STAGES.has(stage) || !privacyAccepted) return res.status(400).json({ ok: false, code: 'validation' });
+    if (!await verifyTurnstile(body.turnstileToken, key)) return res.status(400).json({ ok: false, code: 'turnstile' });
 
-    const cleanMessage = message.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim();
+    const lead = { name, email, phone: phone || undefined, company: company || undefined, topic, stage, message, source, occurredAt: new Date().toISOString(), privacyAccepted: true };
+    let forwarded = false;
     const webhookUrl = process.env.JOINHOOK_LEAD_WEBHOOK_URL;
-    if (!webhookUrl) return res.status(202).json({ ok: true, forwarded: false });
-
-    try {
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'User-Agent': 'JoinHook-Web/2.0' },
-            body: JSON.stringify({ intent, message: cleanMessage, source: typeof source === 'string' ? source.slice(0, 80) : 'joinhook-web', occurredAt: new Date().toISOString(), notify: 'ventas@joinhook.cl' }),
-            signal: AbortSignal.timeout(6000)
-        });
-        if (!response.ok) return res.status(502).json({ ok: false, forwarded: false });
-        return res.status(202).json({ ok: true, forwarded: true });
-    } catch {
-        return res.status(502).json({ ok: false, forwarded: false });
+    if (webhookUrl) {
+        try {
+            const response = await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'User-Agent': 'JoinHook-Web/3.0' }, body: JSON.stringify({ ...lead, notify: 'ventas@joinhook.cl' }), signal: AbortSignal.timeout(7000) });
+            forwarded = response.ok;
+            if (!response.ok) return res.status(502).json({ ok: false, code: 'lead_forward' });
+        } catch { return res.status(502).json({ ok: false, code: 'lead_forward' }); }
     }
+
+    let newsletter = { requested: false, configured: false, ok: false };
+    if (newsletterOptIn) {
+        try {
+            const doi = await subscribeBrevoDoubleOptIn(email, name.split(/\s+/)[0] || '');
+            newsletter = { requested: true, configured: doi.configured, ok: doi.ok };
+        } catch { newsletter = { requested: true, configured: true, ok: false }; }
+    }
+
+    return res.status(202).json({ ok: true, forwarded, newsletter });
 }
