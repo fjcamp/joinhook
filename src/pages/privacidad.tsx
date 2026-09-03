@@ -1,52 +1,25 @@
-import Head from 'next/head';
-import Link from 'next/link';
+import { PageShell, SiteHead, SITE_EMAIL } from '@/components/JoinHookV3';
 
-export default function Privacidad() {
-    return (
-        <>
-            <Head>
-                <title>Privacidad | JoinHook</title>
-                <meta name="description" content="Política de privacidad de JoinHook y Control Gastronómico Express durante su etapa beta local-first." />
-                <link rel="canonical" href="https://joinhook.cl/privacidad" />
-            </Head>
-            <main className="jh-site jh-legal-page">
-                <header className="jh-header">
-                    <Link className="jh-brand" href="/"><span className="jh-brand-mark" aria-hidden="true">JH</span><span>JoinHook</span></Link>
-                    <Link className="jh-header-cta" href="/herramientas/control-gastronomico-express">Control Gastronómico</Link>
-                </header>
-
-                <article className="jh-legal jh-surface">
-                    <span className="jh-eyebrow">Privacidad · actualización 19 agosto 2026</span>
-                    <h1>Privacidad en JoinHook y Control Gastronómico Express</h1>
-                    <p>JoinHook es un proyecto independiente de Francisco Javier Campos. Esta política describe el funcionamiento de privacidad de la web y de la beta actual de Control Gastronómico Express.</p>
-
-                    <h2>1. Datos operativos de Control Gastronómico Express</h2>
-                    <p>La beta actual es local-first. Inventario, compras, mermas, proveedores, movimientos y configuración del negocio se almacenan en el navegador del dispositivo mediante almacenamiento local. JoinHook no recibe ni sincroniza automáticamente esos datos con una base de datos propia en esta versión.</p>
-
-                    <h2>2. Respaldos</h2>
-                    <p>La aplicación permite descargar un respaldo JSON y archivos CSV. Esos archivos permanecen bajo control del usuario y no se envían automáticamente a JoinHook. El usuario debe conservar sus respaldos en un lugar seguro.</p>
-
-                    <h2>3. Contacto por correo</h2>
-                    <p>Los enlaces de contacto abren el cliente de correo del usuario. Si escribes a <a href="mailto:info@joinhook.cl">info@joinhook.cl</a>, se recibirán los datos que voluntariamente incluyas en el mensaje, como nombre, correo, negocio, ciudad o descripción de tu necesidad. Esa información se utilizará para responder la consulta, gestionar una solicitud de beta o coordinar una eventual compra.</p>
-
-                    <h2>4. Hosting y registros técnicos</h2>
-                    <p>La web puede ser servida por proveedores de infraestructura y alojamiento que generen registros técnicos necesarios para seguridad, diagnóstico y entrega del servicio, como dirección IP, fecha, navegador o ruta solicitada. JoinHook no incorpora actualmente publicidad comportamental ni una plataforma propia de perfiles de usuario en Control Gastronómico Express.</p>
-
-                    <h2>5. Cookies y analítica</h2>
-                    <p>La versión actual no necesita cookies publicitarias para funcionar. Si posteriormente se incorpora analítica, autenticación, pagos o servicios externos que requieran tratamiento adicional de datos, esta política se actualizará antes de activarlos cuando corresponda.</p>
-
-                    <h2>6. Derechos y consultas</h2>
-                    <p>Para consultar por información entregada directamente a JoinHook, solicitar su corrección o pedir su eliminación cuando corresponda, escribe a <a href="mailto:info@joinhook.cl?subject=Privacidad%20JoinHook">info@joinhook.cl</a>. La operación de datos personales se ajustará a la normativa chilena aplicable y esta política será revisada antes de la entrada en vigencia de las nuevas disposiciones de protección de datos previstas para diciembre de 2026.</p>
-
-                    <h2>7. Cambios</h2>
-                    <p>Control Gastronómico Express está en beta. Si cambia la arquitectura —por ejemplo al incorporar cuentas, sincronización cloud o pagos— esta política también deberá cambiar antes de utilizar esas funciones.</p>
-
-                    <div className="jh-actions">
-                        <Link className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Volver al producto</Link>
-                        <Link className="jh-button jh-button-soft" href="/condiciones-beta">Condiciones de beta</Link>
-                    </div>
-                </article>
-            </main>
-        </>
-    );
+export default function PrivacyPage() {
+    return <PageShell>
+        <SiteHead title="Política de Privacidad | JoinHook" description="Cómo JoinHook trata los datos recibidos a través del sitio, formularios, newsletter y herramientas de medición." path="/privacidad" />
+        <main className="jh-legal">
+            <header className="jh-legal-header"><span className="jh3-kicker">Privacidad</span><h1>Política de Privacidad</h1><p>Última actualización: 1 de septiembre de 2026. Esta política explica qué información recibe JoinHook, para qué se utiliza y qué opciones tiene cada visitante.</p></header>
+            <article>
+                <section><h2>1. Responsable y alcance</h2><p>JoinHook, Chile, administra joinhook.cl y sus formularios públicos. Para consultas de privacidad puedes escribir a <a href={`mailto:${SITE_EMAIL}`}>{SITE_EMAIL}</a>.</p><p>Esta política cubre el sitio público, formularios de contacto, newsletter y medición del sitio. Productos que manejen información propia pueden contar con condiciones adicionales.</p></section>
+                <section><h2>2. Datos que podemos recibir</h2><ul><li>Datos entregados voluntariamente en contacto: nombre, correo, teléfono opcional, empresa/proyecto, tipo y etapa de la necesidad y contenido del mensaje.</li><li>Correo y nombre opcional cuando una persona solicita suscribirse a la newsletter.</li><li>Datos técnicos limitados de seguridad y operación, como dirección IP temporal, user-agent, fecha y resultado de una solicitud.</li><li>Datos de navegación y atribución solo cuando corresponda al consentimiento otorgado: páginas, eventos, dispositivo, fuente, campaña y rendimiento.</li></ul><p>No solicitamos RUT, fecha de nacimiento, contraseñas, datos financieros ni categorías sensibles para el contacto comercial ordinario.</p></section>
+                <section><h2>3. Finalidades</h2><ul><li>Responder consultas y evaluar proyectos o necesidades.</li><li>Gestionar oportunidades comerciales solicitadas por el visitante.</li><li>Enviar newsletter únicamente a quienes completen el flujo de doble confirmación.</li><li>Proteger el sitio contra abuso, bots y fraude.</li><li>Comprender rendimiento y uso del sitio cuando la persona autoriza analítica opcional.</li><li>Cumplir obligaciones legales o contractuales aplicables.</li></ul></section>
+                <section><h2>4. Contacto y marketing son finalidades distintas</h2><p>Enviar una consulta a JoinHook no implica suscribirse a comunicaciones promocionales. La opción de newsletter es independiente, voluntaria y puede retirarse en cualquier momento mediante el enlace de baja de cada envío.</p></section>
+                <section><h2>5. Proveedores</h2><p>Según la configuración habilitada, JoinHook puede utilizar servicios de infraestructura y seguridad, Cloudflare Turnstile, Brevo para suscripciones y correo, Google Analytics 4 y Google Search Console para medición, y Cloudflare Web Analytics para rendimiento. Cada integración se configura con minimización de datos y la analítica opcional queda sujeta a la elección de privacidad del visitante.</p></section>
+                <section><h2>6. Analítica y datos personales</h2><p>No enviamos a herramientas de analítica el nombre, correo, teléfono, empresa ni contenido de los formularios. Los eventos comerciales se registran de manera agregada, por ejemplo: inicio de formulario, envío, clic en un CTA, producto consultado o clic de WhatsApp.</p></section>
+                <section><h2>7. Conservación</h2><ul><li>Consultas comerciales: mientras exista una relación activa y, como política operativa general, hasta 24 meses desde la última interacción si no existe una obligación que requiera otro periodo.</li><li>Newsletter: mientras la suscripción continúe activa; después de una baja puede conservarse el mínimo registro necesario para respetar la exclusión.</li><li>Registros técnicos de seguridad: por periodos limitados y proporcionales al objetivo de protección.</li><li>Preferencias de consentimiento: hasta que se cambien, se eliminen del navegador o deban renovarse.</li></ul></section>
+                <section><h2>8. Derechos y solicitudes</h2><p>Puedes solicitar información sobre tus datos, rectificación, eliminación cuando corresponda, oposición o retiro de consentimiento y otras facultades reconocidas por la normativa aplicable. Las solicitudes pueden dirigirse a <a href={`mailto:${SITE_EMAIL}`}>{SITE_EMAIL}</a>. Podremos solicitar antecedentes mínimos para verificar que la solicitud corresponde a la persona titular.</p></section>
+                <section><h2>9. Seguridad</h2><p>Aplicamos controles como cifrado TLS, validación servidor, limitación de frecuencia, honeypot, protección anti-bot, encabezados de seguridad, restricciones de origen, minimización de datos y separación entre analítica y contenido de formularios. Ningún sistema conectado a Internet puede garantizar riesgo cero, por lo que estos controles se revisan y mejoran de manera continua.</p></section>
+                <section><h2>10. Transferencias y servicios internacionales</h2><p>Algunos proveedores tecnológicos pueden procesar información fuera de Chile. JoinHook procura utilizar proveedores con medidas contractuales y técnicas adecuadas y limita los datos enviados a lo estrictamente necesario para la finalidad correspondiente.</p></section>
+                <section><h2>11. Cookies y preferencias</h2><p>Las tecnologías no esenciales se controlan mediante el gestor de preferencias. Puedes aceptar, rechazar o configurar categorías y volver a abrir las preferencias desde el botón “Privacidad”. Consulta además la <a href="/cookies">Política de Cookies</a>.</p></section>
+                <section><h2>12. Marco normativo</h2><p>JoinHook adapta sus prácticas a la normativa chilena vigente. La Ley 21.719, que moderniza la regulación de datos personales en Chile, entra en vigor el 1 de diciembre de 2026; esta política y los procesos asociados se han preparado considerando esa transición y serán revisados cuando corresponda.</p></section>
+                <section><h2>13. Cambios</h2><p>La política puede actualizarse cuando cambien las funcionalidades, proveedores o requisitos aplicables. La fecha de actualización se mantendrá visible en esta página.</p></section>
+            </article>
+        </main>
+    </PageShell>;
 }

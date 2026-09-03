@@ -1,5 +1,14 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 Disallow: /app/
+Disallow: /agent-center/
+Disallow: /local/
+Disallow: /local-admin/
+Disallow: /local-admin-content/
+Disallow: /local-admin-users/
+Disallow: /local-import/
+Disallow: /local-setup/
+Disallow: /newsletter-confirmada/
 
 Sitemap: https://joinhook.cl/sitemap.xml
