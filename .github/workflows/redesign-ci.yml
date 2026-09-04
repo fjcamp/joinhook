@@ -68,8 +68,14 @@ jobs:
       - name: Start app for smoke tests
         run: |
           npm run start -- -p 3000 > /tmp/joinhook-next.log 2>&1 & echo $! > /tmp/joinhook-next.pid
-          for i in {1..30}; do curl -fsS http://127.0.0.1:3000/ >/dev/null && exit 0 || true; sleep 1; done
-          cat /tmp/joinhook-next.log; exit 1
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/joinhook-next.log
+          exit 1
       - name: Smoke test public routes and PWA assets
         run: |
           for url in / /herramientas/control-gastronomico-express /app/control-gastronomico-express /privacidad /condiciones-beta /robots.txt /sitemap.xml /cge-manifest.webmanifest /app/cge-sw.js /icons/cge-icon.svg /icons/cge-icon-192.png /icons/cge-icon-512.png /plantillas/control-gastronomico-inventario.csv; do curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000${url}"; done
@@ -119,9 +125,35 @@ jobs:
           test ! -d deploy-bluehosting/document-root-assets/_next/static/static
       - name: Smoke test standalone artifact
         run: |
-          PORT=3010 HOSTNAME=127.0.0.1 NODE_ENV=production node deploy-bluehosting/server.js > /tmp/joinhook-standalone.log 2>&1 & echo $! > /tmp/joinhook-standalone.pid
-          for i in {1..30}; do curl -fsS http://127.0.0.1:3010/ >/dev/null && break || true; sleep 1; done
-          curl --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express >/tmp/cge-standalone.html
+          rm -f /tmp/joinhook-standalone.log /tmp/cge-standalone.html /tmp/standalone-headers.txt
+          PORT=3010 HOST=127.0.0.1 NODE_ENV=production node deploy-bluehosting/server.js > /tmp/joinhook-standalone.log 2>&1 &
+          STANDALONE_PID=$!
+          echo "$STANDALONE_PID" > /tmp/joinhook-standalone.pid
+          ready=0
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3010/ >/dev/null; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$STANDALONE_PID" 2>/dev/null; then
+              echo 'Standalone process exited before readiness.'
+              cat /tmp/joinhook-standalone.log || true
+              exit 1
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo 'Standalone server did not become ready within 30 seconds.'
+            echo '=== PROCESS ==='
+            ps -p "$STANDALONE_PID" -f || true
+            echo '=== SERVER LOG ==='
+            cat /tmp/joinhook-standalone.log || true
+            exit 1
+          fi
+          echo '=== ROOT STATUS ==='
+          curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3010/
+          echo '=== CGE STATUS ==='
+          curl -sS -o /tmp/cge-standalone.html -w '%{http_code}\n' http://127.0.0.1:3010/herramientas/control-gastronomico-express
           grep -Fq 'Solicitar pack fundador' /tmp/cge-standalone.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
