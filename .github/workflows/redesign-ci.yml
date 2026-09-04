@@ -97,7 +97,6 @@ jobs:
           cp -a .next/standalone/. deploy-bluehosting/
           cp -a .next/static deploy-bluehosting/.next/static
           cp -a public deploy-bluehosting/public
-          # Apache document-root mirror: copy its CONTENT into /home/joinhook/public_html.
           mkdir -p deploy-bluehosting/document-root-assets/_next
           cp -a .next/static deploy-bluehosting/document-root-assets/_next/static
           cp -a public/. deploy-bluehosting/document-root-assets/
@@ -151,13 +150,13 @@ jobs:
             exit 1
           fi
           echo '=== ROOT STATUS ==='
-          curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3010/
+          curl -L -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3010/
           echo '=== CGE STATUS ==='
-          curl -sS -o /tmp/cge-standalone.html -w '%{http_code}\n' http://127.0.0.1:3010/herramientas/control-gastronomico-express
+          curl -L -sS -o /tmp/cge-standalone.html -w '%{http_code}\n' http://127.0.0.1:3010/herramientas/control-gastronomico-express
           grep -Fq 'Solicitar pack fundador' /tmp/cge-standalone.html
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
-          curl --fail --silent --show-error --dump-header /tmp/standalone-headers.txt --output /dev/null http://127.0.0.1:3010/
+          curl -L --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
+          curl -L --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
+          curl -L --fail --silent --show-error --dump-header /tmp/standalone-headers.txt --output /dev/null http://127.0.0.1:3010/
           grep -qi '^content-security-policy:' /tmp/standalone-headers.txt
           grep -qi '^x-robots-tag: noindex, nofollow, noarchive' /tmp/standalone-headers.txt
       - name: Stop standalone artifact
