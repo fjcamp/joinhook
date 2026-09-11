@@ -1,0 +1,52 @@
+name: JoinOps MVP CI
+
+on:
+  push:
+    branches: [main, 'joinops/**']
+    paths:
+      - 'projects/02-joinops/**'
+      - '.github/workflows/joinops-mvp.yml'
+  pull_request:
+    paths:
+      - 'projects/02-joinops/**'
+      - '.github/workflows/joinops-mvp.yml'
+  workflow_dispatch:
+
+jobs:
+  web-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/02-joinops/app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: projects/02-joinops/app/package.json
+      - run: npm install
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+  windows-installer:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: projects/02-joinops/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: projects/02-joinops/desktop/package.json
+      - run: npm install
+      - run: npm run dist
+        env:
+          JOINOPS_REMOTE_URL: https://joinops.joinhook.cl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JoinOps-Windows-Installer
+          path: projects/02-joinops/desktop/dist/*.exe
+          if-no-files-found: error
