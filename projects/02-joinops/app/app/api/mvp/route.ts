@@ -23,8 +23,26 @@ export async function POST(request: Request) {
   const totalMinor = Number(body?.totalMinor ?? 0);
   if (!idempotencyKey || !items.length || !Number.isSafeInteger(totalMinor) || totalMinor < 0) return NextResponse.json({ ok: false, error: 'Invalid order payload.' }, { status: 400 });
 
+  const normalized = items.map((item: any) => ({
+    productId: String(item?.productId ?? ''),
+    quantity: Number(item?.quantity ?? 0),
+    unitMinor: Number(item?.unitMinor ?? 0),
+  }));
+  if (normalized.some(x => !x.productId || !(x.quantity > 0) || !Number.isSafeInteger(x.unitMinor) || x.unitMinor < 0)) {
+    return NextResponse.json({ ok: false, error: 'Invalid order item.' }, { status: 400 });
+  }
+  const calculated = normalized.reduce((sum, x) => sum + Math.round(x.quantity * x.unitMinor), 0);
+  if (calculated !== totalMinor) return NextResponse.json({ ok: false, error: 'Order total mismatch.' }, { status: 400 });
+
   const existing = await sql`SELECT id, order_number, status, total_minor FROM ops.orders WHERE tenant_id = ${tenantId} AND idempotency_key = ${idempotencyKey} LIMIT 1`;
   if (existing.length) return NextResponse.json({ ok: true, replay: true, order: existing[0] });
+
+  const productIds = normalized.map(x => x.productId);
+  const validProducts = await sql`
+    SELECT id FROM core.products
+    WHERE tenant_id = ${tenantId} AND status = 'active' AND id = ANY(${productIds}::uuid[])
+  `;
+  if (validProducts.length !== new Set(productIds).size) return NextResponse.json({ ok: false, error: 'One or more products are not valid for this tenant.' }, { status: 409 });
 
   const orderNumber = `POS-${Date.now()}`;
   const order = await sql`
@@ -32,18 +50,12 @@ export async function POST(request: Request) {
     VALUES (${tenantId}, ${orderNumber}, 'paid', ${totalMinor}, 'CLP', ${idempotencyKey})
     RETURNING id, order_number, status, total_minor, currency, created_at
   `;
-
-  for (const item of items) {
-    const productId = String(item?.productId ?? '');
-    const quantity = Number(item?.quantity ?? 0);
-    const unitMinor = Number(item?.unitMinor ?? 0);
-    if (!productId || !(quantity > 0) || !Number.isSafeInteger(unitMinor) || unitMinor < 0) return NextResponse.json({ ok: false, error: 'Invalid order item.' }, { status: 400 });
+  for (const item of normalized) {
     await sql`
       INSERT INTO ops.order_items (tenant_id, order_id, product_id, quantity, unit_price, line_total)
-      VALUES (${tenantId}, ${order[0].id}, ${productId}, ${quantity}, ${unitMinor}, ${Math.round(quantity * unitMinor)})
+      VALUES (${tenantId}, ${order[0].id}, ${item.productId}, ${item.quantity}, ${item.unitMinor}, ${Math.round(item.quantity * item.unitMinor)})
     `;
   }
-
   await sql`
     INSERT INTO audit.events (tenant_id, event_type, entity_type, entity_id, payload)
     VALUES (${tenantId}, 'ORDER_CREATED', 'ORDER', ${order[0].id}, ${JSON.stringify({ source: 'joinops-mvp', idempotencyKey, totalMinor })}::jsonb)
