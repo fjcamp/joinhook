@@ -10,19 +10,19 @@ La memoria operativa registra 21 proyectos. `PROJECTS.md` de este repositorio co
 
 ## Resultado ejecutivo
 
-**Conclusión: el catálogo documental está respaldado, pero NO todos los 21 proyectos tienen código propio ni activos visuales completos en GitHub.** Esto es correcto para varios módulos conceptuales, pero debe quedar explícitamente clasificado para evitar creer que existe implementación cuando sólo existe diseño/documentación.
+**Conclusión actualizada:** el catálogo documental está respaldado, pero no todos los 21 proyectos son productos independientes ni todos tienen repositorio propio. La segunda pasada de auditoría confirmó implementaciones embebidas que no habían quedado reflejadas en la primera matriz.
 
 ### Repositorios GitHub actualmente identificados
 
-- `fjcamp/joinhook` — sitio corporativo JoinHook, documentación maestra, JoinHook V2 (`redesign-v2`), activos web y catálogo de proyectos.
+- `fjcamp/joinhook` — sitio corporativo JoinHook, documentación maestra, JoinHook V2 (`redesign-v2`), activos web, JoinHook Local y catálogo de proyectos.
 - `fjcamp/joinhook-os` — Business OS privado, backend y documentación de continuidad/arquitectura.
 - `fjcamp/snowwise` — código productivo de SnowWise (mobile/admin/Supabase).
 - `fjcamp/landing` — starter/legado; no se considera fuente de verdad de JoinHook.
-- `fjcamp/Habitante` — repositorio existente, pero no se pudo validar su contenido mediante README; queda en auditoría pendiente.
+- `fjcamp/Habitante` — repositorio Android real, con código y documentación propia; su relación con los 21 proyectos de JoinHook **no está identificada** y no debe asignarse por inferencia.
 
-No se encontró un repositorio específico para Cumbre Brava ni para un JoinOps independiente durante esta auditoría.
+No se encontró un repositorio específico para JoinOps, Mi Gestión, Audio Player, Directorio Nacional ni Cumbre Brava. Sin embargo, la búsqueda de código/documentación reveló implementación territorial verificable relacionada históricamente con Directorio Nacional dentro de `fjcamp/joinhook`.
 
-## Matriz de respaldo
+## Matriz de respaldo actualizada
 
 | ID | Proyecto | Documentación | Código confirmado | Imágenes/activos | Fuente principal | Estado |
 |---|---|---|---|---|---|---|
@@ -30,7 +30,7 @@ No se encontró un repositorio específico para Cumbre Brava ni para un JoinOps 
 | 02 | JoinOps | Sí | **No confirmado como código propio** | Sí, portada `joinops-cover.svg` | `joinhook` + futuro repo/producto | 🔴 código pendiente |
 | 03 | Mi Gestión | Sí | No confirmado como repo independiente | Sí, `mi-gestion-cover.svg` | `joinhook` + futuras fuentes | 🔴 código pendiente |
 | 04 | Agent Lab | Sí | Parcial/conceptual dentro de OS; repo independiente no confirmado | No confirmado | `joinhook-os` | 🟡 |
-| 05 | Directorio Nacional | Sí | No confirmado | No confirmado | `joinhook` | 🔴 |
+| 05 | Directorio Nacional | Sí | **Sí, pero bajo evolución JoinHook Local/Pulse dentro de `joinhook`** | No se confirmó paquete visual dedicado | `joinhook` | 🟡 naming/arquitectura pendiente |
 | 06 | SnowWise | Sí | **Sí**, `fjcamp/snowwise` | Sí, portada en `joinhook`; assets propios deben mantenerse en SnowWise | `snowwise` | 🟢 |
 | 07 | JoinHook Audio Player | Sí | No confirmado | No confirmado | `joinhook` | 🔴 código pendiente |
 | 08 | JoinHook.cl | Sí | **Sí**, `fjcamp/joinhook`, incluida rama `redesign-v2` | Sí, activos `public/` | `joinhook` | 🟢/🟡 por publicación |
@@ -45,8 +45,32 @@ No se encontró un repositorio específico para Cumbre Brava ni para un JoinOps 
 | 17 | Startup Validation / Agent Discovery | Sí | No confirmado | No confirmado | `joinhook` | 🔴 |
 | 18 | Turismo & Estacionalidad | Sí | Investigación/documentación; software no confirmado | No confirmado | `joinhook` + Notion | 🟡 |
 | 19 | Gestión y comunidades locales | Sí | Investigación/documentación; software no confirmado | No confirmado | `joinhook` + Notion | 🟡 |
-| 20 | Observatorio de mercado | Sí | No confirmado como aplicación independiente | No confirmado | `joinhook` + Notion | 🟡 |
+| 20 | Observatorio de mercado | Sí | No confirmado como aplicación independiente | No confirmado | `joinhook` | 🟡 |
 | 21 | Cumbre Brava | Sí | **No se encontró repo dedicado** | No confirmado en GitHub como proyecto completo | `joinhook` + futura repo Cumbre Brava | 🔴 código/activos pendientes |
+
+## Evidencia adicional encontrada en segunda pasada
+
+### Directorio Nacional → JoinHook Local / Pulse
+
+El archivo `docs/continuity/JOINHOOK_LOCAL_PULSE_HANDOFF_2026-08-31.md` establece que existe una **implementación territorial funcional en `fjcamp/joinhook` main**, con superficie pública `/local` y administración `/local-admin`. El handoff identifica Directorio Nacional, JoinHook Pulse y JoinHook Local como evoluciones del mismo espacio de problema y ordena resolver el naming mediante ADR antes de escalar. fileciteturn122file0L2-L2
+
+La implementación actual documentada incluye backend territorial en Supabase, tablas `local_*`, Auth/RLS/RBAC, API server-side, dataset de contingencia, geolocalización/clima, discovery multi-negocio, CRUD administrativo y auditoría. Por tanto, **no corresponde seguir clasificando Directorio Nacional simplemente como “sin código”**. Lo correcto es clasificarlo como implementación existente bajo el nombre/evolución JoinHook Local/Pulse, con identidad de producto todavía pendiente de decisión. fileciteturn122file0L2-L2
+
+### JoinOps
+
+La búsqueda en `fjcamp/joinhook` confirma documentación, portada visual y presencia pública del proyecto, incluyendo que la portada y el sitio lo presentan como producto en desarrollo. No apareció una ruta de aplicación ni un repositorio de código independiente que permita afirmar que existe un runtime JoinOps propio. Por ahora se mantiene **código dedicado pendiente de confirmar**, sin confundirlo con CGE. fileciteturn117file0L2-L10 fileciteturn117file10L140-L148 fileciteturn117file11L153-L160
+
+### Mi Gestión
+
+La búsqueda confirma integración del producto en la superficie corporativa y su portada visual, pero no encontró un repositorio/ruta de aplicación independiente que permita afirmar que existe un runtime propio. Se mantiene **código dedicado pendiente de confirmar**. fileciteturn118file2L40-L47 fileciteturn118file3L53-L61
+
+### Audio Player y Cumbre Brava
+
+Las búsquedas confirman documentación persistente en el catálogo, pero no localizaron implementación propia en `joinhook` o `joinhook-os`. Cumbre Brava debe seguir tratándose como proyecto personal independiente de JoinHook. fileciteturn119file0L2-L8 fileciteturn120file0L2-L8
+
+### Habitante
+
+La auditoría actual ya no considera `fjcamp/Habitante` un repositorio ambiguo: existe código Android real y documentación propia. Sin embargo, **no se asigna a ninguno de los 21 proyectos** hasta que exista evidencia que establezca esa relación. Esto evita contaminar el catálogo JoinHook con una asociación incorrecta.
 
 ## Evidencia visual encontrada
 
@@ -72,15 +96,19 @@ La memoria y la documentación coinciden en los puntos estructurales principales
 - Drive como repositorio maestro para originales/binarios pesados.
 - Notion como índice, dashboard y conocimiento relacional.
 
+La segunda pasada agrega una corrección importante: **Directorio Nacional no está vacío de implementación; su código verificable vive actualmente bajo JoinHook Local/Pulse en `fjcamp/joinhook`.**
+
 ## Corrección importante
 
 No debe interpretarse el catálogo de `PROJECTS.md` como evidencia de que cada proyecto ya tiene implementación. El propio documento indica que las ubicaciones previstas no implican que todo el código exista todavía.
 
-Por lo tanto, a partir de esta auditoría cada proyecto debe manejar tres estados independientes:
+Por lo tanto, cada proyecto debe manejar tres estados independientes:
 
 1. **Código:** inexistente / prototipo / desarrollo / piloto / producción.
 2. **Documentación:** básica / completa / mantenida.
 3. **Activos:** inexistentes / parciales / completos.
+
+Además, cuando un proyecto evoluciona bajo otro nombre, debe conservarse una relación explícita de identidad/naming para evitar duplicar productos o crear repositorios innecesarios.
 
 ## Arquitectura permanente de respaldo recomendada
 
@@ -153,8 +181,9 @@ Ante una nueva conversación, el orden de recuperación debe ser:
 3. Preparar paquete visual de cada proyecto que deba mostrarse públicamente.
 4. Registrar enlaces GitHub + Drive + Notion por proyecto.
 5. Mantener JoinHook V2 y JoinOps como prioridades de concurso.
-6. No eliminar ni mover proyectos ambiguos hasta completar auditoría.
-7. No confundir documentación de proyecto con implementación existente.
+6. Resolver el naming Directorio Nacional / JoinHook Local / Pulse mediante ADR antes de nueva expansión.
+7. No eliminar ni mover proyectos ambiguos hasta completar auditoría.
+8. No confundir documentación de proyecto con implementación existente.
 
 ## Estado de esta auditoría
 
