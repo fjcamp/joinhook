@@ -57,7 +57,7 @@ El catálogo oficial contiene 21 proyectos y establece explícitamente que la do
 ## 4. Repositorios confirmados
 
 ### `fjcamp/joinhook`
-Fuente principal del sitio corporativo, documentación maestra, catálogo de proyectos y activos web. JoinHook V2 se encuentra en la rama `redesign-v2`.
+Fuente principal del sitio corporativo, documentación maestra, catálogo de proyectos y activos web. JoinHook V2 se encuentra en la rama `redesign-v2`. También contiene la implementación verificable actual de **JoinHook Local/Pulse**, evolución del espacio de producto históricamente denominado Directorio Nacional.
 
 ### `fjcamp/joinhook-os`
 Fuente principal del Business OS y sus módulos internos.
@@ -69,7 +69,7 @@ Fuente principal del código de SnowWise.
 Starter/legado. No usar como fuente de verdad de JoinHook sin auditoría.
 
 ### `fjcamp/Habitante`
-Repositorio existente. Su función/contenido requiere auditoría adicional antes de convertirlo en fuente de verdad de algún proyecto.
+Repositorio Android real con código y documentación propia. Su relación con el catálogo de 21 proyectos de JoinHook **no está identificada**; no asignarlo por inferencia.
 
 ## 5. Estado de implementación conocido al cierre
 
@@ -79,7 +79,7 @@ Repositorio existente. Su función/contenido requiere auditoría adicional antes
 | JoinOps | Código dedicado no confirmado | Sí | Portada confirmada |
 | Mi Gestión | Código dedicado no confirmado | Sí | Portada confirmada |
 | Agent Lab | Parcial/conceptual dentro de OS | Sí | Pendiente |
-| Directorio Nacional | No confirmado | Sí | Pendiente |
+| Directorio Nacional | **Implementación verificable bajo JoinHook Local/Pulse en `joinhook`** | Sí | Pendiente de paquete dedicado |
 | SnowWise | Confirmado en `snowwise` | Sí | Portada confirmada |
 | Audio Player | No confirmado | Sí | Pendiente |
 | JoinHook.cl | Confirmado en `joinhook` | Sí | Sí |
@@ -115,7 +115,7 @@ Repositorio existente. Su función/contenido requiere auditoría adicional antes
 - Agent Control Plane.
 
 ### Prioridad 4 — Investigación y futuros productos
-- Directorio Nacional.
+- Directorio Nacional / JoinHook Local / Pulse — resolver identidad mediante ADR antes de expansión.
 - Audio Player.
 - Startup Validation.
 - Observatorio.
@@ -135,6 +135,7 @@ Repositorio existente. Su función/contenido requiere auditoría adicional antes
 - n8n Community Edition se usa para automatización/orquestación, nunca como fuente de verdad.
 - No mezclar CGE con JoinOps: son productos distintos.
 - JoinHook V2 es el sitio corporativo; no debe convertirse en contenedor indiscriminado de código de productos.
+- JoinHook Local/Pulse y Directorio Nacional deben reconciliar su identidad antes de crear otro repositorio o duplicar implementación.
 
 ## 8. Regla de cambios
 
@@ -169,6 +170,8 @@ La auditoría de continuidad fue registrada en:
 
 `docs/continuity/PROJECTS-BACKUP-AUDIT-2026-09-11.md`
 
+La segunda pasada de auditoría confirmó que Directorio Nacional tiene implementación verificable bajo JoinHook Local/Pulse en `fjcamp/joinhook`; este dato queda persistido tanto en la auditoría como en este master.
+
 También existe una entrada de continuidad en Notion.
 
 ### Pendiente antes de declarar cierre físico total
@@ -176,6 +179,7 @@ También existe una entrada de continuidad en Notion.
 - Auditoría directa de Google Drive cuando la conexión esté disponible.
 - Confirmar archivos originales por proyecto.
 - Confirmar si JoinOps, Mi Gestión, Audio Player y Cumbre Brava tienen código fuera de los repositorios actualmente identificados.
+- Resolver mediante ADR el naming Directorio Nacional / JoinHook Local / Pulse.
 - Crear una matriz final de enlaces GitHub/Drive/Notion por proyecto.
 - Crear/actualizar paquetes visuales por proyecto donde corresponda.
 
