@@ -1,14 +1,19 @@
 -- JoinOps Inventory hardening
 -- Fixes the first inventory foundation race: application-level balance checks are not sufficient under concurrency.
 -- The ledger remains append-only; a per-bucket lock serializes stock-affecting writes.
+-- IMPORTANT: lot_id/location_id may be NULL, so they cannot be part of a conventional primary key.
 
 create table if not exists ops.inventory_balance_locks (
+  id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null,
   product_id uuid not null references ops.products(id),
   lot_id uuid null,
   location_id uuid null,
-  primary key (tenant_id, product_id, lot_id, location_id)
+  created_at timestamptz not null default now()
 );
+
+create unique index if not exists uq_inventory_balance_locks_bucket
+  on ops.inventory_balance_locks(tenant_id, product_id, lot_id, location_id) nulls not distinct;
 
 create table if not exists ops.reason_codes (
   id uuid primary key default gen_random_uuid(),
@@ -45,7 +50,7 @@ as $$
 begin
   insert into ops.inventory_balance_locks (tenant_id, product_id, lot_id, location_id)
   values (new.tenant_id, new.product_id, new.lot_id, new.location_id)
-  on conflict do nothing;
+  on conflict (tenant_id, product_id, lot_id, location_id) do nothing;
 
   perform 1 from ops.inventory_balance_locks
   where tenant_id = new.tenant_id
