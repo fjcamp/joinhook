@@ -30,25 +30,32 @@ export async function POST(request: Request) {
   if (existing.length) return NextResponse.json({ ok: true, replay: true, order: existing[0] });
 
   const codes = normalized.map(x => x.productCode);
-  const validProducts = await sql`SELECT id, code FROM core.products WHERE tenant_id = ${tenantId} AND status = 'active' AND code = ANY(${codes}::text[])`;
-  const productMap = new Map(validProducts.map((p: any) => [p.code, p.id]));
-  if (productMap.size !== new Set(codes).size) return NextResponse.json({ ok: false, error: 'One or more products are not valid for this tenant.' }, { status: 409 });
+  const validProducts = await sql`SELECT code FROM core.products WHERE tenant_id = ${tenantId} AND status = 'active' AND code = ANY(${codes}::text[])`;
+  if (validProducts.length !== new Set(codes).size) return NextResponse.json({ ok: false, error: 'One or more products are not valid for this tenant.' }, { status: 409 });
 
   const orderNumber = `POS-${Date.now()}`;
-  const order = await sql`
-    INSERT INTO ops.orders (tenant_id, order_number, status, total_minor, currency, idempotency_key)
-    VALUES (${tenantId}, ${orderNumber}, 'paid', ${totalMinor}, 'CLP', ${idempotencyKey})
-    RETURNING id, order_number, status, total_minor, currency, created_at
-  `;
-  for (const item of normalized) {
-    await sql`
+  const itemsJson = JSON.stringify(normalized);
+  const result = await sql`
+    WITH new_order AS (
+      INSERT INTO ops.orders (tenant_id, order_number, status, total_minor, currency, idempotency_key)
+      VALUES (${tenantId}, ${orderNumber}, 'paid', ${totalMinor}, 'CLP', ${idempotencyKey})
+      RETURNING id, order_number, status, total_minor, currency, created_at
+    ), inserted_items AS (
       INSERT INTO ops.order_items (tenant_id, order_id, product_id, quantity, unit_price, line_total)
-      VALUES (${tenantId}, ${order[0].id}, ${productMap.get(item.productCode)}, ${item.quantity}, ${item.unitMinor}, ${Math.round(item.quantity * item.unitMinor)})
-    `;
-  }
-  await sql`
-    INSERT INTO audit.events (tenant_id, event_type, aggregate_type, aggregate_id, payload)
-    VALUES (${tenantId}, 'ORDER_CREATED', 'ORDER', ${String(order[0].id)}, ${JSON.stringify({ source: 'joinops-mvp', idempotencyKey, totalMinor })}::jsonb)
+      SELECT ${tenantId}, o.id, p.id, (item->>'quantity')::numeric, (item->>'unitMinor')::numeric,
+             ROUND((item->>'quantity')::numeric * (item->>'unitMinor')::numeric)
+      FROM new_order o
+      CROSS JOIN jsonb_array_elements(${itemsJson}::jsonb) item
+      JOIN core.products p ON p.tenant_id = ${tenantId} AND p.code = item->>'productCode' AND p.status = 'active'
+      RETURNING id
+    ), audit_row AS (
+      INSERT INTO audit.events (tenant_id, event_type, aggregate_type, aggregate_id, payload)
+      SELECT ${tenantId}, 'ORDER_CREATED', 'ORDER', o.id::text,
+             ${JSON.stringify({ source: 'joinops-mvp', idempotencyKey, totalMinor })}::jsonb
+      FROM new_order o
+      RETURNING id
+    )
+    SELECT * FROM new_order
   `;
-  return NextResponse.json({ ok: true, replay: false, order: order[0] }, { status: 201 });
+  return NextResponse.json({ ok: true, replay: false, order: result[0] }, { status: 201 });
 }
