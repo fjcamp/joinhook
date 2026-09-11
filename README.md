@@ -1,14 +1,20 @@
 # JoinHook
 
-JoinHook es mi espacio independiente para investigar, diseñar y construir productos digitales, sistemas de gestión, PWA y experimentos de interfaz.
+JoinHook es una iniciativa tecnológica chilena orientada al diseño, desarrollo y evolución de soluciones digitales, sistemas de gestión, automatización y productos propios para resolver necesidades concretas de organizaciones y personas.
 
-Detrás del proyecto estoy yo, **Francisco Javier Campos**. No intento presentar JoinHook como una gran compañía: el objetivo es mostrar trabajo real, proyectos en construcción, aprendizajes y herramientas que puedan resolver problemas concretos.
+JoinHook combina investigación, diseño, desarrollo y validación práctica, manteniendo una comunicación rigurosa y transparente sobre el estado real de cada producto. **Francisco Javier Campos** lidera la iniciativa.
 
-## Estado
+## Estado de JoinHook V2
 
 La nueva versión del sitio se desarrolla en la rama `redesign-v2` y todavía no se fusiona a `main` hasta completar staging y el gate de publicación.
 
-Proyecto principal en lanzamiento:
+JoinHook V2 funcionará como sitio corporativo y puerta de entrada al ecosistema de productos y soluciones de JoinHook. Los productos mantienen sus propios límites técnicos y ciclos de desarrollo cuando corresponde.
+
+## Productos y proyectos destacados
+
+### JoinOps
+
+Sistema modular de gestión y operaciones, actualmente prioridad estratégica para la postulación a concurso. Su arquitectura contempla módulos interconectados para organizaciones con distintas áreas y servicios, incluyendo operaciones gastronómicas con cafetería, heladería, pastelería y otros servicios.
 
 ### Control Gastronómico Express — Beta 0.3
 
@@ -26,13 +32,12 @@ Herramienta local-first para pequeños negocios gastronómicos que necesitan ord
 
 La beta guarda los datos operativos en el navegador del dispositivo. No utiliza todavía cuentas, sincronización cloud ni una base de datos de JoinHook.
 
-## Otros proyectos visibles en JoinHook
+### Otros proyectos visibles
 
-- **JoinOps** — sistema modular de gestión y operaciones en desarrollo.
 - **SnowWise** — experiencia digital para montaña, clima y seguridad.
-- **Mi Gestión** — exploración de organización, indicadores y procesos administrativos.
+- **Mi Gestión** — solución orientada a organización, indicadores y procesos administrativos.
 
-Los estados de los proyectos se muestran de forma explícita; estar en desarrollo, prototipo o beta es parte de la información del proyecto.
+Los estados de los proyectos se muestran de forma explícita; estar en desarrollo, prototipo o beta forma parte de la información del proyecto.
 
 ## Stack actual
 
@@ -42,7 +47,7 @@ Los estados de los proyectos se muestran de forma explícita; estar en desarroll
 - Tailwind CSS 4
 - PWA / Service Worker para Control Gastronómico Express
 - GitHub como fuente de verdad
-- Netlify preparado para despliegue mediante OpenNext
+- Despliegue preparado mediante artefactos de producción y adaptadores configurados en el repositorio
 
 ## Desarrollo local
 
@@ -115,7 +120,7 @@ feature / release branch
 
 ## Despliegue
 
-`netlify.toml` mantiene únicamente la configuración necesaria para el build de Next.js. El proyecto deja que Netlify aplique automáticamente su adaptador OpenNext actual.
+El repositorio mantiene la configuración necesaria para generar y validar artefactos de producción. El despliegue definitivo se realizará únicamente después de completar la validación de staging y el gate de publicación.
 
 El primer despliegue de validación debe realizarse desde la rama:
 
@@ -129,14 +134,15 @@ sin reemplazar producción hasta terminar las pruebas.
 
 - `docs/cge-launch-kit-v1.md` — estrategia orgánica, guiones y primera semana de contenidos.
 - `docs/cge-checkout-config.md` — requisitos para habilitar el checkout de forma segura.
+- `docs/decision-log/joinhook-v2-audit-2026-09-11.md` — auditoría, decisiones y plan de acción de JoinHook V2.
 - Issue **#13** — checklist GO/NO-GO para staging, producción y primeras ventas.
 
 ## Contacto
 
-Para conversaciones relacionadas con JoinHook o Control Gastronómico Express:
+Para conversaciones relacionadas con JoinHook o sus productos:
 
 `info@joinhook.cl`
 
 ---
 
-**JoinHook es un proyecto independiente en evolución.** La prioridad es construir, probar con usuarios reales y mejorar antes de agregar complejidad innecesaria.
+**JoinHook mantiene una evolución documentada y verificable.** Cada solución debe avanzar mediante diseño, implementación, pruebas y validación antes de pasar a producción.
