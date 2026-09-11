@@ -1,0 +1,23 @@
+{
+  "name": "joinops-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^38.1.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "cl.joinhook.joinops",
+    "productName": "JoinOps",
+    "artifactName": "JoinOps-Setup-${version}-${arch}.exe",
+    "directories": { "output": "dist" },
+    "files": ["main.cjs", "package.json"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }] },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "createStartMenuShortcut": true }
+  }
+}
