@@ -27,6 +27,7 @@ jobs:
           cache-dependency-path: projects/02-joinops/app/package.json
       - run: npm install
       - run: npx tsc --noEmit
+      - run: npm test
       - run: npm run build
 
   windows-installer:
