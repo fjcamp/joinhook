@@ -1,5 +1,25 @@
 -- JoinOps: operational cash close + reconciliation
 -- Additive and reversible. No destructive operations.
+
+-- The MVP already depended on this table; keep the migration self-contained so
+-- a fresh PostgreSQL environment can reproduce the cash foundation.
+CREATE TABLE IF NOT EXISTS ops.cash_sessions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id uuid NOT NULL REFERENCES kernel.tenants(id),
+  register_code text NOT NULL,
+  cashier_name text NOT NULL,
+  opening_amount bigint NOT NULL DEFAULT 0 CHECK (opening_amount >= 0),
+  expected_amount bigint NOT NULL DEFAULT 0,
+  counted_amount bigint,
+  status text NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN','CLOSED')),
+  opened_at timestamptz NOT NULL DEFAULT now(),
+  closed_at timestamptz
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_open_cash_register
+  ON ops.cash_sessions(tenant_id, register_code)
+  WHERE status = 'OPEN';
+
 ALTER TABLE ops.cash_sessions
   ADD COLUMN IF NOT EXISTS variance_amount bigint,
   ADD COLUMN IF NOT EXISTS reconciliation_status text;
