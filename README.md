@@ -2,39 +2,41 @@
 
 JoinHook es mi espacio independiente para investigar, diseñar y construir productos digitales, sistemas de gestión, PWA y experimentos de interfaz.
 
-Detrás del proyecto estoy yo, **Francisco Javier Campos**. No intento presentar JoinHook como una gran compañía: el objetivo es mostrar trabajo real, proyectos en construcción, aprendizajes y herramientas que puedan resolver problemas concretos.
+## Catálogo maestro y documentación
 
-## Estado
+El repositorio incorpora ahora un catálogo documental para que desarrolladores, colaboradores y sistemas distintos de ChatGPT puedan comprender los proyectos sin depender de conversaciones previas:
+
+- `PROJECTS.md` — catálogo maestro de proyectos, estructura y tecnologías candidatas.
+- `docs/PROJECT-DOCUMENTATION-STANDARD.md` — estándar obligatorio para documentar implementación.
+- `projects/` — manuales individuales y mapas conceptuales de cada proyecto.
+
+Cada proyecto debe documentar propósito, estado, arquitectura, tecnologías candidatas, ubicación de archivos, datos, APIs, seguridad, pruebas, despliegue y decisiones técnicas antes de considerarse correctamente documentado.
+
+## Estado actual del sitio
 
 La nueva versión del sitio se desarrolla en la rama `redesign-v2` y todavía no se fusiona a `main` hasta completar staging y el gate de publicación.
 
-Proyecto principal en lanzamiento:
+## Proyecto principal en lanzamiento
 
 ### Control Gastronómico Express — Beta 0.3
 
-Herramienta local-first para pequeños negocios gastronómicos que necesitan ordenar:
-
-- inventario y stock mínimo;
-- compras y entradas de mercadería;
-- mermas y sus causas;
-- proveedores;
-- ajustes trazables de inventario;
-- sugerencias simples de reposición;
-- importación/exportación CSV;
-- respaldo y restauración JSON;
-- uso como PWA y continuidad local.
+Herramienta local-first para pequeños negocios gastronómicos que necesitan ordenar inventario, compras, mermas, proveedores, ajustes trazables, reposición, importación/exportación CSV y respaldo/restauración JSON.
 
 La beta guarda los datos operativos en el navegador del dispositivo. No utiliza todavía cuentas, sincronización cloud ni una base de datos de JoinHook.
 
-## Otros proyectos visibles en JoinHook
+## Proyectos visibles
 
-- **JoinOps** — sistema modular de gestión y operaciones en desarrollo.
-- **SnowWise** — experiencia digital para montaña, clima y seguridad.
-- **Mi Gestión** — exploración de organización, indicadores y procesos administrativos.
+- JoinOps — gestión y operaciones modular.
+- SnowWise — montaña, clima y seguridad.
+- Mi Gestión — organización e indicadores administrativos.
+- JoinHook Business OS — plataforma central federada.
+- Directorio Nacional — turismo, comercio, cultura y servicios.
+- JoinHook Audio Player — reproductor multimedia.
+- Cumbre Brava — videojuego independiente y separado de JoinHook.
 
-Los estados de los proyectos se muestran de forma explícita; estar en desarrollo, prototipo o beta es parte de la información del proyecto.
+Los estados de los proyectos deben mantenerse explícitos.
 
-## Stack actual
+## Stack actual del sitio
 
 - Next.js 16.3
 - React 19
@@ -46,60 +48,25 @@ Los estados de los proyectos se muestran de forma explícita; estar en desarroll
 
 ## Desarrollo local
 
-Requisitos recomendados:
-
-- Node.js 20.20.2
-- npm
+Requisitos recomendados: Node.js 20.20.2 y npm.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Abrir después:
+Abrir `http://localhost:3000`.
 
-```txt
-http://localhost:3000
-```
-
-Build de producción:
+Build:
 
 ```bash
 npm run build
 npm run start
 ```
 
-## Rutas principales
-
-```txt
-/                                           JoinHook V2
-/herramientas/control-gastronomico-express  Landing comercial
-/app/control-gastronomico-express           Aplicación Beta 0.3
-/privacidad                                 Política de privacidad
-/condiciones-beta                           Condiciones de la beta
-```
-
-El contenido ficticio del starter anterior (`/info`, `/blog`, `/projects` y ejemplos) está despublicado y sus rutas responden 404.
-
-## Calidad y seguridad
-
-El pipeline de CI de `redesign-v2` comprueba actualmente:
-
-- auditoría completa de dependencias;
-- auditoría de dependencias runtime;
-- ESLint;
-- build de Next.js;
-- presupuesto interno de JavaScript cliente;
-- arranque real del servidor;
-- smoke tests de rutas públicas y activos PWA;
-- rutas heredadas despublicadas;
-- headers base y Content-Security-Policy.
-
-El proyecto mantiene el checkout de Control Gastronómico Express **deshabilitado por defecto**. Un enlace de pago solo puede activarse cuando están configurados de forma explícita el enlace HTTPS y los datos públicos del vendedor. No se deben guardar tokens, claves privadas ni credenciales de pagos en variables `NEXT_PUBLIC_*` ni en el repositorio.
-
 ## Flujo de ramas
 
-```txt
+```text
 feature / release branch
         ↓
     redesign-v2
@@ -111,29 +78,13 @@ feature / release branch
    joinhook.cl
 ```
 
-`main` no debe recibir el rediseño hasta aprobar staging en escritorio/móvil, PWA/offline, seguridad, rendimiento y flujo comercial.
+No reemplazar producción sin staging, backup y validación.
 
-## Despliegue
+## Seguridad
 
-`netlify.toml` mantiene únicamente la configuración necesaria para el build de Next.js. El proyecto deja que Netlify aplique automáticamente su adaptador OpenNext actual.
-
-El primer despliegue de validación debe realizarse desde la rama:
-
-```txt
-redesign-v2
-```
-
-sin reemplazar producción hasta terminar las pruebas.
-
-## Documentación de lanzamiento
-
-- `docs/cge-launch-kit-v1.md` — estrategia orgánica, guiones y primera semana de contenidos.
-- `docs/cge-checkout-config.md` — requisitos para habilitar el checkout de forma segura.
-- Issue **#13** — checklist GO/NO-GO para staging, producción y primeras ventas.
+No guardar tokens, claves privadas, contraseñas ni credenciales en GitHub. No utilizar `NEXT_PUBLIC_*` para secretos.
 
 ## Contacto
-
-Para conversaciones relacionadas con JoinHook o Control Gastronómico Express:
 
 `info@joinhook.cl`
 
