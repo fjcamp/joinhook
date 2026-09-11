@@ -47,8 +47,8 @@ export async function POST(request: Request) {
     `;
   }
   await sql`
-    INSERT INTO audit.events (tenant_id, event_type, entity_type, entity_id, payload)
-    VALUES (${tenantId}, 'ORDER_CREATED', 'ORDER', ${order[0].id}, ${JSON.stringify({ source: 'joinops-mvp', idempotencyKey, totalMinor })}::jsonb)
+    INSERT INTO audit.events (tenant_id, event_type, aggregate_type, aggregate_id, payload)
+    VALUES (${tenantId}, 'ORDER_CREATED', 'ORDER', ${String(order[0].id)}, ${JSON.stringify({ source: 'joinops-mvp', idempotencyKey, totalMinor })}::jsonb)
   `;
   return NextResponse.json({ ok: true, replay: false, order: order[0] }, { status: 201 });
 }
