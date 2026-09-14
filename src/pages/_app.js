@@ -15,6 +15,7 @@ import '../css/cge-v02.css';
 import '../css/cge-pwa.css';
 import '../css/cge-launch.css';
 import '../css/theme-modes.css';
+import '../css/joinhook-web-v1.css';
 
 const themeBootstrap = `
 (function () {
@@ -62,11 +63,7 @@ export default function MyApp({ Component, pageProps }) {
                     <meta name="theme-color" content="#728d78" />
                 </Head>
             )}
-            <style jsx global>{`
-                :root {
-                    ${cssVars}
-                }
-            `}</style>
+            <style jsx global>{`\n                :root {\n                    ${cssVars}\n                }\n            `}</style>
             <Component {...pageProps} />
             <ThemeToggle compact={isCGEApp} />
             {isHome && <JoinHookAssistant />}
