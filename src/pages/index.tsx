@@ -1,72 +1,61 @@
 import Head from 'next/head';
-import { CSSProperties, useMemo, useState } from 'react';
+import Link from 'next/link';
 
-const projects = [
+const services = [
     {
-        key: 'joinops',
-        name: 'JoinOps',
-        stage: 'EN DESARROLLO',
-        eyebrow: 'Operaciones · Gestión · Gastronomía',
-        description:
-            'ERP operacional modular para ordenar inventario, producción, personas, compras y operación diaria con trazabilidad y una arquitectura preparada para crecer por etapas.',
-        tags: ['Inventario', 'Operaciones', 'RR.HH.', 'PWA'],
-        metric: 'Arquitectura modular',
-        accent: '#6e7cff',
-        glow: 'rgba(110, 124, 255, .36)',
-        cover: '/project-covers/joinops-cover.svg',
-        coverLabel: 'Vista de inicio · operaciones y gestión'
+        number: '01',
+        title: 'Diagnóstico y orden',
+        text: 'Entender cómo funciona hoy un negocio o proyecto, detectar fugas de información, fricciones y oportunidades, y ordenar prioridades antes de invertir.'
     },
     {
-        key: 'snowwise',
-        name: 'SnowWise',
-        stage: 'EN CONSTRUCCIÓN',
-        eyebrow: 'Montaña · Seguridad · Clima',
-        description:
-            'Plataforma para planificar actividades de nieve y montaña combinando meteorología, mapas, destinos, seguridad, equipamiento y contexto útil en una sola experiencia.',
-        tags: ['Weather', 'GPS', 'Maps', 'Safety'],
-        metric: 'Producto insignia',
-        accent: '#32d7e8',
-        glow: 'rgba(50, 215, 232, .28)',
-        cover: '/project-covers/snowwise-cover.svg',
-        coverLabel: 'Vista de inicio · montaña, clima y seguridad'
+        number: '02',
+        title: 'Diseño de soluciones',
+        text: 'Traducir necesidades reales en procesos, experiencias, servicios o herramientas que puedan implementarse por etapas y con objetivos claros.'
     },
     {
-        key: 'mi-gestion',
-        name: 'Mi Gestión',
-        stage: 'EXPERIMENTAL',
-        eyebrow: 'Organización · Datos · Decisiones',
-        description:
-            'Herramienta administrativa para reunir tareas, agenda, operaciones, equipo, proveedores, documentos, indicadores y seguimiento cotidiano en un solo espacio.',
-        tags: ['Dashboard', 'Procesos', 'Datos', 'Offline'],
-        metric: 'Gestión práctica',
-        accent: '#58e2a3',
-        glow: 'rgba(88, 226, 163, .24)',
-        cover: '/project-covers/mi-gestion-cover.svg',
-        coverLabel: 'Vista de inicio · agenda, tareas e indicadores'
+        number: '03',
+        title: 'Digitalización proporcional',
+        text: 'Usar web, datos, automatización o software solo cuando aporten valor. La tecnología acompaña la solución; no reemplaza el criterio del negocio.'
+    },
+    {
+        number: '04',
+        title: 'Acompañamiento y mejora',
+        text: 'Medir, aprender, ajustar y documentar. Cada proyecto debe poder mostrar qué está funcionando, qué falta y cuál es el siguiente paso.'
     }
 ];
 
-const capabilities = [
+const projects = [
     {
-        index: '01',
-        title: 'Desarrollo Web & PWA',
-        text: 'Sitios, aplicaciones web y experiencias instalables, responsive y preparadas para evolucionar sin rehacer todo desde cero.'
+        name: 'JoinOps',
+        state: 'En desarrollo',
+        category: 'Gastronomía · Operaciones · Gestión',
+        description: 'ERP operacional modular para restaurantes, cafeterías, pastelerías y servicios de alimentos, con una arquitectura extensible a turismo y hotelería.',
+        cover: '/project-covers/joinops-cover.svg',
+        href: 'https://github.com/fjcamp/joinops'
     },
     {
-        index: '02',
-        title: 'Sistemas & Automatización',
-        text: 'Flujos, paneles y automatizaciones que ayudan a ordenar procesos, conectar información y reducir trabajo repetitivo manteniendo control humano.'
+        name: 'SnowWise',
+        state: 'En construcción',
+        category: 'Montaña · Clima · Seguridad',
+        description: 'Experiencia para planificar actividades de nieve y montaña integrando clima, destinos, orientación y seguridad en un solo lugar.',
+        cover: '/project-covers/snowwise-cover.svg',
+        href: 'https://github.com/fjcamp/snowwise'
     },
     {
-        index: '03',
-        title: 'UX/UI & Diseño',
-        text: 'Interfaces claras, accesibles y coherentes, diseñadas para que la tecnología sea útil antes que decorativa.'
-    },
-    {
-        index: '04',
-        title: 'Ideas & Prototipos',
-        text: 'Investigación, validación y prototipado para convertir una necesidad real en una solución que se pueda probar, medir y mejorar.'
+        name: 'Otros proyectos',
+        state: 'Exploración',
+        category: 'Ideas · Territorio · Nuevas necesidades',
+        description: 'Experimentos, productos y colaboraciones que nacen desde una necesidad concreta y se desarrollan solo cuando existe una razón para hacerlo.',
+        cover: '/project-covers/mi-gestion-cover.svg',
+        href: '#contacto'
     }
+];
+
+const principles = [
+    'Escuchamos antes de proponer.',
+    'Ordenamos antes de digitalizar.',
+    'Mostramos con claridad lo disponible y lo pendiente.',
+    'Buscamos soluciones compatibles con las personas, el negocio y el territorio.'
 ];
 
 function ArrowIcon() {
@@ -78,343 +67,201 @@ function ArrowIcon() {
 }
 
 export default function Home() {
-    const [activeProject, setActiveProject] = useState(1);
-    const project = projects[activeProject];
-
-    const projectStyle = useMemo(
-        () =>
-            ({
-                '--project-accent': project.accent,
-                '--project-glow': project.glow
-            }) as CSSProperties,
-        [project]
-    );
-
-    const moveProject = (direction: number) => {
-        setActiveProject((current) => (current + direction + projects.length) % projects.length);
-    };
-
     return (
         <>
             <Head>
-                <title>JoinHook — Ideas reales, productos digitales</title>
-                <meta
-                    name="description"
-                    content="Diseño, investigo y construyo soluciones digitales que convierten problemas reales en herramientas útiles. Desarrollo web y PWA, sistemas, automatización, UX/UI y prototipos."
-                />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <title>JoinHook — Acompañamos negocios y proyectos a crecer con sentido</title>
+                <meta name="description" content="JoinHook acompaña, diagnostica, ordena, diseña, conecta e impulsa negocios y proyectos de turismo, hospitalidad, gastronomía, ecoturismo y territorio." />
                 <meta name="theme-color" content="#f3f0e8" />
-                <link rel="canonical" href="https://joinhook.cl/" />
-                <meta property="og:title" content="JoinHook — Ideas reales, productos digitales" />
-                <meta
-                    property="og:description"
-                    content="Soluciones digitales que convierten problemas reales en herramientas útiles. Proyectos, productos y servicios construidos con criterio, transparencia y visión de futuro."
-                />
+                <meta property="og:title" content="JoinHook — Soluciones para negocios y proyectos que quieren avanzar" />
+                <meta property="og:description" content="Diagnóstico, orden, diseño, digitalización y acompañamiento para turismo, hospitalidad, gastronomía, ecoturismo y territorio." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://joinhook.cl/" />
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            '@context': 'https://schema.org',
-                            '@type': 'WebSite',
-                            name: 'JoinHook',
-                            url: 'https://joinhook.cl/',
-                            description:
-                                'Espacio de Francisco Javier Campos para investigar, diseñar y construir productos digitales, sistemas de gestión, aplicaciones web y PWA.',
-                            author: {
-                                '@type': 'Person',
-                                name: 'Francisco Javier Campos'
-                            }
-                        })
-                    }}
-                />
+                <link rel="canonical" href="https://joinhook.cl/" />
+                <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'Organization',
+                    name: 'JoinHook',
+                    url: 'https://joinhook.cl/',
+                    description: 'Acompañamiento y diseño de soluciones para negocios y proyectos vinculados con turismo, hospitalidad, gastronomía, ecoturismo y territorio.',
+                    founder: { '@type': 'Person', name: 'Francisco Javier Campos' }
+                }) }} />
             </Head>
 
-            <main className="jh-site">
-                <header className="jh-header">
+            <main className="jh-site jh-web-v1">
+                <header className="jh-header jh-v1-header">
                     <a className="jh-brand" href="#inicio" aria-label="JoinHook, volver al inicio">
                         <span className="jh-brand-mark" aria-hidden="true">JH</span>
                         <span>JoinHook</span>
                     </a>
                     <nav className="jh-nav" aria-label="Navegación principal">
-                        <a href="#inicio">Inicio</a>
+                        <a href="#que-hacemos">Qué hacemos</a>
+                        <a href="#metodo">Cómo trabajamos</a>
                         <a href="#proyectos">Proyectos</a>
-                        <a href="#herramientas">Herramientas</a>
-                        <a href="#lab">Lab</a>
-                        <a href="#blog">Blog</a>
+                        <Link href="/info">Sobre mí</Link>
                         <a href="#contacto">Contacto</a>
                     </nav>
-                    <a className="jh-header-cta" href="mailto:info@joinhook.cl?subject=Hablemos%20sobre%20un%20proyecto">Hablemos</a>
+                    <a className="jh-header-cta" href="mailto:info@joinhook.cl?subject=Conversación%20JoinHook">Conversemos</a>
                 </header>
 
-                <section className="jh-hero" id="inicio">
-                    <div className="jh-hero-copy">
-                        <div className="jh-kicker"><span className="jh-status-dot" /> Hola, soy Francisco</div>
+                <section className="jh-v1-hero" id="inicio">
+                    <div className="jh-v1-hero-copy">
+                        <span className="jh-v1-kicker"><i /> Turismo · Hospitalidad · Gastronomía · Territorio</span>
                         <h1>
-                            Ideas reales, <span>productos digitales.</span>
+                            Antes de buscar una herramienta,
+                            <em>entendamos lo que necesitas resolver.</em>
                         </h1>
-                        <p className="jh-hero-lead">
-                            Diseño, investigo y construyo soluciones digitales que convierten problemas reales en herramientas útiles. JoinHook es mi espacio para explorar, crear y compartir proyectos con visión de futuro.
+                        <p>
+                            JoinHook acompaña negocios y proyectos para diagnosticar, ordenar, diseñar y poner en marcha soluciones útiles. Cuando la tecnología ayuda, la incorporamos; cuando no, buscamos otra forma.
                         </p>
                         <div className="jh-actions">
-                            <a className="jh-button jh-button-primary" href="#proyectos">
-                                Explorar proyectos <ArrowIcon />
-                            </a>
-                            <a className="jh-button jh-button-soft" href="#contacto">Conversemos</a>
+                            <a className="jh-button jh-button-primary" href="#contacto">Cuéntame tu desafío <ArrowIcon /></a>
+                            <a className="jh-button jh-button-soft" href="#que-hacemos">Conoce JoinHook</a>
                         </div>
-                        <div className="jh-hero-footnotes" aria-label="Áreas de trabajo">
-                            <span>Desarrollo Web & PWA</span>
-                            <span>Sistemas & Automatización</span>
-                            <span>UX/UI & Diseño</span>
-                            <span>Ideas & Prototipos</span>
+                        <div className="jh-v1-proof-row">
+                            <span>Escucha activa</span><b />
+                            <span>Orden y trazabilidad</span><b />
+                            <span>Soluciones por etapas</span>
                         </div>
                     </div>
 
-                    <div className="jh-hero-visual" aria-label="Vista conceptual de proyectos JoinHook">
-                        <div className="jh-orbit jh-orbit-one" />
-                        <div className="jh-orbit jh-orbit-two" />
-                        <div className="jh-workspace jh-surface">
-                            <div className="jh-workspace-bar">
-                                <div><span /><span /><span /></div>
-                                <small>joinhook / workspace</small>
-                                <span className="jh-live">LIVE</span>
-                            </div>
-                            <div className="jh-workspace-grid">
-                                <article className="jh-mini-card jh-mini-main">
-                                    <div className="jh-mini-label">JoinHook</div>
-                                    <h3>Grandes proyectos comienzan con una buena idea.</h3>
-                                    <p>Investigar, diseñar, construir, operar y mejorar con evidencia y trazabilidad.</p>
-                                    <div className="jh-mini-chart" aria-hidden="true">
-                                        <i /><i /><i /><i /><i /><i />
-                                    </div>
-                                </article>
-                                <article className="jh-mini-card">
-                                    <span className="jh-chip jh-chip-blue">JoinOps</span>
-                                    <strong>EN DESARROLLO</strong>
-                                    <small>Operaciones y gestión</small>
-                                </article>
-                                <article className="jh-mini-card">
-                                    <span className="jh-chip jh-chip-cyan">SnowWise</span>
-                                    <strong>EN CONSTRUCCIÓN</strong>
-                                    <small>Montaña, clima y seguridad</small>
-                                </article>
-                                <article className="jh-mini-card jh-mini-wide">
-                                    <div>
-                                        <span className="jh-mini-label">JoinHook Lab</span>
-                                        <strong>Explorando nuevas ideas y tecnologías</strong>
-                                    </div>
-                                    <div className="jh-toggle-demo" aria-hidden="true"><span /></div>
-                                </article>
-                            </div>
+                    <div className="jh-v1-hero-visual" aria-label="Esquema del acompañamiento JoinHook">
+                        <div className="jh-v1-orbit jh-v1-orbit-one" />
+                        <div className="jh-v1-orbit jh-v1-orbit-two" />
+                        <div className="jh-v1-terrain" aria-hidden="true">
+                            <span /><span /><span /><span /><span />
                         </div>
-                        <div className="jh-floating-note jh-surface">
-                            <span>✦</span>
-                            <div><small>En construcción</small><strong>Producto, diseño, sistemas y automatización</strong></div>
+                        <div className="jh-v1-bridge jh-surface">
+                            <small>JOINHOOK / ACOMPAÑAMIENTO</small>
+                            <div className="jh-v1-bridge-grid">
+                                <article><span>01</span><strong>Escuchamos</strong><p>Contexto, personas, clientes y objetivos.</p></article>
+                                <article><span>02</span><strong>Observamos</strong><p>Procesos, datos, fricciones y oportunidades.</p></article>
+                                <article><span>03</span><strong>Ordenamos</strong><p>Prioridades, decisiones y próximos pasos.</p></article>
+                                <article><span>04</span><strong>Impulsamos</strong><p>Implementación, aprendizaje y mejora.</p></article>
+                            </div>
+                            <div className="jh-v1-bridge-foot"><span>Una solución no empieza por el software.</span><b>Empieza por la necesidad.</b></div>
                         </div>
                     </div>
                 </section>
 
-                <section className="jh-section jh-capabilities" aria-labelledby="capabilities-title">
-                    <div className="jh-section-heading">
-                        <div>
-                            <span className="jh-eyebrow">Qué hago</span>
-                            <h2 id="capabilities-title">De una necesidad real a una solución digital útil.</h2>
-                        </div>
-                        <p>JoinHook trabaja desde la investigación y el entendimiento del problema hasta el prototipo, desarrollo, operación y mejora. Las capacidades disponibles, las que están en desarrollo y las propuestas futuras se comunican por separado.</p>
+                <section className="jh-v1-intro" id="que-hacemos">
+                    <div>
+                        <span className="jh-eyebrow">Qué hacemos</span>
+                        <h2>Conectamos la mirada del negocio con soluciones que puedan sostenerse en la práctica.</h2>
                     </div>
-                    <div className="jh-capability-grid">
-                        {capabilities.map((item) => (
-                            <article className="jh-capability jh-surface" key={item.index}>
-                                <span>{item.index}</span>
-                                <h3>{item.title}</h3>
-                                <p>{item.text}</p>
-                                <i aria-hidden="true"><ArrowIcon /></i>
+                    <p>
+                        Trabajamos principalmente con emprendimientos, empresas y proyectos de turismo, hospitalidad, gastronomía, ecoturismo y territorio. El punto de partida puede ser un problema de organización, una nueva experiencia para clientes, una oportunidad comercial o una necesidad de digitalización.
+                    </p>
+                </section>
+
+                <section className="jh-v1-service-grid">
+                    {services.map((service) => (
+                        <article className="jh-v1-service jh-surface" key={service.number}>
+                            <span className="jh-v1-service-number">{service.number}</span>
+                            <h3>{service.title}</h3>
+                            <p>{service.text}</p>
+                            <span className="jh-v1-service-link" aria-hidden="true"><ArrowIcon /></span>
+                        </article>
+                    ))}
+                </section>
+
+                <section className="jh-v1-method" id="metodo" aria-labelledby="method-title">
+                    <div className="jh-v1-method-intro">
+                        <span className="jh-eyebrow">Cómo trabajamos</span>
+                        <h2 id="method-title">Escuchamos → Observamos → Ordenamos → Diseñamos → Conectamos → Impulsamos.</h2>
+                        <p>No imponemos una metodología por moda. Ajustamos la forma de trabajar al tamaño del proyecto, las personas involucradas, la temporada, los recursos disponibles y el contexto local.</p>
+                    </div>
+                    <div className="jh-v1-method-steps" aria-label="Método JoinHook">
+                        {['Escuchamos', 'Observamos', 'Ordenamos', 'Diseñamos', 'Conectamos', 'Impulsamos'].map((step, index) => (
+                            <div key={step} className="jh-v1-method-step">
+                                <span>{String(index + 1).padStart(2, '0')}</span>
+                                <strong>{step}</strong>
+                                {index < 5 && <i>→</i>}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                <section className="jh-v1-territory jh-surface">
+                    <div>
+                        <span className="jh-eyebrow">Negocio + territorio</span>
+                        <h2>Las soluciones tienen que conversar con el lugar donde viven.</h2>
+                    </div>
+                    <p>
+                        La estacionalidad turística, las economías locales, las comunidades, los proveedores, los ritmos de trabajo y las capacidades disponibles importan. JoinHook busca construir puentes entre esas realidades y las decisiones de gestión o desarrollo.
+                    </p>
+                    <div className="jh-v1-principles">
+                        {principles.map((principle) => <span key={principle}><i>✓</i>{principle}</span>)}
+                    </div>
+                </section>
+
+                <section className="jh-v1-projects" id="proyectos" aria-labelledby="projects-title">
+                    <div className="jh-section-heading">
+                        <div><span className="jh-eyebrow">Proyectos</span><h2 id="projects-title">Cuando una necesidad se convierte en algo que vale la pena construir.</h2></div>
+                        <p>Algunos trabajos se transforman en productos propios. Otros quedan como diseño, acompañamiento o experimentación. Cada estado se comunica tal como es.</p>
+                    </div>
+                    <div className="jh-v1-project-grid">
+                        {projects.map((project) => (
+                            <article className="jh-v1-project jh-surface" key={project.name}>
+                                <div className="jh-v1-project-image">
+                                    <img src={project.cover} alt={`Vista conceptual de ${project.name}`} loading="lazy" decoding="async" />
+                                </div>
+                                <div className="jh-v1-project-body">
+                                    <div className="jh-v1-project-meta"><span>{project.category}</span><b>{project.state}</b></div>
+                                    <h3>{project.name}</h3>
+                                    <p>{project.description}</p>
+                                    {project.href.startsWith('http') ? (
+                                        <a href={project.href} target="_blank" rel="noreferrer" className="jh-v1-text-link">Ver proyecto <ArrowIcon /></a>
+                                    ) : (
+                                        <a href={project.href} className="jh-v1-text-link">Conversar sobre una idea <ArrowIcon /></a>
+                                    )}
+                                </div>
                             </article>
                         ))}
                     </div>
                 </section>
 
-                <section className="jh-projects" id="proyectos" style={projectStyle} aria-labelledby="projects-title">
-                    <div className="jh-project-glow" aria-hidden="true" />
-                    <div className="jh-project-stage">
-                        <div className="jh-project-copy" aria-live="polite">
-                            <span className="jh-eyebrow">En qué estoy trabajando · {String(activeProject + 1).padStart(2, '0')}</span>
-                            <h2 id="projects-title">{project.name}</h2>
-                            <div className="jh-project-stage-label"><span /> {project.stage}</div>
-                            <p className="jh-project-eyebrow">{project.eyebrow}</p>
-                            <p className="jh-project-description">{project.description}</p>
-                            <div className="jh-tags">
-                                {project.tags.map((tag) => <span key={tag}>{tag}</span>)}
-                            </div>
-                            <div className="jh-project-meta">
-                                <div><small>Enfoque</small><strong>{project.metric}</strong></div>
-                                <div><small>Disponibilidad</small><strong>Próximamente</strong></div>
-                            </div>
-                        </div>
+                <section className="jh-v1-tool jh-surface" aria-labelledby="tool-title">
+                    <div className="jh-v1-tool-copy">
+                        <span className="jh-eyebrow">Herramienta en uso · Beta</span>
+                        <h2 id="tool-title">Control Gastronómico Express</h2>
+                        <p>Una herramienta para pequeños negocios gastronómicos que necesitan empezar a ordenar inventario, compras, mermas y proveedores sin comenzar por un ERP completo.</p>
+                        <div className="jh-actions"><Link className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Conocer la herramienta <ArrowIcon /></Link></div>
+                    </div>
+                    <div className="jh-v1-tool-note"><span>Producto propio</span><strong>La herramienta nace de una necesidad operativa concreta.</strong><small>Disponible en etapa beta · alcance comunicado de forma transparente.</small></div>
+                </section>
 
-                        <div className="jh-project-deck-shell">
-                            <button className="jh-project-side-nav is-prev" type="button" onClick={() => moveProject(-1)} aria-label="Proyecto anterior">
-                                <span aria-hidden="true">←</span>
-                            </button>
-
-                            <div className="jh-project-deck" aria-label="Proyectos JoinHook">
-                                {projects.map((item, index) => {
-                                    const offset = index - activeProject;
-                                    return (
-                                        <button
-                                            type="button"
-                                            className={`jh-project-card jh-surface ${index === activeProject ? 'is-active' : ''}`}
-                                            key={item.key}
-                                            onClick={() => setActiveProject(index)}
-                                            style={{ '--card-offset': offset } as CSSProperties}
-                                            aria-pressed={index === activeProject}
-                                            aria-label={`Mostrar ${item.name}`}
-                                        >
-                                            <div className="jh-project-card-top">
-                                                <span>{item.name}</span>
-                                                <small>{String(index + 1).padStart(2, '0')}</small>
-                                            </div>
-                                            <div className={`jh-project-visual jh-project-visual-${item.key}`}>
-                                                <img
-                                                    className="jh-project-cover"
-                                                    src={item.cover}
-                                                    alt={`Vista de inicio de ${item.name}`}
-                                                    loading={index === activeProject ? 'eager' : 'lazy'}
-                                                    decoding="async"
-                                                />
-                                                <span className="jh-project-cover-label">{item.coverLabel}</span>
-                                            </div>
-                                            <div className="jh-project-card-bottom">
-                                                <small>{item.stage}</small>
-                                                <span>Próximamente</span>
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            <button className="jh-project-side-nav is-next" type="button" onClick={() => moveProject(1)} aria-label="Proyecto siguiente">
-                                <span aria-hidden="true">→</span>
-                            </button>
-
-                            <div className="jh-project-pagination" aria-live="polite" aria-label={`Proyecto ${activeProject + 1} de ${projects.length}`}>
-                                <span className="jh-project-pagination-current">{String(activeProject + 1).padStart(2, '0')}</span>
-                                <span>/</span>
-                                <span>{String(projects.length).padStart(2, '0')}</span>
-                            </div>
-                        </div>
+                <section className="jh-v1-about" id="sobre-mi" aria-labelledby="about-title">
+                    <div className="jh-v1-about-portrait jh-surface"><span>JH</span><small>JoinHook · desde territorio</small></div>
+                    <div className="jh-v1-about-copy">
+                        <span className="jh-eyebrow">Sobre mí</span>
+                        <h2 id="about-title">Experiencia de operación, administración y tecnología puesta al servicio de problemas reales.</h2>
+                        <p>JoinHook es una iniciativa independiente de Francisco Javier Campos. La experiencia en servicios, hospitalidad, administración y desarrollo se cruza aquí para trabajar desde una perspectiva práctica: entender la operación, conversar con quienes participan y construir solo lo que tiene sentido.</p>
+                        <Link className="jh-v1-text-link" href="/info">Conocer más <ArrowIcon /></Link>
                     </div>
                 </section>
 
-                <section className="jh-section jh-product" id="herramientas" aria-labelledby="product-title">
-                    <div className="jh-product-panel jh-surface">
-                        <div className="jh-product-copy">
-                            <span className="jh-eyebrow">Herramienta disponible · BETA</span>
-                            <h2 id="product-title">Control Gastronómico Express</h2>
-                            <p>
-                                Una herramienta enfocada en pequeños negocios gastronómicos para registrar y controlar inventario, compras, mermas, proveedores, stock mínimo y respaldos sin partir por un ERP completo.
-                            </p>
-                            <div className="jh-tags">
-                                <span>Inventario</span><span>Mermas</span><span>Compras</span><span>Dashboard</span><span>PWA</span>
-                            </div>
-                            <div className="jh-actions">
-                                <a className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Conocer y probar <ArrowIcon /></a>
-                                <span className="jh-product-status"><i /> BETA · disponible</span>
-                            </div>
-                        </div>
-                        <div className="jh-product-dashboard">
-                            <div className="jh-product-kpis">
-                                <article><small>Stock crítico</small><strong>06</strong><span>requieren atención</span></article>
-                                <article><small>Merma estimada</small><strong>2,4%</strong><span>del período</span></article>
-                                <article><small>Compras</small><strong>$248k</strong><span>vista demo</span></article>
-                            </div>
-                            <div className="jh-product-graph">
-                                <div className="jh-graph-head"><span>Movimiento de inventario</span><small>Vista conceptual</small></div>
-                                <div className="jh-bars" aria-hidden="true">
-                                    {[42, 68, 51, 84, 62, 93, 71, 88].map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}
-                                </div>
-                            </div>
-                        </div>
+                <section className="jh-v1-notes jh-surface" aria-labelledby="notes-title">
+                    <div><span className="jh-eyebrow">Notas</span><h2 id="notes-title">Aprendizajes que quedan disponibles para otros.</h2></div>
+                    <p>El blog de JoinHook reunirá observaciones y aprendizajes sobre gestión, turismo, hospitalidad, diseño de servicios, automatización, producto y tecnología aplicada a contextos reales.</p>
+                    <Link className="jh-button jh-button-soft" href="/blog">Ver notas</Link>
+                </section>
+
+                <section className="jh-v1-contact" id="contacto" aria-labelledby="contact-title">
+                    <div>
+                        <span className="jh-eyebrow">Contacto</span>
+                        <h2 id="contact-title">Cuéntame qué está pasando antes de decidir qué construir.</h2>
+                    </div>
+                    <div className="jh-v1-contact-side">
+                        <p>Una conversación inicial puede servir para delimitar el problema, identificar prioridades y saber si JoinHook es el apoyo adecuado.</p>
+                        <a className="jh-button jh-button-primary" href="mailto:info@joinhook.cl?subject=Quiero%20conversar%20con%20JoinHook">Escribir a JoinHook <ArrowIcon /></a>
                     </div>
                 </section>
 
-                <section className="jh-section jh-lab" id="lab" aria-labelledby="lab-title">
-                    <div className="jh-section-heading">
-                        <div><span className="jh-eyebrow">JoinHook Lab</span><h2 id="lab-title">Explorar, probar y convertir aprendizaje en producto.</h2></div>
-                        <p>El laboratorio reúne experimentos de interfaz, automatización, agentes, datos y nuevas tecnologías. Una prueba no se presenta como producto terminado: cada iniciativa mantiene su estado visible.</p>
-                    </div>
-                    <div className="jh-lab-grid">
-                        <article className="jh-lab-card jh-surface">
-                            <small>Interacción</small>
-                            <div className="jh-demo-buttons"><button>Acción</button><button className="pressed">Activo</button></div>
-                            <p>Profundidad, tactilidad y movimiento aplicados solo cuando mejoran la experiencia.</p>
-                        </article>
-                        <article className="jh-lab-card jh-surface">
-                            <small>Estados transparentes</small>
-                            <div className="jh-demo-status"><span className="green">Disponible</span><span className="blue">Beta</span><span className="amber">En desarrollo</span></div>
-                            <p>Disponible, beta, experimental y en desarrollo significan cosas distintas y se muestran como tales.</p>
-                        </article>
-                        <article className="jh-lab-card jh-surface">
-                            <small>Datos</small>
-                            <div className="jh-demo-ring"><span>72%</span></div>
-                            <p>Indicadores y visualización pensados para apoyar decisiones, no para decorar un panel.</p>
-                        </article>
-                    </div>
-                </section>
-
-                <section className="jh-section jh-lab" id="blog" aria-labelledby="blog-title">
-                    <div className="jh-section-heading">
-                        <div><span className="jh-eyebrow">Blog</span><h2 id="blog-title">Decisiones, aprendizaje y construcción en proceso.</h2></div>
-                        <p>Este espacio reunirá notas sobre desarrollo de producto, administración, automatización, experiencia de usuario, tecnología y lo aprendido mientras los proyectos avanzan.</p>
-                    </div>
-                    <div className="jh-lab-grid">
-                        <article className="jh-lab-card jh-surface">
-                            <small>Producto</small>
-                            <p>Cómo una necesidad se transforma en alcance, prototipo, métricas y una solución que pueda validarse.</p>
-                        </article>
-                        <article className="jh-lab-card jh-surface">
-                            <small>Tecnología</small>
-                            <p>Arquitectura, seguridad, despliegues, datos y automatización explicados desde proyectos reales.</p>
-                        </article>
-                        <article className="jh-lab-card jh-surface">
-                            <small>Próximamente</small>
-                            <p>La publicación del blog se habilitará de forma progresiva junto con el resto del ecosistema JoinHook.</p>
-                        </article>
-                    </div>
-                </section>
-
-                <section className="jh-section jh-about" id="sobre-mi" aria-labelledby="about-title">
-                    <div className="jh-about-quote jh-surface">
-                        <span>“</span>
-                        <p>Construir con transparencia: mostrar lo que está disponible, lo que sigue en desarrollo y lo que todavía es una propuesta.</p>
-                    </div>
-                    <div className="jh-about-copy">
-                        <span className="jh-eyebrow">Detrás de JoinHook</span>
-                        <h2 id="about-title">Un espacio independiente que conecta administración, tecnología, diseño y nuevos productos.</h2>
-                        <p>
-                            Soy Francisco Javier Campos. JoinHook nace para convertir problemas y oportunidades reales en herramientas digitales útiles. El trabajo combina investigación, experiencia de usuario, desarrollo, automatización y gestión, manteniendo alcance, estados y capacidades comunicados con claridad.
-                        </p>
-                        <div className="jh-process">
-                            <span>Descubrir</span><i>→</i><span>Prototipar</span><i>→</i><span>Desarrollar</span><i>→</i><span>Operar</span><i>→</i><span>Medir</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="jh-contact" id="contacto" aria-labelledby="contact-title">
-                    <span className="jh-eyebrow">Hablemos</span>
-                    <h2 id="contact-title">Cuéntame qué necesitas resolver.</h2>
-                    <p>Antes de proponer una solución, prefiero entender la necesidad, el contexto, los objetivos, las restricciones y el resultado esperado. Puedes consultar por un sitio web, una PWA, un sistema interno, automatización o alguno de los productos de JoinHook.</p>
-                    <div className="jh-actions">
-                        <a className="jh-button jh-button-primary" href="mailto:info@joinhook.cl?subject=Hablemos%20desde%20JoinHook">Escribirme <ArrowIcon /></a>
-                        <a className="jh-button jh-button-soft" href="https://github.com/fjcamp" target="_blank" rel="noreferrer">Ver GitHub</a>
-                    </div>
-                </section>
-
-                <footer className="jh-footer">
+                <footer className="jh-footer jh-v1-footer">
                     <a className="jh-brand" href="#inicio"><span className="jh-brand-mark">JH</span><span>JoinHook</span></a>
-                    <p>Ideas reales, productos digitales.</p>
-                    <span>© {new Date().getFullYear()} Francisco Javier Campos · <a href="/privacidad">Privacidad</a></span>
+                    <p>Acompañamos ideas, negocios y proyectos a avanzar con sentido.</p>
+                    <div><a href="/privacidad">Privacidad</a><span>·</span><a href="/condiciones-beta">Condiciones beta</a><span>·</span><a href="https://github.com/fjcamp" target="_blank" rel="noreferrer">GitHub</a></div>
                 </footer>
             </main>
         </>

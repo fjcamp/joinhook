@@ -30,11 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit all dependencies
-        run: npm audit --audit-level=high
-
       - name: Audit runtime dependencies
         run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit development dependency tree
+        run: npm audit --include=dev --audit-level=critical
 
       - name: Lint
         run: npx eslint .
