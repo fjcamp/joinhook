@@ -333,5 +333,5 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/joinhook-browser.pid ]; then
-            kill "$(cat /tmp/joinhook-browser.pid")" || true
+            kill "$(cat /tmp/joinhook-browser.pid)" || true
           fi
