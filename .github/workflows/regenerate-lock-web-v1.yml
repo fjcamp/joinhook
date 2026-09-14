@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   lockfile:
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore(deps): regenerate web v1 lockfile') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,7 +21,8 @@ jobs:
           cache: npm
       - name: Regenerate lockfile
         run: npm install --package-lock-only --ignore-scripts --no-audit
-      - name: Commit lockfile
+      - name: Commit lockfile when changed
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
