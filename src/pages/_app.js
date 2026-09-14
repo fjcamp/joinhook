@@ -63,7 +63,11 @@ export default function MyApp({ Component, pageProps }) {
                     <meta name="theme-color" content="#728d78" />
                 </Head>
             )}
-            <style jsx global>{`\n                :root {\n                    ${cssVars}\n                }\n            `}</style>
+            <style jsx global>{`
+                :root {
+                    ${cssVars}
+                }
+            `}</style>
             <Component {...pageProps} />
             <ThemeToggle compact={isCGEApp} />
             {isHome && <JoinHookAssistant />}
