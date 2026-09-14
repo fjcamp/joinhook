@@ -1,0 +1,151 @@
+name: JoinHook Web CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      JOINHOOK_DEPLOY_TARGET: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.20.2
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit development dependency tree
+        run: npm audit --include=dev --audit-level=critical
+
+      - name: Lint
+        run: npx eslint .
+
+      - name: Build
+        run: npm run build
+
+      - name: Check client JavaScript budget
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import gzip
+          files = list(Path('.next/static').rglob('*.js'))
+          total = sum(len(gzip.compress(p.read_bytes(), compresslevel=9)) for p in files)
+          limit = 1500000
+          print(f'Client JS gzip total: {total / 1024:.1f} KiB across {len(files)} files')
+          print(f'Internal budget: {limit / 1024:.1f} KiB')
+          assert total <= limit, 'Client JavaScript budget exceeded'
+          PY
+
+      - name: Start production build
+        run: |
+          npm run start -- -p 3000 > /tmp/joinhook.log 2>&1 &
+          echo $! > /tmp/joinhook.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/joinhook.log
+          exit 1
+
+      - name: Smoke test public routes
+        run: |
+          set -e
+          for path in / /info /blog /privacidad /condiciones-beta /herramientas/control-gastronomico-express /app/control-gastronomico-express /robots.txt /sitemap.xml /cge-manifest.webmanifest /app/cge-sw.js; do
+            echo "Checking $path"
+            curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000$path"
+          done
+          curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge.html
+          grep -Fq 'Solicitar pack fundador' /tmp/cge.html
+
+      - name: Check protected legacy routes remain unpublished
+        run: |
+          set -e
+          for path in /projects /projects/project-one /blog/post-one /redesign /redesign-v2; do
+            code=$(curl --location --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:3000$path")
+            test "$code" = "404" || { echo "Expected 404 for $path, got $code"; exit 1; }
+          done
+
+      - name: Verify security headers
+        run: |
+          curl --fail --silent --show-error --dump-header /tmp/headers.txt --output /dev/null http://127.0.0.1:3000/
+          grep -qi '^content-security-policy:' /tmp/headers.txt
+          grep -qi "default-src 'self'" /tmp/headers.txt
+          grep -qi "object-src 'none'" /tmp/headers.txt
+          grep -qi '^x-content-type-options: nosniff' /tmp/headers.txt
+          grep -qi '^referrer-policy: strict-origin-when-cross-origin' /tmp/headers.txt
+          grep -qi '^x-frame-options: SAMEORIGIN' /tmp/headers.txt
+          grep -qi '^permissions-policy:' /tmp/headers.txt
+          grep -qi '^x-robots-tag: noindex, nofollow, noarchive' /tmp/headers.txt
+          if grep -qi '^x-powered-by:' /tmp/headers.txt; then exit 1; fi
+
+      - name: Validate PWA assets
+        run: |
+          test -f public/cge-manifest.webmanifest
+          test -f public/app/cge-sw.js
+          grep -Fq '/app/control-gastronomico-express' public/app/cge-sw.js
+          grep -Fq '/plantillas/control-gastronomico-inventario.csv' public/app/cge-sw.js
+
+      - name: Prepare BlueHosting standalone artifact
+        run: |
+          rm -rf deploy-bluehosting
+          mkdir -p deploy-bluehosting/.next
+          cp -a .next/standalone/. deploy-bluehosting/
+          cp -a .next/static deploy-bluehosting/.next/static
+          cp -a public deploy-bluehosting/public
+          cat > deploy-bluehosting/DEPLOYMENT.txt <<EOF
+          JoinHook Web V1
+          Source commit: $GITHUB_SHA
+          Runtime: Node.js 20.20.2
+          Target: BlueHosting Passenger staging
+          Startup: server.js
+          Search indexing: disabled in staging
+          Do not run next build on BlueHosting.
+          EOF
+          test -f deploy-bluehosting/server.js
+          test -d deploy-bluehosting/node_modules
+          test -d deploy-bluehosting/.next/static
+
+      - name: Smoke test standalone artifact
+        run: |
+          PORT=3010 NODE_ENV=production node deploy-bluehosting/server.js > /tmp/standalone.log 2>&1 &
+          echo $! > /tmp/standalone.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3010/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/info
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/blog
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
+
+      - name: Upload BlueHosting artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: joinhook-bluehosting-standalone
+          path: deploy-bluehosting
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop servers
+        if: always()
+        run: |
+          test ! -f /tmp/joinhook.pid || kill "$(cat /tmp/joinhook.pid)" || true
+          test ! -f /tmp/standalone.pid || kill "$(cat /tmp/standalone.pid)" || true
