@@ -4,7 +4,7 @@ JoinHook es mi espacio independiente para investigar, diseñar y construir produ
 
 ## Catálogo maestro y documentación
 
-El repositorio incorpora ahora un catálogo documental para que desarrolladores, colaboradores y sistemas distintos de ChatGPT puedan comprender los proyectos sin depender de conversaciones previas:
+El repositorio incorpora un catálogo documental para que desarrolladores, colaboradores y sistemas distintos de ChatGPT puedan comprender los proyectos sin depender de conversaciones previas:
 
 - `PROJECTS.md` — catálogo maestro de proyectos, estructura y tecnologías candidatas.
 - `docs/PROJECT-DOCUMENTATION-STANDARD.md` — estándar obligatorio para documentar implementación.
@@ -14,7 +14,9 @@ Cada proyecto debe documentar propósito, estado, arquitectura, tecnologías can
 
 ## Estado actual del sitio
 
-La nueva versión del sitio se desarrolla en la rama `redesign-v2` y todavía no se fusiona a `main` hasta completar staging y el gate de publicación.
+La versión institucional **Web V1** ya fue integrada en `main` mediante PR #46, con merge commit `a29e433e7e5315424b9f264b6adc19d04f9370dc`.
+
+El siguiente ciclo es de consolidación: staging real en BlueHosting, validación post-despliegue, corrección de detalles detectados y evolución incremental mediante ramas de feature. El sitio de producción `joinhook.cl` no debe considerarse actualizado hasta verificar un despliegue real.
 
 ## Proyecto principal en lanzamiento
 
@@ -38,13 +40,15 @@ Los estados de los proyectos deben mantenerse explícitos.
 
 ## Stack actual del sitio
 
-- Next.js 16.3
+- Next.js 16.3.x
 - React 19
 - TypeScript
 - Tailwind CSS 4
 - PWA / Service Worker para Control Gastronómico Express
 - GitHub como fuente de verdad
-- Netlify preparado para despliegue mediante OpenNext
+- BlueHosting + Passenger para el despliegue objetivo
+
+El artefacto de despliegue se genera y valida en GitHub Actions como build **standalone**. No depende de terminal/SSH en cPanel y no se debe ejecutar `next build` dentro de BlueHosting.
 
 ## Desarrollo local
 
@@ -67,15 +71,17 @@ npm run start
 ## Flujo de ramas
 
 ```text
-feature / release branch
-        ↓
-    redesign-v2
-        ↓
-      staging
-        ↓
-       main
-        ↓
-   joinhook.cl
+feature/*
+   ↓
+Pull Request → main
+   ↓
+CI + QA
+   ↓
+staging real en BlueHosting
+   ↓
+validación / rollback disponible
+   ↓
+producción joinhook.cl
 ```
 
 No reemplazar producción sin staging, backup y validación.
