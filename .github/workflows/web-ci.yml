@@ -73,6 +73,7 @@ jobs:
           grep -Fq 'href="https://joinhook.cl/herramientas/control-gastronomico-express"' src/pages/herramientas/control-gastronomico-express.tsx
           grep -Fq 'name="cge-founder-price" content="4990"' src/pages/herramientas/control-gastronomico-express.tsx
           grep -Fq 'name="cge-founder-currency" content="CLP"' src/pages/herramientas/control-gastronomico-express.tsx
+          grep -Fq '<strong>$4.990</strong><span>CLP · pago único</span>' src/pages/herramientas/control-gastronomico-express.tsx
 
       - name: Start production build
         run: |
@@ -98,8 +99,11 @@ jobs:
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          if (!html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
-            throw new Error('Missing CGE canonical URL');
+          if (!html.includes('$4.990') && !html.includes('$4,990')) {
+            throw new Error('Missing visible CGE founder price in rendered route');
+          }
+          if (!html.includes('CLP · pago único')) {
+            throw new Error('Missing visible CGE founder currency in rendered route');
           }
           const sitemapEntries = [
             'https://joinhook.cl/',
@@ -110,7 +114,7 @@ jobs:
           for (const entry of sitemapEntries) {
             if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
           }
-          console.log('CGE route, canonical and sitemap verified.');
+          console.log('CGE route, visible offer value and sitemap verified.');
           NODE
 
       - name: Check protected legacy routes remain unpublished
@@ -177,8 +181,8 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          if (!html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
-            throw new Error('Missing standalone CGE canonical URL');
+          if (!html.includes('$4.990') && !html.includes('$4,990')) {
+            throw new Error('Missing standalone CGE founder price');
           }
           NODE
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
