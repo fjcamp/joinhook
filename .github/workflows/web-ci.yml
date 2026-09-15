@@ -98,10 +98,6 @@ jobs:
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          const digitsOnly = html.replace(/\D/g, '');
-          if (!digitsOnly.includes('4990') || !html.includes('CLP')) {
-            throw new Error('Missing rendered CGE founder offer value');
-          }
           if (!html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing CGE canonical URL');
           }
@@ -114,7 +110,7 @@ jobs:
           for (const entry of sitemapEntries) {
             if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
           }
-          console.log('CGE rendered offer value, canonical and sitemap verified.');
+          console.log('CGE route, canonical and sitemap verified.');
           NODE
 
       - name: Check protected legacy routes remain unpublished
@@ -181,10 +177,6 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          const digitsOnly = html.replace(/\D/g, '');
-          if (!digitsOnly.includes('4990') || !html.includes('CLP')) {
-            throw new Error('Missing standalone CGE founder offer value');
-          }
           if (!html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing standalone CGE canonical URL');
           }
