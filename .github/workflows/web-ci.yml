@@ -79,14 +79,23 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/sitemap.xml
           node <<'NODE'
           const fs = require('node:fs');
+          const decodeHtml = (value) => value
+            .replace(/&oacute;/gi, 'ó')
+            .replace(/&#243;/g, 'ó')
+            .replace(/&#xF3;/gi, 'ó')
+            .replace(/&amp;/gi, '&')
+            .replace(/&nbsp;/gi, ' ');
           const cge = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          const cgeMarkers = [
-            '<title>Control Gastronómico Express',
-            'https://joinhook.cl/herramientas/control-gastronomico-express'
-          ];
-          for (const marker of cgeMarkers) {
-            if (!cge.includes(marker)) throw new Error(`Missing CGE marker: ${marker}`);
+          const titleMatch = cge.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title>/i);
+          if (!titleMatch) throw new Error('Missing CGE <title> tag');
+          const titleText = decodeHtml(titleMatch[1]).replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+          if (!titleText.includes('Control Gastronómico Express')) {
+            throw new Error(`Unexpected CGE title: ${titleText}`);
+          }
+          const canonicalMatch = cge.match(/<link\\b[^>]*rel=["']canonical["'][^>]*>/i);
+          if (!canonicalMatch || !canonicalMatch[0].includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
+            throw new Error('Missing CGE canonical URL');
           }
           if (!cge.includes('$4.990') && !cge.includes('4990')) {
             throw new Error('Missing CGE price marker');
@@ -100,7 +109,7 @@ jobs:
           for (const entry of sitemapEntries) {
             if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
           }
-          console.log('CGE metadata and sitemap markers verified');
+          console.log(`CGE SEO verified · title=${titleText}`);
           NODE
 
       - name: Check protected legacy routes remain unpublished
@@ -164,13 +173,14 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
           node <<'NODE'
           const fs = require('node:fs');
+          const decodeHtml = (value) => value.replace(/&oacute;/gi, 'ó').replace(/&#243;/g, 'ó').replace(/&#xF3;/gi, 'ó').replace(/&amp;/gi, '&').replace(/&nbsp;/gi, ' ');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          for (const marker of [
-            '<title>Control Gastronómico Express',
-            'https://joinhook.cl/herramientas/control-gastronomico-express'
-          ]) {
-            if (!html.includes(marker)) throw new Error(`Missing standalone CGE marker: ${marker}`);
-          }
+          const titleMatch = html.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title>/i);
+          if (!titleMatch) throw new Error('Missing standalone CGE <title> tag');
+          const titleText = decodeHtml(titleMatch[1]).replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+          if (!titleText.includes('Control Gastronómico Express')) throw new Error(`Unexpected standalone CGE title: ${titleText}`);
+          const canonicalMatch = html.match(/<link\\b[^>]*rel=["']canonical["'][^>]*>/i);
+          if (!canonicalMatch || !canonicalMatch[0].includes('https://joinhook.cl/herramientas/control-gastronomico-express')) throw new Error('Missing standalone CGE canonical URL');
           NODE
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
