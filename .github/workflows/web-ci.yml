@@ -87,14 +87,14 @@ jobs:
             .replace(/&nbsp;/gi, ' ');
           const cge = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          const titleMatch = cge.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title>/i);
-          if (!titleMatch) throw new Error('Missing CGE <title> tag');
-          const titleText = decodeHtml(titleMatch[1]).replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+          const titleStart = cge.indexOf('<title');
+          const titleEnd = titleStart >= 0 ? cge.indexOf('</title>', titleStart) : -1;
+          if (titleStart < 0 || titleEnd < 0) throw new Error('Missing CGE <title> tag');
+          const titleText = decodeHtml(cge.slice(cge.indexOf('>', titleStart) + 1, titleEnd)).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
           if (!titleText.includes('Control Gastronómico Express')) {
             throw new Error(`Unexpected CGE title: ${titleText}`);
           }
-          const canonicalMatch = cge.match(/<link\\b[^>]*rel=["']canonical["'][^>]*>/i);
-          if (!canonicalMatch || !canonicalMatch[0].includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
+          if (!cge.includes('rel="canonical"') || !cge.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing CGE canonical URL');
           }
           if (!cge.includes('$4.990') && !cge.includes('4990')) {
@@ -175,12 +175,12 @@ jobs:
           const fs = require('node:fs');
           const decodeHtml = (value) => value.replace(/&oacute;/gi, 'ó').replace(/&#243;/g, 'ó').replace(/&#xF3;/gi, 'ó').replace(/&amp;/gi, '&').replace(/&nbsp;/gi, ' ');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          const titleMatch = html.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title>/i);
-          if (!titleMatch) throw new Error('Missing standalone CGE <title> tag');
-          const titleText = decodeHtml(titleMatch[1]).replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+          const titleStart = html.indexOf('<title');
+          const titleEnd = titleStart >= 0 ? html.indexOf('</title>', titleStart) : -1;
+          if (titleStart < 0 || titleEnd < 0) throw new Error('Missing standalone CGE <title> tag');
+          const titleText = decodeHtml(html.slice(html.indexOf('>', titleStart) + 1, titleEnd)).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
           if (!titleText.includes('Control Gastronómico Express')) throw new Error(`Unexpected standalone CGE title: ${titleText}`);
-          const canonicalMatch = html.match(/<link\\b[^>]*rel=["']canonical["'][^>]*>/i);
-          if (!canonicalMatch || !canonicalMatch[0].includes('https://joinhook.cl/herramientas/control-gastronomico-express')) throw new Error('Missing standalone CGE canonical URL');
+          if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) throw new Error('Missing standalone CGE canonical URL');
           NODE
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
