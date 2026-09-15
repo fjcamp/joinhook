@@ -9,12 +9,15 @@ permissions:
   contents: read
   issues: write
 
+env:
+  # Commerce remains disabled unless explicitly enabled in GitHub Repository Variables.
+  # The checkout URL must come from a GitHub Secret and is never stored in source control.
+  NEXT_PUBLIC_CGE_CHECKOUT_ENABLED: ${{ vars.CGE_CHECKOUT_ENABLED || 'false' }}
+  NEXT_PUBLIC_CGE_CHECKOUT_URL: ${{ secrets.CGE_CHECKOUT_URL || '' }}
+
 jobs:
   production:
     runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_CGE_CHECKOUT_ENABLED: 'true'
-      NEXT_PUBLIC_CGE_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -28,10 +31,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit dependencies
-        run: |
-          npm audit --audit-level=high
-          npm audit --omit=dev --audit-level=high
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit development dependency tree
+        run: npm audit --include=dev --audit-level=critical
 
       - name: Lint
         run: npx eslint .
@@ -54,10 +58,12 @@ jobs:
           cat /tmp/joinhook-production.log
           exit 1
 
-      - name: Verify production routes and indexing
+      - name: Verify production routes, indexing and commerce state
         run: |
+          set -e
           curl --fail --silent --show-error --dump-header /tmp/production-headers.txt --output /dev/null http://127.0.0.1:3000/
           grep -qi '^content-security-policy:' /tmp/production-headers.txt
+          grep -qi "default-src 'self'" /tmp/production-headers.txt
           grep -qi '^x-content-type-options: nosniff' /tmp/production-headers.txt
           grep -qi '^referrer-policy: strict-origin-when-cross-origin' /tmp/production-headers.txt
           grep -qi '^x-frame-options: SAMEORIGIN' /tmp/production-headers.txt
@@ -67,11 +73,10 @@ jobs:
             cat /tmp/production-headers.txt
             exit 1
           fi
+
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/robots.txt
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/sitemap.xml
           curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-production.html
-          grep -Fq 'Comprar pack fundador' /tmp/cge-production.html
-          grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/cge-production.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
@@ -79,8 +84,26 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/project-covers/snowwise-cover.svg
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/project-covers/mi-gestion-cover.svg
 
+          if [ "${NEXT_PUBLIC_CGE_CHECKOUT_ENABLED}" = 'true' ]; then
+            case "${NEXT_PUBLIC_CGE_CHECKOUT_URL}" in
+              https://*) ;;
+              *) echo 'CGE checkout enabled but URL is not HTTPS'; exit 1 ;;
+            esac
+            grep -Fq 'Comprar pack fundador' /tmp/cge-production.html
+            grep -Fq "${NEXT_PUBLIC_CGE_CHECKOUT_URL}" /tmp/cge-production.html
+            echo 'CGE checkout: ENABLED by explicit repository configuration.'
+          else
+            grep -Fq 'Solicitar pack fundador' /tmp/cge-production.html
+            if grep -Fq 'Comprar pack fundador' /tmp/cge-production.html; then
+              echo 'Checkout is disabled but production rendered a purchase CTA.'
+              exit 1
+            fi
+            echo 'CGE checkout: DISABLED by default.'
+          fi
+
       - name: Prepare production standalone artifact
         run: |
+          set -e
           rm -rf deploy-production
           mkdir -p deploy-production/.next
           cp -a .next/standalone/. deploy-production/
@@ -115,18 +138,18 @@ jobs:
           EOF
 
           cat > deploy-production/DEPLOYMENT.txt <<EOF
-          JoinHook V2 + CGE Beta 0.3
+          JoinHook Web production artifact
           Source commit: $GITHUB_SHA
           Built by: GitHub Actions / Production Artifact
           Runtime: Node.js 20.20.2
-          Deploy target: production
-          Search indexing: enabled (no staging X-Robots-Tag)
-          CGE checkout: Mercado Pago https://mpago.li/1ZUHT1R
-          Target: BlueHosting Passenger joinhook.cl
+          Deploy target: BlueHosting Passenger joinhook.cl
           Startup file: server.js
+          CGE checkout enabled: ${NEXT_PUBLIC_CGE_CHECKOUT_ENABLED}
+          Search indexing: enabled (no staging X-Robots-Tag)
           Document-root static sync: document-root-assets/ -> /home/joinhook/public_html/
           Do not run next build on BlueHosting.
           EOF
+
           test -f deploy-production/server.js
           test -f deploy-production/package.json
           test -d deploy-production/node_modules
@@ -138,6 +161,7 @@ jobs:
 
       - name: Verify document-root mirror matches build
         run: |
+          set -e
           test "$(find .next/static -type f | wc -l)" -gt 0
           test "$(find deploy-production/document-root-assets/_next/static -type f | wc -l)" -gt 0
           diff -qr .next/static deploy-production/document-root-assets/_next/static
@@ -145,6 +169,7 @@ jobs:
 
       - name: Smoke test standalone production artifact
         run: |
+          set -e
           PORT=3010 HOSTNAME=127.0.0.1 NODE_ENV=production node deploy-production/server.js > /tmp/joinhook-production-standalone.log 2>&1 &
           echo $! > /tmp/joinhook-production-standalone.pid
           for i in {1..30}; do
@@ -157,15 +182,21 @@ jobs:
             fi
             sleep 1
           done
+
           curl --fail --silent --show-error --dump-header /tmp/standalone-production-headers.txt --output /dev/null http://127.0.0.1:3010/
           grep -qi '^content-security-policy:' /tmp/standalone-production-headers.txt
           if grep -qi '^x-robots-tag:' /tmp/standalone-production-headers.txt; then
             echo 'Standalone production artifact contains staging noindex header'
             exit 1
           fi
+
           curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-production-standalone.html
-          grep -Fq 'Comprar pack fundador' /tmp/cge-production-standalone.html
-          grep -Fq 'https://mpago.li/1ZUHT1R' /tmp/cge-production-standalone.html
+          if [ "${NEXT_PUBLIC_CGE_CHECKOUT_ENABLED}" = 'true' ]; then
+            grep -Fq 'Comprar pack fundador' /tmp/cge-production-standalone.html
+            grep -Fq "${NEXT_PUBLIC_CGE_CHECKOUT_URL}" /tmp/cge-production-standalone.html
+          else
+            grep -Fq 'Solicitar pack fundador' /tmp/cge-production-standalone.html
+          fi
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/project-covers/snowwise-cover.svg
@@ -195,7 +226,7 @@ jobs:
         with:
           script: |
             const marker = '<!-- joinhook-production-artifact -->';
-            const body = `${marker}\n## Production artifact ready\n\n- Commit: \`${context.sha}\`\n- Artifact: \`joinhook-bluehosting-production\`\n- Artifact ID: \`${process.env.ARTIFACT_ID}\`\n- Digest: \`${process.env.ARTIFACT_DIGEST}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n- Artifact URL: ${process.env.ARTIFACT_URL}\n- CGE checkout: Mercado Pago \`https://mpago.li/1ZUHT1R\` verified in the rendered production landing.\n- BlueHosting document-root mirror packaged and verified for \`/_next/static\` + public assets.\n- Production build verified without staging \`X-Robots-Tag\`.\n`;
+            const body = `${marker}\n## Production artifact ready\n\n- Commit: \`${context.sha}\`\n- Artifact: \`joinhook-bluehosting-production\`\n- Artifact ID: \`${process.env.ARTIFACT_ID}\`\n- Digest: \`${process.env.ARTIFACT_DIGEST}\`\n- Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n- Artifact URL: ${process.env.ARTIFACT_URL}\n- CGE checkout enabled: \`${process.env.NEXT_PUBLIC_CGE_CHECKOUT_ENABLED}\` by explicit repository configuration.\n- BlueHosting document-root mirror packaged and verified for \`/_next/static\` + public assets.\n- Production build verified without staging \`X-Robots-Tag\`.\n`;
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -204,17 +235,7 @@ jobs:
             });
             const previous = comments.find(comment => comment.body && comment.body.includes(marker));
             if (previous) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: previous.id,
-                body
-              });
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: previous.id, body });
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: 13,
-                body
-              });
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: 13, body });
             }
