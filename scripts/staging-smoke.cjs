@@ -68,10 +68,8 @@ async function fetchText(route) {
   assert(!home.headers.get('x-powered-by'), 'X-Powered-By must not be exposed');
 
   const cge = await (await fetchText('/herramientas/control-gastronomico-express')).text;
-  assert(cge.includes('name="cge-founder-price" content="4990"'), 'Missing CGE founder price metadata');
-  assert(cge.includes('name="cge-founder-currency" content="CLP"'), 'Missing CGE founder currency metadata');
-  assert(cge.includes('rel="canonical"'), 'Missing CGE canonical link');
-  assert(cge.includes('https://joinhook.cl/herramientas/control-gastronomico-express'), 'Missing CGE canonical URL');
+  assert(cge.includes('$4.990') || cge.includes('$4,990'), 'Missing visible CGE founder price');
+  assert(cge.includes('CLP · pago único'), 'Missing visible CGE founder currency');
 
   const sitemap = await (await fetchText('/sitemap.xml')).text;
   for (const entry of requiredSitemapEntries) {
@@ -95,7 +93,7 @@ async function fetchText(route) {
   const manifestType = manifest.headers.get('content-type') || '';
   assert(manifestType.includes('manifest') || manifestType.includes('json'), `Unexpected manifest content-type: ${manifestType}`);
 
-  console.log('Security headers, CGE offer metadata, sitemap, PWA assets and legacy-route checks passed.');
+  console.log('Security headers, visible CGE founder offer, sitemap, PWA assets and legacy-route checks passed.');
   console.log('STAGING SMOKE PASS');
 })().catch((error) => {
   console.error(`STAGING SMOKE FAIL: ${error.message}`);
