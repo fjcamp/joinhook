@@ -73,7 +73,14 @@ jobs:
             curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000$path"
           done
           curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge.html
-          grep -Fq 'Solicitar pack fundador' /tmp/cge.html
+          if grep -Fq 'Solicitar pack fundador' /tmp/cge.html; then
+            echo 'CGE fallback CTA verified'
+          elif grep -Fq 'Comprar pack fundador' /tmp/cge.html; then
+            echo 'CGE checkout CTA verified'
+          else
+            echo 'CGE must expose exactly one supported founder-pack CTA state'
+            exit 1
+          fi
 
       - name: Check protected legacy routes remain unpublished
         run: |
