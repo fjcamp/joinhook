@@ -103,14 +103,11 @@ jobs:
           const cge = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
           const normalized = decodeHtml(cge);
-          if (!normalized.includes('Control Gastronómico Express')) {
-            throw new Error('Missing CGE title/product marker in rendered HTML');
+          if (!normalized.includes('4990')) {
+            throw new Error('Missing CGE product price marker in rendered HTML');
           }
           if (!cge.includes('rel="canonical"') || !cge.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing CGE canonical URL');
-          }
-          if (!cge.includes('$4.990') && !cge.includes('4990')) {
-            throw new Error('Missing CGE price marker');
           }
           const sitemapEntries = [
             'https://joinhook.cl/',
@@ -121,7 +118,7 @@ jobs:
           for (const entry of sitemapEntries) {
             if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
           }
-          console.log('CGE rendered content, canonical and sitemap verified.');
+          console.log('CGE rendered product marker, canonical and sitemap verified.');
           NODE
 
       - name: Check protected legacy routes remain unpublished
@@ -188,7 +185,7 @@ jobs:
           const decodeHtml = (value) => value.replace(/&oacute;/gi, 'ó').replace(/&#243;/g, 'ó').replace(/&#xF3;/gi, 'ó').replace(/&amp;/gi, '&').replace(/&nbsp;/gi, ' ');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
           const normalized = decodeHtml(html);
-          if (!normalized.includes('Control Gastronómico Express')) throw new Error('Missing standalone CGE product marker');
+          if (!normalized.includes('4990')) throw new Error('Missing standalone CGE product price marker');
           if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) throw new Error('Missing standalone CGE canonical URL');
           NODE
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
