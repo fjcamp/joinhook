@@ -23,6 +23,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Verify checked-out commit
+        run: |
+          echo "Workflow SHA: $GITHUB_SHA"
+          echo "Checked-out SHA: $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
