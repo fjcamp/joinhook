@@ -91,10 +91,10 @@ jobs:
           set -e
           for path in / /info /blog /privacidad /condiciones-beta /herramientas/control-gastronomico-express /app/control-gastronomico-express /robots.txt /sitemap.xml /cge-manifest.webmanifest /app/cge-sw.js; do
             echo "Checking $path"
-            curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000$path"
+            curl --fail --location --silent --show-error --output /dev/null "http://127.0.0.1:3000$path"
           done
-          curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge.html
-          curl --fail --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/sitemap.xml
+          curl --fail --location --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge.html
+          curl --fail --location --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/sitemap.xml
           node <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge.html', 'utf8');
@@ -175,9 +175,9 @@ jobs:
             if curl -fsS http://127.0.0.1:3010/ > /dev/null; then break; fi
             sleep 1
           done
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/info
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/blog
-          curl --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
+          curl --fail --location --silent --show-error --output /dev/null http://127.0.0.1:3010/info
+          curl --fail --location --silent --show-error --output /dev/null http://127.0.0.1:3010/blog
+          curl --fail --location --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
           node <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
@@ -185,7 +185,7 @@ jobs:
             throw new Error('Missing standalone CGE founder price');
           }
           NODE
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
+          curl --fail --location --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
       - name: Upload BlueHosting artifact
         uses: actions/upload-artifact@v4
