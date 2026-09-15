@@ -5,7 +5,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "start:passenger": "node server.js"
+        "start:passenger": "node server.js",
+        "smoke:staging": "node scripts/staging-smoke.cjs"
     },
     "engines": {
         "node": ">=20.9.0"
