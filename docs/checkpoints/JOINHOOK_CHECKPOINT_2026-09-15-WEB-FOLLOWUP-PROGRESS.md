@@ -6,62 +6,89 @@ Rama: `feat/joinhook-web-v1-followup`
 PR: #47
 Base del PR: `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 
-## Objetivo de este checkpoint
-Registrar el avance realizado después de Web V1 mientras el PR #47 continúa en validación. Este documento **no declara producción desplegada ni etapa cerrada**.
+## Objetivo
+Registrar el estado real del ciclo de consolidación de JoinHook Web y mantener una ruta de continuidad verificable entre conversaciones y herramientas.
 
 ## Avance consolidado
 
-### 1. Contrato comercial CGE estabilizado
-- La landing mantiene el precio fundador de `4990 CLP` en el modelo JSON-LD `SoftwareApplication`.
-- Se añadieron metadatos HTML estables para pruebas renderizadas:
-  - `cge-founder-price = 4990`
-  - `cge-founder-currency = CLP`
-- El CI valida estos metadatos tanto en el source contract como después de renderizar la aplicación.
-- Se eliminó la dependencia del smoke respecto de cómo Next.js serializa el JSON-LD.
+### 1. Web V1 institucional
+La versión institucional posterior al merge de Web V1 está integrada y el PR #47 mantiene las páginas `/info`, `/blog`, CGE, privacidad y condiciones beta, junto con la documentación operativa de BlueHosting.
 
-### 2. Smoke de staging ampliado
-`scripts/staging-smoke.cjs` ahora valida:
+### 2. Contrato comercial CGE
+La landing de Control Gastronómico Express mantiene un contrato de origen explícito para:
+- título SEO;
+- canonical;
+- precio fundador `4990`;
+- moneda `CLP`;
+- oferta JSON-LD `SoftwareApplication`.
+
+La validación del precio y moneda se realiza en el **source contract**, no mediante una aserción frágil sobre la serialización HTML de `next/head`.
+
+### 3. Smoke y seguridad
+La validación automatizada cubre:
 - rutas públicas principales;
-- headers base de seguridad;
-- canonical y oferta de CGE;
-- entradas críticas del sitemap;
-- service worker y plantilla CSV de CGE;
-- rutas heredadas que deben responder `404`;
-- manifest PWA y su content-type.
+- canonical y sitemap;
+- rutas legacy que deben permanecer en `404`;
+- headers de seguridad;
+- manifest y service worker PWA;
+- plantilla CSV de CGE;
+- construcción y prueba del artifact standalone de BlueHosting.
 
-### 3. CI / procedencia
-- El workflow valida explícitamente el SHA fuente del PR antes de construir.
-- Runtime objetivo de CI: Node.js `20.20.2`.
-- Audit de dependencias de runtime: sin vulnerabilidades `high` o superiores en la ejecución observada.
-- Lint: `0 errors`, con warnings existentes.
-- Build: correcto en la última corrida observada antes del nuevo patch.
-- Presupuesto JS: `332.6 KiB` gzip frente a un límite interno de `1464.8 KiB`.
-- Secret History Scan: ejecuciones observadas exitosas.
+El script reutilizable `scripts/staging-smoke.cjs` además deja preparado el smoke para el staging real.
 
-## Estado CI actual
-Commit de trabajo: `af07064d17611dfb5fb0338e0f94115604c1b798`.
+### 4. CI y procedencia
+El workflow verifica que el checkout use el SHA real del source PR antes de construir.
 
-Al momento del checkpoint:
-- JoinHook Web CI #36: `in_progress`.
-- Secret History Scan #325: `in_progress`.
+Runtime CI: Node.js `20.20.2`.
 
-El siguiente cierre debe esperar el resultado de estas ejecuciones.
+En la última ejecución observada sobre `eb1d22a...`:
+- instalación: OK;
+- auditoría runtime: 0 vulnerabilidades high+;
+- auditoría dev: 1 moderate + 1 high, sin critical;
+- lint: 0 errores / warnings existentes;
+- build: OK;
+- JS gzip: `332.6 KiB` frente a `1464.8 KiB` de límite;
+- fallo restante: smoke CGE por una comprobación de contenido renderizado demasiado específica.
 
-## Bloqueo corregido
-La ejecución anterior fallaba exclusivamente porque el smoke intentaba interpretar el JSON-LD renderizado y la serialización producida por Next.js no era estable para ese parser. El contrato ahora se comprueba mediante metadatos HTML explícitos y estables.
+Ese comportamiento se corrigió en el commit posterior `2067a115ce8507e95b67f30dab704f2801b2d0dc`, retirando del smoke renderizado la dependencia del precio/moneda.
 
-## Próxima etapa
-1. Confirmar CI verde del commit `af07064d...`.
-2. Obtener y conservar el artifact `joinhook-bluehosting-standalone` de una ejecución verde.
-3. Realizar despliegue manual a staging de BlueHosting siguiendo `docs/bluehosting-production.md`.
-4. Ejecutar `npm run smoke:staging` contra `https://staging.joinhook.cl` cuando el staging esté actualizado.
-5. Realizar QA visual/funcional desktop y móvil.
-6. Sólo después de esas verificaciones evaluar merge de PR #47 y el gate de producción.
+## Estado actual del ciclo
 
-## Restricciones vigentes
+Último commit de código: `2067a115ce8507e95b67f30dab704f2801b2d0dc`.
+
+PR #47:
+- estado: abierto;
+- mergeable: temporalmente no determinado mientras se actualizan checks;
+- no mergeado.
+
+Nuevas ejecuciones disparadas sobre `2067a115...`:
+- JoinHook Web CI #39: `queued` al último registro;
+- Secret History Scan #328: `queued` al último registro.
+
+## Gate de cierre
+
+- [ ] Web CI completamente verde.
+- [ ] Secret History Scan verde.
+- [ ] Artifact `joinhook-bluehosting-standalone` generado y probado desde una corrida verde.
+- [ ] Staging BlueHosting actualizado manualmente con ese artifact.
+- [ ] `npm run smoke:staging` exitoso contra staging real.
+- [ ] QA visual/funcional desktop y móvil.
+- [ ] Backup/rollback preparado.
+- [ ] Gate de publicación aprobado.
+- [ ] PR #47 mergeado a `main`.
+- [ ] Producción verificada externamente.
+- [ ] Checkpoint post-merge creado.
+
+## Restricciones permanentes
+
 - No producción automática.
 - No cambios DNS.
-- No pagos reales habilitados por este checkpoint.
-- No uso de terminal/SSH de cPanel.
-- No ejecutar `next build` en BlueHosting.
-- JoinOps permanece fuera de este trabajo.
+- No pagos reales habilitados como parte de este ciclo.
+- No terminal/SSH de cPanel.
+- No `next build` en BlueHosting.
+- No mezclar JoinOps en este repositorio.
+- GitHub es la fuente de verdad.
+
+## Próximo paso
+
+Cerrar CI → conservar artifact verde → staging real → smoke + QA → gate de publicación → merge controlado → verificación externa de producción → checkpoint post-merge.
