@@ -100,9 +100,10 @@ jobs:
             .replace(/&#xF3;/gi, 'ó')
             .replace(/&amp;/gi, '&')
             .replace(/&nbsp;/gi, ' ');
+          const normalizeReactMarkup = (value) => decodeHtml(value).replace(/<!--.*?-->/gs, '');
           const cge = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          const normalized = decodeHtml(cge);
+          const normalized = normalizeReactMarkup(cge);
           if (!normalized.includes('4.990')) {
             throw new Error('Missing CGE displayed founder price marker in rendered HTML');
           }
@@ -185,8 +186,9 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const decodeHtml = (value) => value.replace(/&oacute;/gi, 'ó').replace(/&#243;/g, 'ó').replace(/&#xF3;/gi, 'ó').replace(/&amp;/gi, '&').replace(/&nbsp;/gi, ' ');
+          const normalizeReactMarkup = (value) => decodeHtml(value).replace(/<!--.*?-->/gs, '');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          const normalized = decodeHtml(html);
+          const normalized = normalizeReactMarkup(html);
           if (!normalized.includes('4.990')) throw new Error('Missing standalone CGE displayed founder price marker');
           if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) throw new Error('Missing standalone CGE canonical URL');
           NODE
