@@ -71,6 +71,8 @@ jobs:
         run: |
           grep -Fq '<title>Control Gastronómico Express | Inventario y mermas para pequeños negocios</title>' src/pages/herramientas/control-gastronomico-express.tsx
           grep -Fq 'href="https://joinhook.cl/herramientas/control-gastronomico-express"' src/pages/herramientas/control-gastronomico-express.tsx
+          grep -Fq 'name="cge-founder-price" content="4990"' src/pages/herramientas/control-gastronomico-express.tsx
+          grep -Fq 'name="cge-founder-currency" content="CLP"' src/pages/herramientas/control-gastronomico-express.tsx
 
       - name: Start production build
         run: |
@@ -96,15 +98,8 @@ jobs:
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          const ldJsonBlocks = [...html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
-            .map((match) => match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-          const productJsonLd = ldJsonBlocks
-            .map((value) => {
-              try { return JSON.parse(value); } catch { return null; }
-            })
-            .find((value) => value?.['@type'] === 'SoftwareApplication');
-          if (!productJsonLd?.offers || String(productJsonLd.offers.price) !== '4990' || productJsonLd.offers.priceCurrency !== 'CLP') {
-            throw new Error('Missing CGE JSON-LD founder offer price contract');
+          if (!html.includes('name="cge-founder-price" content="4990"') || !html.includes('name="cge-founder-currency" content="CLP"')) {
+            throw new Error('Missing rendered CGE founder offer metadata');
           }
           if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing CGE canonical URL');
@@ -118,7 +113,7 @@ jobs:
           for (const entry of sitemapEntries) {
             if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
           }
-          console.log('CGE JSON-LD offer, canonical and sitemap verified.');
+          console.log('CGE rendered offer metadata, canonical and sitemap verified.');
           NODE
 
       - name: Check protected legacy routes remain unpublished
@@ -185,15 +180,8 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          const ldJsonBlocks = [...html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
-            .map((match) => match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-          const productJsonLd = ldJsonBlocks
-            .map((value) => {
-              try { return JSON.parse(value); } catch { return null; }
-            })
-            .find((value) => value?.['@type'] === 'SoftwareApplication');
-          if (!productJsonLd?.offers || String(productJsonLd.offers.price) !== '4990' || productJsonLd.offers.priceCurrency !== 'CLP') {
-            throw new Error('Missing standalone CGE JSON-LD founder offer price contract');
+          if (!html.includes('name="cge-founder-price" content="4990"') || !html.includes('name="cge-founder-currency" content="CLP"')) {
+            throw new Error('Missing standalone CGE founder offer metadata');
           }
           if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing standalone CGE canonical URL');
