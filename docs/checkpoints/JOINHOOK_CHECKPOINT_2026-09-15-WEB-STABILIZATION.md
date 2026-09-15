@@ -7,7 +7,7 @@
 - PR activo: `#47` — `feat(web): consolidate institutional pages and CI after Web V1`
 - Base del PR: `main` / `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - Rama: `feat/joinhook-web-v1-followup`
-- Último commit de desarrollo: `e6aaf395ca82bf82cce83912d820fc5d4207453f`
+- Último commit de desarrollo registrado: `ba8a92120180de8037211f7411576eb8df8837ea`
 
 ## Cambios del ciclo
 
@@ -16,16 +16,17 @@
 3. Se actualizaron los documentos de staging de BlueHosting para eliminar referencias operativas al antiguo `redesign-v2`.
 4. Se actualizó el incidente histórico JH-OPS-001 para distinguir el contexto del incidente de la arquitectura actual y evitar fijar versiones antiguas como stack vigente.
 5. README actualizado con el flujo actual de Web V1 y el comando reutilizable `smoke:staging`.
-6. El smoke de CGE dejó de depender de búsquedas `grep` sobre HTML/XML y ahora valida marcadores mediante Node.js, reduciendo falsos negativos por serialización/minificación.
-7. `tsconfig.json` quedó alineado explícitamente con los valores que Next.js estaba aplicando automáticamente (`moduleResolution: bundler` y `jsx: react-jsx`).
+6. El smoke de CGE pasó de búsquedas textuales frágiles a validación programática del HTML renderizado.
+7. La validación de CGE ahora acepta entidades HTML para el nombre del producto, exige un `<title>` real, comprueba su contenido y valida el canonical por atributo.
+8. Se reforzó la validación equivalente para el artefacto standalone de BlueHosting.
+9. `tsconfig.json` quedó alineado explícitamente con los valores que Next.js estaba aplicando automáticamente (`moduleResolution: bundler` y `jsx: react-jsx`).
 
 ## Estado CI
 
-- Secret History Scan del último commit: `34914257330` → `success`.
-- El run anterior `34913666091` falló exclusivamente en el smoke test; instalación, auditorías, lint, build y presupuesto JS habían pasado.
-- El nuevo run de Web CI es `34914286541` → `in_progress` al momento de este checkpoint.
-- Job `validate`: en instalación de dependencias; las etapas de validación posteriores aún no han terminado.
-- No declarar CI verde hasta contar con conclusión `success` del run `34914286541`.
+- Secret History Scan del commit `ba8a92120180de8037211f7411576eb8df8837ea`: run `34915307707` → `queued` al momento de este checkpoint.
+- Web CI del mismo commit: run `34915307731` → `queued` al momento de este checkpoint.
+- El último Web CI completado, `34914314110`, falló exclusivamente en el smoke CGE por una aserción demasiado rígida del `<title>`.
+- No declarar CI verde hasta contar con conclusión `success` de `34915307731`.
 
 ## Criterios de cierre del PR #47
 
@@ -37,7 +38,7 @@
 - [ ] Headers de seguridad verdes.
 - [ ] PWA/Service Worker verdes.
 - [ ] Artefacto standalone BlueHosting generado y probado.
-- [x] Secret History Scan verde.
+- [ ] Secret History Scan verde.
 - [ ] Staging externo verificado.
 - [ ] QA visual/funcional de staging completado.
 - [ ] PR #47 mergeado a `main`.
