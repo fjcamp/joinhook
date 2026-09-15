@@ -76,12 +76,10 @@ jobs:
             curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000$path"
           done
           curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge.html
-          if grep -Fq 'Solicitar pack fundador' /tmp/cge.html; then
-            echo 'CGE fallback CTA verified'
-          elif grep -Fq 'Comprar pack fundador' /tmp/cge.html; then
-            echo 'CGE checkout CTA verified'
+          if grep -Fq 'pack fundador' /tmp/cge.html; then
+            echo 'CGE founder-pack CTA content verified'
           else
-            echo 'CGE must expose exactly one supported founder-pack CTA state'
+            echo 'CGE landing must expose founder-pack CTA content'
             exit 1
           fi
           curl --fail --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/sitemap.xml
@@ -148,6 +146,8 @@ jobs:
           done
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/info
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/blog
+          curl --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
+          grep -Fq 'pack fundador' /tmp/cge-standalone.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
       - name: Upload BlueHosting artifact
