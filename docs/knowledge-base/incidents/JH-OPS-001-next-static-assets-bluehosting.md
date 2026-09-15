@@ -1,13 +1,15 @@
 # JH-OPS-001 — Next.js carga sin estilos en BlueHosting/cPanel
 
-**Fecha:** 2026-08-21  
-**Estado:** Resuelto y validado en producción  
+**Fecha de origen:** 2026-08-21  
+**Estado:** Incidente histórico documentado; solución incorporada al flujo de despliegue  
 **Entornos afectados:** `staging.joinhook.cl` (antecedente) y `joinhook.cl` (producción)  
-**Stack:** Next.js 16.3.0, Node.js 20.20.2, cPanel, CloudLinux Passenger, Apache/LiteSpeed, WordPress legado en `public_html`.
+**Stack del incidente histórico:** Next.js 16.3.x, Node.js 20.20.2, cPanel, CloudLinux Passenger, Apache/LiteSpeed, WordPress legado en `public_html`.
 
 ## Resumen
 
-Al promover la nueva web JoinHook desde staging hacia `joinhook.cl`, la aplicación Next.js arrancaba y generaba correctamente el HTML, pero el sitio se mostraba prácticamente sin diseño. Los recursos CSS/JS solicitados bajo `/_next/static/...` devolvían 404.
+Durante una promoción de la nueva web JoinHook desde staging hacia `joinhook.cl`, la aplicación Next.js arrancaba y generaba correctamente el HTML, pero los recursos estáticos bajo `/_next/static/...` devolvían 404. El sitio aparecía prácticamente sin diseño.
+
+El aprendizaje permanente de este incidente es que el **runtime Next.js y el document root público deben desplegarse como una unidad del mismo build** cuando Apache/LiteSpeed sirve los assets públicos desde `public_html`.
 
 ## Arquitectura relevante
 
@@ -27,36 +29,22 @@ Staging equivalente:
 
 ## Síntomas
 
-1. `https://joinhook.cl/` entregaba el contenido HTML correcto de la nueva web.
+1. `https://joinhook.cl/` entregaba el HTML correcto de la nueva web.
 2. El diseño, estilos e interacción no cargaban.
-3. DevTools/Network mostraba múltiples CSS/JS fallando bajo `/_next/static/...`.
-4. Una petición concreta, por ejemplo `/_next/static/chunks/<hash>.js`, respondía `404 Not Found` y `Content-Type: text/html`.
-
-## Evidencia que descartó un fallo de Node/Next
-
-El log de Passenger mostraba arranque normal:
-
-```text
-Next.js 16.3.0
-Local:   http://0.0.0.0:3000
-Network: http://0.0.0.0:3000
-Ready
-Running next.config
-```
-
-Además, el artifact contenía `.next/static`, `chunks` y el Build ID. Por tanto, el build no estaba incompleto y Passenger no estaba fallando al iniciar.
+3. DevTools/Network mostraba errores bajo `/_next/static/...`.
+4. Una petición de ejemplo `/_next/static/chunks/<hash>.js` respondía 404 con `Content-Type: text/html`.
 
 ## Causa raíz
 
-El runtime de Next.js y el document root público de Apache estaban en directorios diferentes.
+El runtime de Next.js y el document root público estaban en directorios diferentes.
 
-Los assets existían físicamente en:
+Los assets existían en:
 
 ```text
 /home/joinhook/joinhook-production/.next/static
 ```
 
-pero el navegador los solicitaba como:
+pero el navegador solicitaba:
 
 ```text
 https://joinhook.cl/_next/static/...
@@ -68,75 +56,77 @@ Apache buscaba esa ruta dentro de:
 /home/joinhook/public_html/_next/static
 ```
 
-El `.htaccess` de `public_html` todavía contenía reglas de WordPress. Cuando el archivo solicitado no existía físicamente en el document root, la petición podía terminar en el routing legado/HTML, explicando el `404` con `Content-Type: text/html`.
+Las reglas heredadas del sitio anterior también podían dirigir las peticiones faltantes hacia HTML/WordPress en lugar del archivo estático esperado.
 
-## Solución validada
+## Solución validada en el incidente
 
-Crear/sincronizar la ruta pública:
+Se sincronizó la ruta pública:
 
 ```text
 /home/joinhook/public_html/_next/static
 ```
 
-con **el contenido exacto del build activo** ubicado en:
+con el contenido exacto del `.next/static` perteneciente al build activo.
+
+También se verificaron assets públicos específicos y se recargó el sitio después de reiniciar Passenger cuando correspondía.
+
+## Lecciones operativas
+
+- Reiniciar Passenger no corrige un asset que Apache no encuentra en su document root.
+- La existencia de `.next/static` dentro del runtime no garantiza por sí sola que Apache exponga `/_next/static`.
+- Los hashes del build activo deben coincidir entre runtime y document root.
+- No modificar `.htaccess` a ciegas: primero identificar URL, status y `Content-Type` del recurso fallido.
+- No asumir que un nuevo deploy está completo hasta probar al menos un chunk JS real y un asset público real.
+
+## Recurrencia y corrección de proceso
+
+El incidente volvió a aparecer después de extraer un nuevo artefacto en `/home/joinhook/joinhook-production` y reiniciar Passenger **antes de sincronizar el document root**. También se observaron 404 en assets públicos nuevos como `/project-covers/joinops-cover.svg`.
+
+La corrección de proceso quedó incorporada al packaging de BlueHosting: el artefacto puede incluir una carpeta `document-root-assets/` con los recursos que deben reflejarse en `public_html` para el mismo build.
+
+### Orden obligatorio de despliegue
+
+1. Extraer el artefacto aprobado en el directorio runtime correspondiente.
+2. Sincronizar el contenido de `document-root-assets/` con el document root público antes de declarar terminado el deploy.
+3. Verificar un asset real de `/_next/static/chunks/<hash>.js`.
+4. Verificar un asset público nuevo, por ejemplo `/project-covers/joinops-cover.svg`.
+5. Reiniciar Passenger cuando haya cambios de runtime.
+6. Ejecutar smoke test y QA.
+
+**Regla:** no declarar un despliegue completado ni solicitar revisión visual hasta que runtime + assets del document root correspondan al mismo SHA/build.
+
+## Estado actual del proceso
+
+Este incidente ya no representa una instrucción para compilar en BlueHosting. El flujo vigente es:
 
 ```text
-/home/joinhook/joinhook-production/.next/static
+GitHub Actions
+    ↓
+next build / standalone
+    ↓
+smoke tests
+    ↓
+artefacto BlueHosting
+    ↓
+runtime + document-root-assets
+    ↓
+BlueHosting / Passenger
+    ↓
+smoke test externo
 ```
 
-Procedimiento que resolvió producción:
-
-1. Crear `public_html/_next/static` si no existe.
-2. Copiar **el contenido de** `joinhook-production/.next/static` hacia `public_html/_next/static`.
-3. No crear accidentalmente `static/static`.
-4. Confirmar físicamente un asset cuyo nombre/hash esté siendo solicitado por DevTools.
-5. Abrir directamente `https://joinhook.cl/_next/static/chunks/<archivo-real>.js` y comprobar que deja de responder 404/HTML.
-6. Recargar `joinhook.cl` con `Ctrl + F5`.
-7. Resultado: estilos y JavaScript cargaron correctamente.
-
-## Intentos que no bastaron / lecciones
-
-- Reiniciar Passenger no resuelve un asset que Apache no encuentra en su document root.
-- El hecho de que `.next/static` exista dentro del runtime no garantiza que Apache lo exponga en `/_next/static`.
-- Copiar assets sin comprobar los hashes del build activo puede dejar un conjunto desactualizado y mantener los 404.
-- No conviene modificar `.htaccess` a ciegas. Primero comprobar la URL exacta fallida, status code y `Content-Type` en DevTools.
-- No era necesario recompilar, ejecutar `npm install` ni reemplazar `node_modules` para este incidente.
+La versión concreta del stack debe consultarse siempre en el commit/artefacto desplegado; este documento no fija la versión actual de Next.js.
 
 ## Diagnóstico rápido si reaparece
 
-1. Revisar Passenger log: si Next está `Ready`, continuar.
+1. Revisar Passenger: si Next está `Ready`, continuar.
 2. DevTools → Network → filtrar CSS/JS.
 3. Tomar una URL real `/_next/static/...` que falle.
-4. Verificar que ese archivo exista en el `.next/static` del build activo.
-5. Verificar que el mismo archivo exista en el document root público bajo `_next/static`.
-6. Si existe y aún devuelve 404, revisar `.htaccess`, permisos y routing Apache/LiteSpeed.
-7. Si devuelve `200` + MIME correcto, investigar caché/build mismatch en lugar de Passenger.
-
-## Recurrencia 2026-08-22 — despliegue del asistente
-
-El incidente reapareció al extraer un nuevo artifact en `/home/joinhook/joinhook-production` y reiniciar Passenger **antes de sincronizar el document root**. El video de diagnóstico mostró además `404 Not Found` para assets públicos nuevos como `/project-covers/joinops-cover.svg` y `/project-covers/mi-gestion-cover.svg`.
-
-La conclusión operativa es más amplia que el incidente original: **cada despliegue de producción debe tratar el runtime y el document root como una unidad inseparable del mismo build**.
-
-El artifact actual ya contiene `document-root-assets/`, preparado por CI con:
-
-- `document-root-assets/_next/static/` → mirror exacto del build activo.
-- assets públicos de `public/`, incluidos `project-covers`, iconos, manifest, favicon y demás recursos estáticos.
-
-### Orden obligatorio de despliegue desde ahora
-
-1. Extraer el artifact en `/home/joinhook/joinhook-production`.
-2. Copiar/mezclar **todo el contenido de** `/home/joinhook/joinhook-production/document-root-assets/` hacia `/home/joinhook/public_html/`, sobrescribiendo los assets del build anterior pero sin borrar todavía WordPress legado ni `.htaccess`.
-3. Verificar al menos una URL `/_next/static/chunks/<hash>.js` y un asset público nuevo, por ejemplo `/project-covers/joinops-cover.svg`.
-4. Reiniciar Passenger si cambió el runtime.
-5. Ejecutar `Ctrl + F5` y smoke test de Home, carrusel, chat, CGE y checkout.
-
-**Regla:** no declarar un deploy completado ni pedir revisión visual hasta que runtime + `document-root-assets` estén sincronizados.
-
-## Mejora pendiente
-
-Automatizar la promoción staging → producción para que cada despliegue sincronice los assets del build activo hacia el document root. Esto evita que un nuevo Build ID/hash deje `public_html/_next/static` desfasado.
+4. Verificar que el archivo exista en `.next/static` del build activo.
+5. Verificar que el mismo archivo exista bajo `public_html/_next/static`.
+6. Si existe y sigue devolviendo 404, revisar permisos, `.htaccess` y routing Apache/LiteSpeed.
+7. Si responde 200 con MIME correcto, investigar caché o mismatch de build.
 
 ## Etiquetas
 
-`nextjs` `nextjs-16` `cpanel` `cloudlinux` `passenger` `apache` `litespeed` `bluehosting` `static-assets` `_next` `404` `wordpress` `document-root` `production` `staging` `deploy` `project-covers` `document-root-assets`
+`nextjs` `cpanel` `cloudlinux` `passenger` `apache` `litespeed` `bluehosting` `static-assets` `_next` `404` `wordpress` `document-root` `production` `staging` `deploy` `document-root-assets`

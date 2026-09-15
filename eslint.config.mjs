@@ -8,7 +8,18 @@ const eslintConfig = [
         rules: {
             '@next/next/no-img-element': 'off',
             '@next/next/no-html-link-for-pages': 'off',
-            '@typescript-eslint/no-explicit-any': 'warn',
+            '@typescript-eslint/no-explicit-any': 'warn'
+        }
+    },
+    {
+        files: [
+            'src/components/ThemeToggle.tsx',
+            'src/features/local/**/*.ts',
+            'src/features/local/**/*.tsx',
+            'src/pages/agent-center.tsx',
+            'src/pages/app/control-gastronomico-express.tsx'
+        ],
+        rules: {
             'react-hooks/set-state-in-effect': 'warn'
         }
     },
