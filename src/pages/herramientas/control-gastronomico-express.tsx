@@ -180,3 +180,86 @@ export default function ControlGastronomicoExpress() {
                             <span className="jh-eyebrow">Pack fundador · lanzamiento</span>
                             <h2>Control Gastronómico Express</h2>
                             <div className="jh-price"><strong>$4.990</strong><span>CLP · pago único</span></div>
+                            <p>La beta se puede probar gratis. El pack fundador reserva tu acceso a la versión de lanzamiento e incluye acompañamiento inicial, sin mensualidad para este alcance.</p>
+                            <ul className="jh-check-list">
+                                <li>Prueba beta abierta antes de decidir</li>
+                                <li>Pack fundador para la versión de lanzamiento</li>
+                                <li>Inventario, compras, mermas y proveedores</li>
+                                <li>Plantilla CSV, respaldo local y guía de puesta en marcha</li>
+                                <li>Actualizaciones correctivas de esta versión y soporte inicial</li>
+                            </ul>
+                            <div className="jh-actions">
+                                <a
+                                    className="jh-button jh-button-primary"
+                                    href={purchaseHref}
+                                    target={checkoutEnabled ? '_blank' : undefined}
+                                    rel={checkoutEnabled ? 'noreferrer' : undefined}
+                                >
+                                    {checkoutEnabled ? 'Comprar pack fundador · $4.990' : 'Solicitar pack fundador · $4.990'}
+                                </a>
+                                <Link className="jh-button jh-button-soft" href="/app/control-gastronomico-express">Probar antes</Link>
+                            </div>
+                            <small className="jh-purchase-note">
+                                {checkoutEnabled
+                                    ? 'El pago se abre de forma segura en Mercado Pago. Antes de pagar, revisa el producto, el monto y los datos del receptor que muestra la pasarela.'
+                                    : 'La solicitud abre tu correo y no realiza un cobro automático. El checkout permanecerá deshabilitado hasta configurar medio de pago.'}
+                            </small>
+                            {sellerReady && (
+                                <small className="jh-purchase-note">
+                                    <strong>Proveedor:</strong> {seller.name} · RUT {seller.rut} · {seller.email} · {seller.address}
+                                </small>
+                            )}
+                        </article>
+
+                        <article className="jh-surface jh-fit-card">
+                            <span className="jh-eyebrow">¿Para quién es?</span>
+                            <h3>Buena opción si hoy quieres control, no otro proyecto de implementación.</h3>
+                            <p><strong>Sí:</strong> negocios pequeños que quieren ordenar stock, compras y pérdidas con una herramienta simple.</p>
+                            <p><strong>Todavía no:</strong> empresas que necesitan POS, facturación electrónica, recetas complejas, multi-sucursal, permisos avanzados o sincronización cloud.</p>
+                            <p>Para esos escenarios estoy desarrollando proyectos de mayor alcance, pero Express deliberadamente comienza más pequeño.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section className="jh-section" id="faq">
+                    <div className="jh-section-heading">
+                        <div><span className="jh-eyebrow">Preguntas frecuentes</span><h2>Lo importante antes de usar la beta.</h2></div>
+                        <p>Prefiero que tengas claro qué hace y qué no hace la primera versión antes de decidir.</p>
+                    </div>
+                    <div className="jh-faq-grid">
+                        <article className="jh-surface"><h3>¿Qué compro si puedo probar gratis?</h3><p>La beta abierta permite evaluar el flujo. El pack fundador corresponde a la versión de lanzamiento, su guía de puesta en marcha, soporte inicial y correcciones dentro de ese alcance.</p></article>
+                        <article className="jh-surface"><h3>¿Dónde quedan mis datos?</h3><p>En esta beta los datos operativos se guardan localmente en el navegador del dispositivo. Por eso el respaldo JSON es importante.</p></article>
+                        <article className="jh-surface"><h3>¿Puedo usarlo en varios equipos?</h3><p>No existe sincronización cloud todavía. Cada navegador mantiene su propio espacio local; puedes mover información mediante respaldo/restauración.</p></article>
+                        <article className="jh-surface"><h3>¿Funciona sin internet?</h3><p>La PWA está preparada para continuidad local después de una primera carga compatible. Esta función se terminará de validar en staging antes de la beta externa.</p></article>
+                        <article className="jh-surface"><h3>¿Emite boletas o factura?</h3><p>No. Express no reemplaza un POS, un sistema contable ni las herramientas tributarias que correspondan a tu negocio.</p></article>
+                        <article className="jh-surface"><h3>¿Puedo cargar mi inventario?</h3><p>Sí. La beta permite importar productos desde CSV y exportar el inventario para Excel o Google Sheets.</p></article>
+                        <article className="jh-surface"><h3>¿Qué pasa si borro los datos del navegador?</h3><p>Puedes perder la información local. Por eso la app incorpora respaldo y restauración; antes de usarla en operación real conviene respaldar periódicamente.</p></article>
+                    </div>
+                </section>
+
+                <section className="jh-contact" id="interes">
+                    <span className="jh-eyebrow">Primeros usuarios</span>
+                    <h2>¿Tu negocio todavía controla inventario y mermas con demasiados pasos?</h2>
+                    <p>Prueba la beta, cuéntame dónde se te hace difícil y ayúdame a convertir Express en una herramienta realmente útil para pequeños negocios gastronómicos de Chile.</p>
+                    <div className="jh-actions">
+                        <Link className="jh-button jh-button-primary" href="/app/control-gastronomico-express">Probar ahora</Link>
+                        <a
+                            className="jh-button jh-button-soft"
+                            href={purchaseHref}
+                            target={checkoutEnabled ? '_blank' : undefined}
+                            rel={checkoutEnabled ? 'noreferrer' : undefined}
+                        >
+                            {checkoutEnabled ? 'Comprar pack fundador' : 'Solicitar pack fundador'}
+                        </a>
+                        <a className="jh-button jh-button-soft" href="mailto:info@joinhook.cl?subject=Mi%20caso%20gastron%C3%B3mico">Contarme mi caso</a>
+                    </div>
+                </section>
+
+                <footer className="jh-footer">
+                    <span>JoinHook · proyecto independiente de Francisco Javier Campos</span>
+                    <span><Link href="/privacidad">Privacidad</Link> · <Link href="/condiciones-beta">Condiciones de beta</Link> · <Link href="/">Volver a JoinHook</Link></span>
+                </footer>
+            </main>
+        </>
+    );
+}
