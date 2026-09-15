@@ -156,9 +156,11 @@ jobs:
           cp -a .next/standalone/. deploy-bluehosting/
           cp -a .next/static deploy-bluehosting/.next/static
           cp -a public deploy-bluehosting/public
+          source_sha="${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}"
           cat > deploy-bluehosting/DEPLOYMENT.txt <<EOF
           JoinHook Web V1
-          Source commit: $GITHUB_SHA
+          Source commit: $source_sha
+          Workflow SHA: $GITHUB_SHA
           Runtime: Node.js 20.20.2
           Target: BlueHosting Passenger staging
           Startup: server.js
