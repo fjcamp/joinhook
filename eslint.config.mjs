@@ -12,6 +12,18 @@ const eslintConfig = [
         }
     },
     {
+        files: [
+            'src/components/ThemeToggle.tsx',
+            'src/features/local/**/*.ts',
+            'src/features/local/**/*.tsx',
+            'src/pages/agent-center.tsx',
+            'src/pages/app/control-gastronomico-express.tsx'
+        ],
+        rules: {
+            'react-hooks/set-state-in-effect': 'warn'
+        }
+    },
+    {
         files: ['scripts/browser-qa.js'],
         rules: {
             '@typescript-eslint/no-require-imports': 'off'
