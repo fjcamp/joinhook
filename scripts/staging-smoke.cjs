@@ -22,6 +22,14 @@ const routes = [
   '/project-covers/mi-gestion-cover.svg'
 ];
 
+const legacyRoutes = [
+  '/projects',
+  '/projects/project-one',
+  '/blog/post-one',
+  '/redesign',
+  '/redesign-v2'
+];
+
 const requiredSitemapEntries = [
   'https://joinhook.cl/',
   'https://joinhook.cl/info',
@@ -33,20 +41,20 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function checkRoute(route) {
+async function fetchText(route) {
   const response = await fetch(`${baseUrl}${route}`, {
     redirect: 'follow',
-    headers: { 'user-agent': 'JoinHook-staging-smoke/1.0' }
+    headers: { 'user-agent': 'JoinHook-staging-smoke/1.1' }
   });
   assert(response.ok, `${route} returned HTTP ${response.status}`);
-  return response;
+  return { response, text: await response.text() };
 }
 
 (async () => {
   console.log(`Checking staging: ${baseUrl}`);
 
   for (const route of routes) {
-    const response = await checkRoute(route);
+    const { response } = await fetchText(route);
     console.log(`OK  ${response.status} ${route}`);
   }
 
@@ -59,12 +67,35 @@ async function checkRoute(route) {
   assert(Boolean(home.headers.get('referrer-policy')), 'Missing Referrer-Policy');
   assert(!home.headers.get('x-powered-by'), 'X-Powered-By must not be exposed');
 
-  const sitemap = await (await fetch(`${baseUrl}/sitemap.xml`)).text();
+  const cge = await (await fetchText('/herramientas/control-gastronomico-express')).text;
+  assert(cge.includes('name="cge-founder-price" content="4990"'), 'Missing CGE founder price metadata');
+  assert(cge.includes('name="cge-founder-currency" content="CLP"'), 'Missing CGE founder currency metadata');
+  assert(cge.includes('rel="canonical"'), 'Missing CGE canonical link');
+  assert(cge.includes('https://joinhook.cl/herramientas/control-gastronomico-express'), 'Missing CGE canonical URL');
+
+  const sitemap = await (await fetchText('/sitemap.xml')).text;
   for (const entry of requiredSitemapEntries) {
     assert(sitemap.includes(`<loc>${entry}</loc>`), `Missing sitemap entry: ${entry}`);
   }
 
-  console.log('Security headers and sitemap checks passed.');
+  const sw = await (await fetchText('/app/cge-sw.js')).text;
+  assert(sw.includes('/app/control-gastronomico-express'), 'CGE service worker does not precache the app route');
+  assert(sw.includes('/plantillas/control-gastronomico-inventario.csv'), 'CGE service worker does not precache the inventory template');
+
+  for (const route of legacyRoutes) {
+    const response = await fetch(`${baseUrl}${route}`, {
+      redirect: 'manual',
+      headers: { 'user-agent': 'JoinHook-staging-smoke/1.1' }
+    });
+    assert(response.status === 404, `Expected 404 for ${route}, got ${response.status}`);
+  }
+
+  const manifest = await fetch(`${baseUrl}/cge-manifest.webmanifest`);
+  assert(manifest.ok, `Manifest returned HTTP ${manifest.status}`);
+  const manifestType = manifest.headers.get('content-type') || '';
+  assert(manifestType.includes('manifest') || manifestType.includes('json'), `Unexpected manifest content-type: ${manifestType}`);
+
+  console.log('Security headers, CGE offer metadata, sitemap, PWA assets and legacy-route checks passed.');
   console.log('STAGING SMOKE PASS');
 })().catch((error) => {
   console.error(`STAGING SMOKE FAIL: ${error.message}`);
