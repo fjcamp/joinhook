@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  JOINHOOK_CI_SCOPE: web
+
 jobs:
   validate:
     runs-on: ubuntu-latest
