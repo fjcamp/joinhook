@@ -76,12 +76,10 @@ jobs:
             curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000$path"
           done
           curl --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge.html
-          if grep -Fq 'pack fundador' /tmp/cge.html; then
-            echo 'CGE founder-pack CTA content verified'
-          else
-            echo 'CGE landing must expose founder-pack CTA content'
-            exit 1
-          fi
+          grep -Fq '<title>Control Gastronómico Express' /tmp/cge.html
+          grep -Fq 'https://joinhook.cl/herramientas/control-gastronomico-express' /tmp/cge.html
+          grep -Fq '$4.990' /tmp/cge.html || grep -Fq '4990' /tmp/cge.html
+          echo 'CGE metadata and commercial value markers verified'
           curl --fail --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/sitemap.xml
           grep -Fq '<loc>https://joinhook.cl/</loc>' /tmp/sitemap.xml
           grep -Fq '<loc>https://joinhook.cl/info</loc>' /tmp/sitemap.xml
@@ -147,7 +145,8 @@ jobs:
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/info
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/blog
           curl --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
-          grep -Fq 'pack fundador' /tmp/cge-standalone.html
+          grep -Fq '<title>Control Gastronómico Express' /tmp/cge-standalone.html
+          grep -Fq 'https://joinhook.cl/herramientas/control-gastronomico-express' /tmp/cge-standalone.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
       - name: Upload BlueHosting artifact
