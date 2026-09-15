@@ -7,7 +7,7 @@
 - PR activo: `#47` — `feat(web): consolidate institutional pages and CI after Web V1`
 - Base del PR: `main` / `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - Rama: `feat/joinhook-web-v1-followup`
-- Último commit de desarrollo registrado: `ba8a92120180de8037211f7411576eb8df8837ea`
+- Último commit de desarrollo registrado: `c93e0624bdec0e98c6574a299733fd85cec44f98`
 
 ## Cambios del ciclo
 
@@ -17,16 +17,17 @@
 4. Se actualizó el incidente histórico JH-OPS-001 para distinguir el contexto del incidente de la arquitectura actual y evitar fijar versiones antiguas como stack vigente.
 5. README actualizado con el flujo actual de Web V1 y el comando reutilizable `smoke:staging`.
 6. El smoke de CGE pasó de búsquedas textuales frágiles a validación programática del HTML renderizado.
-7. La validación de CGE ahora acepta entidades HTML para el nombre del producto, exige un `<title>` real, comprueba su contenido y valida el canonical por atributo.
+7. La validación de CGE ahora tolera entidades HTML, exige un `<title>` real, comprueba su contenido y valida el canonical por atributo.
 8. Se reforzó la validación equivalente para el artefacto standalone de BlueHosting.
 9. `tsconfig.json` quedó alineado explícitamente con los valores que Next.js estaba aplicando automáticamente (`moduleResolution: bundler` y `jsx: react-jsx`).
+10. Este checkpoint fue actualizado para registrar el estado exacto del ciclo y evitar confundir commits previos con el head vigente.
 
 ## Estado CI
 
-- Secret History Scan del commit `ba8a92120180de8037211f7411576eb8df8837ea`: run `34915307707` → `queued` al momento de este checkpoint.
-- Web CI del mismo commit: run `34915307731` → `queued` al momento de este checkpoint.
+- Web CI del commit de código `ba8a92120180de8037211f7411576eb8df8837ea`: run `34915307731` → `queued` al momento de la última comprobación antes del commit de checkpoint.
+- Este commit de checkpoint también modifica la rama, por lo que debe existir un run posterior antes de declarar el PR verde.
 - El último Web CI completado, `34914314110`, falló exclusivamente en el smoke CGE por una aserción demasiado rígida del `<title>`.
-- No declarar CI verde hasta contar con conclusión `success` de `34915307731`.
+- Secret History Scan del ciclo anterior completó correctamente; el nuevo escaneo debe verificarse para el head final.
 
 ## Criterios de cierre del PR #47
 
@@ -54,4 +55,4 @@
 
 ## Siguiente etapa
 
-Cerrar CI → obtener artefacto BlueHosting del run verde → desplegar manualmente en staging según runbook → ejecutar `npm run smoke:staging` → QA visual/funcional → gate de producción → checkpoint post-merge.
+Cerrar CI → obtener artefacto BlueHosting del run verde del head final → desplegar manualmente en staging según runbook → ejecutar `npm run smoke:staging` → QA visual/funcional → gate de producción → checkpoint post-merge.
