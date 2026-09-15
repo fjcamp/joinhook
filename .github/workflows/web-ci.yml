@@ -94,20 +94,19 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/sitemap.xml
           node <<'NODE'
           const fs = require('node:fs');
-          const decodeHtml = (value) => value
-            .replace(/&oacute;/gi, 'ó')
-            .replace(/&#243;/g, 'ó')
-            .replace(/&#xF3;/gi, 'ó')
-            .replace(/&amp;/gi, '&')
-            .replace(/&nbsp;/gi, ' ');
-          const normalizeReactMarkup = (value) => decodeHtml(value).replace(/<!--.*?-->/gs, '');
-          const cge = fs.readFileSync('/tmp/cge.html', 'utf8');
+          const html = fs.readFileSync('/tmp/cge.html', 'utf8');
           const sitemap = fs.readFileSync('/tmp/sitemap.xml', 'utf8');
-          const normalized = normalizeReactMarkup(cge);
-          if (!normalized.includes('4.990')) {
-            throw new Error('Missing CGE displayed founder price marker in rendered HTML');
+          const ldJsonBlocks = [...html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
+            .map((match) => match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+          const productJsonLd = ldJsonBlocks
+            .map((value) => {
+              try { return JSON.parse(value); } catch { return null; }
+            })
+            .find((value) => value?.['@type'] === 'SoftwareApplication');
+          if (!productJsonLd?.offers || String(productJsonLd.offers.price) !== '4990' || productJsonLd.offers.priceCurrency !== 'CLP') {
+            throw new Error('Missing CGE JSON-LD founder offer price contract');
           }
-          if (!cge.includes('rel="canonical"') || !cge.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
+          if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
             throw new Error('Missing CGE canonical URL');
           }
           const sitemapEntries = [
@@ -119,7 +118,7 @@ jobs:
           for (const entry of sitemapEntries) {
             if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
           }
-          console.log('CGE rendered founder price, canonical and sitemap verified.');
+          console.log('CGE JSON-LD offer, canonical and sitemap verified.');
           NODE
 
       - name: Check protected legacy routes remain unpublished
@@ -185,12 +184,20 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
           node <<'NODE'
           const fs = require('node:fs');
-          const decodeHtml = (value) => value.replace(/&oacute;/gi, 'ó').replace(/&#243;/g, 'ó').replace(/&#xF3;/gi, 'ó').replace(/&amp;/gi, '&').replace(/&nbsp;/gi, ' ');
-          const normalizeReactMarkup = (value) => decodeHtml(value).replace(/<!--.*?-->/gs, '');
           const html = fs.readFileSync('/tmp/cge-standalone.html', 'utf8');
-          const normalized = normalizeReactMarkup(html);
-          if (!normalized.includes('4.990')) throw new Error('Missing standalone CGE displayed founder price marker');
-          if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) throw new Error('Missing standalone CGE canonical URL');
+          const ldJsonBlocks = [...html.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)]
+            .map((match) => match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+          const productJsonLd = ldJsonBlocks
+            .map((value) => {
+              try { return JSON.parse(value); } catch { return null; }
+            })
+            .find((value) => value?.['@type'] === 'SoftwareApplication');
+          if (!productJsonLd?.offers || String(productJsonLd.offers.price) !== '4990' || productJsonLd.offers.priceCurrency !== 'CLP') {
+            throw new Error('Missing standalone CGE JSON-LD founder offer price contract');
+          }
+          if (!html.includes('rel="canonical"') || !html.includes('https://joinhook.cl/herramientas/control-gastronomico-express')) {
+            throw new Error('Missing standalone CGE canonical URL');
+          }
           NODE
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
 
