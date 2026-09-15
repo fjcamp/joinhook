@@ -8,8 +8,7 @@ const eslintConfig = [
         rules: {
             '@next/next/no-img-element': 'off',
             '@next/next/no-html-link-for-pages': 'off',
-            '@typescript-eslint/no-explicit-any': 'warn',
-            'react-hooks/set-state-in-effect': 'warn'
+            '@typescript-eslint/no-explicit-any': 'warn'
         }
     },
     {
