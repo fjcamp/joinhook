@@ -16,7 +16,7 @@ Cada proyecto debe documentar propósito, estado, arquitectura, tecnologías can
 
 La versión institucional **Web V1** ya fue integrada en `main` mediante PR #46, con merge commit `a29e433e7e5315424b9f264b6adc19d04f9370dc`.
 
-El siguiente ciclo es de consolidación: staging real en BlueHosting, validación post-despliegue, corrección de detalles detectados y evolución incremental mediante ramas de feature. El sitio de producción `joinhook.cl` no debe considerarse actualizado hasta verificar un despliegue real.
+El siguiente ciclo es de consolidación: CI verde, staging real en BlueHosting, validación post-despliegue, corrección de detalles detectados y evolución incremental mediante ramas de feature. El sitio de producción `joinhook.cl` no debe considerarse actualizado hasta verificar un despliegue real.
 
 ## Proyecto principal en lanzamiento
 
@@ -67,6 +67,16 @@ Build:
 npm run build
 npm run start
 ```
+
+## Validación de staging
+
+Con el sitio ya publicado en el subdominio de staging, el smoke test reutilizable se ejecuta desde un entorno con Node.js:
+
+```bash
+STAGING_URL=https://staging.joinhook.cl npm run smoke:staging
+```
+
+La prueba comprueba las rutas críticas institucionales/CGE, assets públicos y varios headers de seguridad, además de verificar que el sitemap contenga las entradas públicas principales. No sustituye el QA visual ni el checklist funcional de Control Gastronómico Express.
 
 ## Flujo de ramas
 
