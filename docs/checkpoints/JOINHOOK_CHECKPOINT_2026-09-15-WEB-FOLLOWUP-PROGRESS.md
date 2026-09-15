@@ -22,9 +22,9 @@ La landing de Control Gastronómico Express mantiene un contrato de origen expl�
 - moneda `CLP`;
 - oferta JSON-LD `SoftwareApplication`.
 
-La validación del precio y moneda se realiza en el **source contract**, no mediante una aserción frágil sobre la serialización HTML de `next/head`.
+La validación del precio y moneda se realiza en el **source contract**. El smoke renderizado comprueba el precio y moneda visibles, evitando depender de la serialización literal de `next/head`.
 
-### 3. Smoke y seguridad
+### 3. Smoke, seguridad y PWA
 La validación automatizada cubre:
 - rutas públicas principales;
 - canonical y sitemap;
@@ -34,46 +34,74 @@ La validación automatizada cubre:
 - plantilla CSV de CGE;
 - construcción y prueba del artifact standalone de BlueHosting.
 
-El script reutilizable `scripts/staging-smoke.cjs` además deja preparado el smoke para el staging real.
+El script reutilizable `scripts/staging-smoke.cjs` deja preparado el smoke para el staging real y comprueba el contenido visible de la oferta, no metadatos frágiles de `next/head`.
 
 ### 4. CI y procedencia
 El workflow verifica que el checkout use el SHA real del source PR antes de construir.
 
 Runtime CI: Node.js `20.20.2`.
 
-En la última ejecución observada sobre `eb1d22a...`:
+Último CI verde sobre `aa92cd1be872b8dd84f47ffb4a727b819e0a7785`:
 - instalación: OK;
-- auditoría runtime: 0 vulnerabilidades high+;
-- auditoría dev: 1 moderate + 1 high, sin critical;
-- lint: 0 errores / warnings existentes;
+- auditoría runtime: OK, sin vulnerabilidades high+;
+- auditoría dev: OK bajo umbral crítico, con 1 moderate + 1 high documentadas;
+- lint: OK, 0 errores / warnings existentes;
 - build: OK;
 - JS gzip: `332.6 KiB` frente a `1464.8 KiB` de límite;
-- fallo restante: smoke CGE por una comprobación de contenido renderizado demasiado específica.
+- smoke de rutas/SEO: OK;
+- legacy routes: OK;
+- headers: OK;
+- PWA: OK;
+- artifact standalone: OK;
+- smoke del artifact: OK;
+- upload del artifact: OK.
 
-Ese comportamiento se corrigió en el commit posterior `2067a115ce8507e95b67f30dab704f2801b2d0dc`, retirando del smoke renderizado la dependencia del precio/moneda.
+Secret History Scan del mismo ciclo: OK.
+
+### 5. Corrección de falsa alarma del smoke
+El fallo anterior provenía de probar una URL sin seguir la redirección generada por `trailingSlash: true`. El smoke se corrigió para seguir redirecciones antes de inspeccionar el HTML.
+
+### 6. Gate comercial de producción
+El workflow `.github/workflows/production-artifact.yml` fue endurecido:
+- checkout CGE desactivado por defecto;
+- activación solo mediante una variable explícita de GitHub Actions;
+- URL de checkout solo mediante secret;
+- no se almacena un enlace de Mercado Pago dentro del workflow;
+- auditoría runtime y desarrollo alineada con el CI web;
+- el artifact de producción verifica tanto el estado habilitado como el deshabilitado.
+
+Esto evita que un merge a `main` active un cobro real de forma implícita.
+
+## Artefacto vigente
+
+Nombre: `joinhook-bluehosting-standalone`
+
+Source commit: `aa92cd1be872b8dd84f47ffb4a727b819e0a7785`
+
+Artifact ID: `10394017116`
+
+SHA-256: `ac566ba3536395fab16473cffdc617a2efd5e0a99f25a510d2fcf512914e69a6`
+
+Retención observada: hasta `2026-09-22T11:16:50Z`.
 
 ## Estado actual del ciclo
 
-Último commit de código: `2067a115ce8507e95b67f30dab704f2801b2d0dc`.
+Último commit: el commit que actualiza este checkpoint después de endurecer el artifact de producción.
 
 PR #47:
 - estado: abierto;
-- mergeable: temporalmente no determinado mientras se actualizan checks;
+- mergeable: sí al último registro;
 - no mergeado.
-
-Nuevas ejecuciones disparadas sobre `2067a115...`:
-- JoinHook Web CI #39: `queued` al último registro;
-- Secret History Scan #328: `queued` al último registro.
 
 ## Gate de cierre
 
-- [ ] Web CI completamente verde.
-- [ ] Secret History Scan verde.
-- [ ] Artifact `joinhook-bluehosting-standalone` generado y probado desde una corrida verde.
+- [x] Web CI completamente verde.
+- [x] Secret History Scan verde.
+- [x] Artifact `joinhook-bluehosting-standalone` generado y probado desde una corrida verde.
 - [ ] Staging BlueHosting actualizado manualmente con ese artifact.
 - [ ] `npm run smoke:staging` exitoso contra staging real.
-- [ ] QA visual/funcional desktop y móvil.
-- [ ] Backup/rollback preparado.
+- [ ] QA visual/funcional desktop y móvil en staging real.
+- [ ] Backup/rollback preparado para el servidor.
 - [ ] Gate de publicación aprobado.
 - [ ] PR #47 mergeado a `main`.
 - [ ] Producción verificada externamente.
@@ -83,7 +111,7 @@ Nuevas ejecuciones disparadas sobre `2067a115...`:
 
 - No producción automática.
 - No cambios DNS.
-- No pagos reales habilitados como parte de este ciclo.
+- No pagos reales habilitados por defecto.
 - No terminal/SSH de cPanel.
 - No `next build` en BlueHosting.
 - No mezclar JoinOps en este repositorio.
@@ -91,4 +119,4 @@ Nuevas ejecuciones disparadas sobre `2067a115...`:
 
 ## Próximo paso
 
-Cerrar CI → conservar artifact verde → staging real → smoke + QA → gate de publicación → merge controlado → verificación externa de producción → checkpoint post-merge.
+Con CI y artifact cerrados, el siguiente paso material es instalar ese artifact en `staging.joinhook.cl`, ejecutar `npm run smoke:staging`, hacer QA visual desktop/móvil y documentar backup/rollback. Solo después corresponde evaluar el merge y la posterior verificación externa de producción.
