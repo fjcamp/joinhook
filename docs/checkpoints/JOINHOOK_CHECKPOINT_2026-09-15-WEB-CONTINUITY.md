@@ -14,14 +14,22 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - El workflow de producción exige HTTPS cuando el checkout está habilitado y no contiene una URL de Mercado Pago hardcodeada en la configuración actual.
 - La construcción de producción comprueba headers, rutas públicas, CGE, PWA y sincronización exacta de `.next/static` con el espejo destinado a `/home/joinhook/public_html`.
 - `package.json` declara Node `>=20.20.2`, alineado con el runtime utilizado por CI.
-- El blog ahora tiene una primera nota editorial publicada como ruta propia: `/blog/ordenar-antes-de-digitalizar`.
-- El hub `/blog` distingue explícitamente contenido publicado de contenido en preparación, y enlaza la nota publicada.
-- `public/sitemap.xml` incorpora la nueva nota publicada.
+- El blog tiene una primera nota editorial publicada como ruta propia: `/blog/ordenar-antes-de-digitalizar`.
+- El hub `/blog` distingue explícitamente contenido publicado de contenido en preparación.
+- `public/sitemap.xml` incorpora la nueva nota y la nueva página `/para-ia`.
+
+## Capa de descubribilidad para IA y agentes
+
+- Nueva página oficial `/para-ia`: resumen estructurado de identidad, propuesta, servicios, áreas, proyectos y fuentes canónicas.
+- Nuevo `/llms.txt`: índice Markdown compacto siguiendo la propuesta llms.txt, con enlaces canónicos y contexto explícito sobre cómo debe interpretarse JoinHook.
+- `robots.txt` mantiene el acceso general y declara explícitamente `OAI-SearchBot` y `Claude-SearchBot` con `Allow: /`.
+- La página `/para-ia` incluye `WebPage`, `WebSite`, `Organization` e `ItemList` en JSON-LD, manteniendo los datos alineados con el contenido visible.
+- Esta capa complementa SEO convencional; no garantiza posiciones, citas o recomendaciones de ningún motor.
 
 ## Evidencia CI
 
-- Web CI y Secret History Scan están verdes para el head anterior `b29da72...`.
-- Los commits de contenido posteriores (`c864338...`, `9eb4bf1...`, `2ae3c997...`) requieren una nueva corrida de CI antes de considerar el estado actual como verde.
+- Web CI y Secret History Scan estaban verdes para el head `b29da72...` antes de esta nueva capa.
+- Los cambios posteriores requieren una nueva corrida de CI antes de considerar el estado actual como verde.
 
 ## Gate de publicación
 
@@ -32,6 +40,9 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - [x] Primera nota editorial publicada en una ruta propia.
 - [x] Hub editorial enlaza la nota publicada.
 - [x] Sitemap actualizado.
+- [x] Página `/para-ia` creada.
+- [x] `/llms.txt` creado.
+- [x] Robots actualizado para crawlers de búsqueda de IA documentados.
 - [ ] Nueva Web CI verde después de los cambios posteriores.
 - [ ] Secret History Scan del estado actual.
 - [ ] Instalar artifact en `staging.joinhook.cl`.
@@ -51,6 +62,6 @@ No realizar merge ni publicación automática. El desarrollo continúa en la ram
 
 1. Verificar la nueva corrida de CI sobre el head actual.
 2. Corregir únicamente fallos demostrados por CI.
-3. Continuar fortaleciendo contenido institucional y editorial sin convertir el blog en contenido de relleno.
-4. Preparar staging y QA cuando exista acceso operativo a BlueHosting.
-5. Mantener respaldo y trazabilidad de cada ciclo.
+3. Añadir pruebas automáticas de `/para-ia`, `/llms.txt` y robots si el CI actual no las cubre.
+4. Continuar fortaleciendo contenido institucional y editorial sin convertir el blog en contenido de relleno.
+5. Preparar staging y QA cuando exista acceso operativo a BlueHosting.
