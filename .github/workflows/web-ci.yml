@@ -117,6 +117,63 @@ jobs:
           console.log('CGE route, visible offer value and sitemap verified.');
           NODE
 
+      - name: Verify AI discoverability assets
+        run: |
+          set -e
+          curl --fail --location --silent --show-error http://127.0.0.1:3000/para-ia > /tmp/para-ia.html
+          curl --fail --location --silent --show-error http://127.0.0.1:3000/llms.txt > /tmp/llms.txt
+          curl --fail --location --silent --show-error http://127.0.0.1:3000/robots.txt > /tmp/robots.txt
+          curl --fail --location --silent --show-error http://127.0.0.1:3000/sitemap.xml > /tmp/ai-sitemap.xml
+          node <<'NODE'
+          const fs = require('node:fs');
+          const html = fs.readFileSync('/tmp/para-ia.html', 'utf8');
+          const llms = fs.readFileSync('/tmp/llms.txt', 'utf8');
+          const robots = fs.readFileSync('/tmp/robots.txt', 'utf8');
+          const sitemap = fs.readFileSync('/tmp/ai-sitemap.xml', 'utf8');
+
+          for (const marker of [
+            'JoinHook para IA y agentes',
+            'Francisco Javier Campos',
+            'Diagnóstico y orden',
+            'Diseño de soluciones',
+            'Digitalización proporcional',
+            'Acompañamiento y mejora',
+            'JoinOps',
+            'SnowWise',
+            'Control Gastronómico Express'
+          ]) {
+            if (!html.includes(marker)) throw new Error(`Missing /para-ia marker: ${marker}`);
+          }
+
+          const jsonLdMatches = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+          if (jsonLdMatches.length < 1) throw new Error('Missing JSON-LD on /para-ia');
+          for (const match of jsonLdMatches) JSON.parse(match[1]);
+          if (!html.includes('https://joinhook.cl/para-ia')) throw new Error('Missing /para-ia canonical URL');
+
+          for (const marker of ['# JoinHook', 'https://joinhook.cl/', 'https://joinhook.cl/para-ia', 'JoinOps', 'SnowWise']) {
+            if (!llms.includes(marker)) throw new Error(`Missing /llms.txt marker: ${marker}`);
+          }
+
+          for (const marker of [
+            'User-agent: *',
+            'Allow: /',
+            'Disallow: /app/',
+            'User-agent: OAI-SearchBot',
+            'User-agent: Claude-SearchBot',
+            'Sitemap: https://joinhook.cl/sitemap.xml'
+          ]) {
+            if (!robots.includes(marker)) throw new Error(`Missing robots.txt marker: ${marker}`);
+          }
+
+          for (const entry of [
+            'https://joinhook.cl/para-ia',
+            'https://joinhook.cl/blog/ordenar-antes-de-digitalizar'
+          ]) {
+            if (!sitemap.includes(`<loc>${entry}</loc>`)) throw new Error(`Missing sitemap entry: ${entry}`);
+          }
+          console.log('AI discoverability assets, JSON-LD and sitemap coverage verified.');
+          NODE
+
       - name: Check protected legacy routes remain unpublished
         run: |
           set -e
