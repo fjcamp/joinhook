@@ -1,6 +1,6 @@
 # JoinHook Web — checkpoint de continuidad
 
-Fecha de actualización: 2026-09-16
+Fecha de actualización: 2026-09-17
 Repositorio: `fjcamp/joinhook`
 Rama: `feat/joinhook-web-v1-followup`
 PR: #47
@@ -26,10 +26,19 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - La página `/para-ia` incluye `WebPage`, `WebSite`, `Organization` e `ItemList` en JSON-LD, manteniendo los datos alineados con el contenido visible.
 - Esta capa complementa SEO convencional; no garantiza posiciones, citas o recomendaciones de ningún motor.
 
+## Automatización añadida
+
+- `web-ci.yml` ahora prueba en el build renderizado `/para-ia`, `/llms.txt`, `robots.txt` y `sitemap.xml`.
+- CI verifica marcadores institucionales y de proyectos en `/para-ia`.
+- CI parsea todos los bloques JSON-LD de `/para-ia` para detectar JSON inválido.
+- CI comprueba canonical `/para-ia`, directivas de robots y nuevas entradas del sitemap.
+- La validación se ejecuta sobre el SHA exacto de la cabeza del PR.
+
 ## Evidencia CI
 
-- Web CI y Secret History Scan estaban verdes para el head `b29da72...` antes de esta nueva capa.
-- Los cambios posteriores requieren una nueva corrida de CI antes de considerar el estado actual como verde.
+- El head anterior `91eca8d...` todavía no tenía una nueva corrida verificable mediante la consulta disponible.
+- El nuevo cambio de CI está en el commit `8b651c1...`; requiere que GitHub Actions ejecute una nueva corrida antes de considerar el estado actual como verde.
+- No se declara CI verde ni staging validado hasta contar con evidencia correspondiente.
 
 ## Gate de publicación
 
@@ -43,6 +52,7 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - [x] Página `/para-ia` creada.
 - [x] `/llms.txt` creado.
 - [x] Robots actualizado para crawlers de búsqueda de IA documentados.
+- [x] CI ampliado con cobertura de descubribilidad IA.
 - [ ] Nueva Web CI verde después de los cambios posteriores.
 - [ ] Secret History Scan del estado actual.
 - [ ] Instalar artifact en `staging.joinhook.cl`.
@@ -60,8 +70,8 @@ No realizar merge ni publicación automática. El desarrollo continúa en la ram
 
 ## Próximo bloque
 
-1. Verificar la nueva corrida de CI sobre el head actual.
+1. Esperar/consultar la nueva corrida de CI sobre el head actualizado.
 2. Corregir únicamente fallos demostrados por CI.
-3. Añadir pruebas automáticas de `/para-ia`, `/llms.txt` y robots si el CI actual no las cubre.
+3. Revisar si el workflow de producción necesita el mismo contrato automatizado para `/para-ia`, `/llms.txt`, robots y sitemap.
 4. Continuar fortaleciendo contenido institucional y editorial sin convertir el blog en contenido de relleno.
 5. Preparar staging y QA cuando exista acceso operativo a BlueHosting.
