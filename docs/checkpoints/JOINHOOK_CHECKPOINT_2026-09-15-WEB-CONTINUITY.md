@@ -26,19 +26,14 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - La página `/para-ia` incluye `WebPage`, `WebSite`, `Organization` e `ItemList` en JSON-LD, manteniendo los datos alineados con el contenido visible.
 - Esta capa complementa SEO convencional; no garantiza posiciones, citas o recomendaciones de ningún motor.
 
-## Automatización añadida
+## CI y corrección reciente
 
-- `web-ci.yml` ahora prueba en el build renderizado `/para-ia`, `/llms.txt`, `robots.txt` y `sitemap.xml`.
-- CI verifica marcadores institucionales y de proyectos en `/para-ia`.
-- CI parsea todos los bloques JSON-LD de `/para-ia` para detectar JSON inválido.
-- CI comprueba canonical `/para-ia`, directivas de robots y nuevas entradas del sitemap.
-- La validación se ejecuta sobre el SHA exacto de la cabeza del PR.
-
-## Evidencia CI
-
-- El head anterior `91eca8d...` todavía no tenía una nueva corrida verificable mediante la consulta disponible.
-- El nuevo cambio de CI está en el commit `8b651c1...`; requiere que GitHub Actions ejecute una nueva corrida antes de considerar el estado actual como verde.
-- No se declara CI verde ni staging validado hasta contar con evidencia correspondiente.
+- El build de producción llegó a compilación exitosa y generó `/para-ia` como ruta estática.
+- El smoke de CGE y sitemap pasó.
+- El fallo demostrado en Web CI #61 estaba aislado en la expresión de prueba del JSON-LD: el test esperaba exactamente `<script type="application/ld+json">`, demasiado estricto para el HTML renderizado.
+- Se corrigió la prueba para detectar `script` con `type="application/ld+json"` independientemente de otros atributos y seguir parseando cada bloque JSON-LD encontrado.
+- El nuevo commit `328504d...` contiene esta corrección; requiere una nueva ejecución de CI antes de considerar el estado como verde.
+- El audit de dependencias de desarrollo mostró 1 vulnerabilidad alta y 1 moderada; el gate configurado permite el nivel `critical`, por lo que no bloqueó la ejecución. No se debe ejecutar un `npm audit fix` indiscriminado sin revisar el árbol y el impacto.
 
 ## Gate de publicación
 
@@ -52,8 +47,9 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - [x] Página `/para-ia` creada.
 - [x] `/llms.txt` creado.
 - [x] Robots actualizado para crawlers de búsqueda de IA documentados.
-- [x] CI ampliado con cobertura de descubribilidad IA.
-- [ ] Nueva Web CI verde después de los cambios posteriores.
+- [x] Pruebas automatizadas añadidas para descubribilidad IA.
+- [x] Corrección del test JSON-LD aplicada tras fallo demostrado.
+- [ ] Nueva Web CI verde después de la corrección.
 - [ ] Secret History Scan del estado actual.
 - [ ] Instalar artifact en `staging.joinhook.cl`.
 - [ ] Ejecutar `npm run smoke:staging` contra staging real.
@@ -64,14 +60,16 @@ Base: `main` / Web V1 `a29e433e7e5315424b9f264b6adc19d04f9370dc`
 - [ ] Verificación externa de producción.
 - [ ] Checkpoint post-merge.
 
+## Estrategia de aceleración hacia publicación
+
+1. Obtener CI verde del HEAD actual sin introducir cambios no relacionados.
+2. Usar el artifact `joinhook-bluehosting-standalone` producido por CI.
+3. Instalarlo primero en `/home/joinhook/staging-joinhook` mediante File Manager de BlueHosting; no ejecutar `next build` en el servidor.
+4. Reiniciar Passenger y ejecutar el smoke externo de staging.
+5. Realizar QA visual desktop/móvil y revisar headers, rutas, assets estáticos y CGE.
+6. Crear backup del estado productivo y conservar rollback antes de tocar `/home/joinhook/joinhook-production` / `public_html`.
+7. Solo con aprobación explícita, publicar el mismo artifact validado y sincronizado, seguido de verificación externa.
+
 ## Decisión de continuidad
 
-No realizar merge ni publicación automática. El desarrollo continúa en la rama de feature. Antes de cualquier merge se debe obtener CI verde del estado actual y completar los gates de staging/QA.
-
-## Próximo bloque
-
-1. Esperar/consultar la nueva corrida de CI sobre el head actualizado.
-2. Corregir únicamente fallos demostrados por CI.
-3. Revisar si el workflow de producción necesita el mismo contrato automatizado para `/para-ia`, `/llms.txt`, robots y sitemap.
-4. Continuar fortaleciendo contenido institucional y editorial sin convertir el blog en contenido de relleno.
-5. Preparar staging y QA cuando exista acceso operativo a BlueHosting.
+El objetivo prioritario es reducir el tiempo hasta que la web esté operativa sin saltarse las comprobaciones que evitan una publicación rota. La ruta más rápida segura es: CI → artifact reproducible → staging → smoke/QA → backup → publicación aprobada. No realizar merge ni publicación automática.
