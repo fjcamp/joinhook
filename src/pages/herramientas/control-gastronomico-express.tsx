@@ -78,6 +78,8 @@ export default function ControlGastronomicoExpress() {
                 />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#f3f0e8" />
+                <meta name="cge-founder-price" content="4990" />
+                <meta name="cge-founder-currency" content="CLP" />
                 <link rel="canonical" href="https://joinhook.cl/herramientas/control-gastronomico-express" />
                 <meta property="og:title" content="Control Gastronómico Express | JoinHook" />
                 <meta property="og:description" content="Inventario, compras, mermas y proveedores en una herramienta simple para pequeños negocios gastronómicos." />

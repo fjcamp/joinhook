@@ -1,19 +1,34 @@
-# Control Gastronómico Express — checkout Mercado Pago
+# Control Gastronómico Express — configuración de checkout
 
-El enlace oficial de pago para **Control Gastronómico Express** es:
+El checkout de **Control Gastronómico Express** está preparado para una pasarela externa, pero **permanece desactivado por defecto** hasta que exista una decisión explícita de lanzamiento comercial.
 
-- `https://mpago.li/1ZUHT1R`
-- Precio de lanzamiento: **$4.990 CLP**
-- Medio de pago: **Mercado Pago**
+## Estado actual
+
+- Precio de lanzamiento definido en la landing: **$4.990 CLP**.
+- Medio de pago previsto: **Mercado Pago**.
+- Staging y producción quedan sin cobro automático mientras no se active el switch comercial.
+- El repositorio no almacena una URL de checkout real como configuración activa.
 
 ## Configuración de producción
 
-El artifact de producción de JoinHook compila la landing con estas variables públicas:
+El workflow `.github/workflows/production-artifact.yml` lee:
 
-- `NEXT_PUBLIC_CGE_CHECKOUT_ENABLED=true`
-- `NEXT_PUBLIC_CGE_CHECKOUT_URL=https://mpago.li/1ZUHT1R`
+- `CGE_CHECKOUT_ENABLED` desde **GitHub Repository Variables**; el valor por defecto es `false`.
+- `CGE_CHECKOUT_URL` desde **GitHub Actions Secrets**.
 
-La landing muestra el CTA **Comprar pack fundador · $4.990** y abre Mercado Pago en una pestaña nueva. El pipeline de producción verifica que tanto el CTA como el enlace oficial estén presentes en el HTML antes de publicar el artifact para BlueHosting.
+Esas variables se entregan al build como:
+
+- `NEXT_PUBLIC_CGE_CHECKOUT_ENABLED`
+- `NEXT_PUBLIC_CGE_CHECKOUT_URL`
+
+Para activar el checkout se deben cumplir ambas condiciones:
+
+1. `CGE_CHECKOUT_ENABLED=true` mediante una decisión comercial explícita.
+2. `CGE_CHECKOUT_URL` debe existir y comenzar por `https://`.
+
+Con el switch desactivado, la landing muestra **Solicitar pack fundador** y no ejecuta ningún cobro automático.
+
+Con el switch activado, la landing puede mostrar **Comprar pack fundador** y abrir la URL externa configurada.
 
 ## Datos públicos del vendedor
 
@@ -24,13 +39,14 @@ La landing admite además estos campos públicos cuando estén definidos:
 - `NEXT_PUBLIC_SELLER_EMAIL=...`
 - `NEXT_PUBLIC_SELLER_ADDRESS=...`
 
-Estos datos siguen siendo recomendables para completar la información previa de contratación electrónica. Su ausencia ya no bloquea técnicamente la pasarela de Mercado Pago, pero debe resolverse antes de cerrar el checklist comercial/legal definitivo.
+Estos valores no deben contener credenciales ni secretos privados. Antes de activar una pasarela real debe existir revisión comercial y legal de la información que se mostrará al comprador.
 
 ## Reglas
 
-1. El enlace de pago debe seguir siendo específico de Control Gastronómico Express y usar HTTPS.
-2. Las variables `NEXT_PUBLIC_*` se entregan al navegador y **no deben contener secretos, tokens ni claves privadas**.
-3. Si posteriormente se integra la API o un webhook de Mercado Pago, las credenciales deben permanecer server-side y nunca usar prefijo `NEXT_PUBLIC_`.
-4. Staging mantiene el checkout desactivado por defecto para evitar cobros accidentales durante QA.
-5. Producción se compila mediante GitHub Actions como artifact standalone y luego se despliega en BlueHosting Passenger; no se debe ejecutar `next build` en el hosting compartido.
-6. Después de cada cambio en la pasarela se debe validar CTA, precio, URL, condiciones y recorrido de compra en el dominio real.
+1. Staging mantiene el checkout desactivado para evitar cobros accidentales durante QA.
+2. No guardar tokens, claves privadas ni credenciales bajo variables `NEXT_PUBLIC_*`.
+3. Una URL de checkout real debe llegar por configuración protegida y usar HTTPS.
+4. Si posteriormente se integra API, webhooks o credenciales de la pasarela, los secretos deben permanecer server-side.
+5. Cada activación comercial debe validar CTA, precio, moneda, URL, condiciones, datos del vendedor y recorrido de compra antes de publicar.
+6. La producción se compila como artifact mediante GitHub Actions y se despliega en BlueHosting Passenger; no se ejecuta `next build` en el hosting compartido.
+7. La activación del checkout no equivale a aprobación de producción: siguen siendo obligatorios backup, staging, smoke, QA visual/funcional y gate de publicación.

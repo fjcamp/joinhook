@@ -5,10 +5,11 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "start:passenger": "node server.js"
+        "start:passenger": "node server.js",
+        "smoke:staging": "node scripts/staging-smoke.cjs"
     },
     "engines": {
-        "node": ">=20.9.0"
+        "node": ">=20.20.2"
     },
     "dependencies": {
         "@tailwindcss/postcss": "^4.0.12",
