@@ -145,7 +145,7 @@ jobs:
             if (!html.includes(marker)) throw new Error(`Missing /para-ia marker: ${marker}`);
           }
 
-          const jsonLdMatches = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+          const jsonLdMatches = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
           if (jsonLdMatches.length < 1) throw new Error('Missing JSON-LD on /para-ia');
           for (const match of jsonLdMatches) JSON.parse(match[1]);
           if (!html.includes('https://joinhook.cl/para-ia')) throw new Error('Missing /para-ia canonical URL');
