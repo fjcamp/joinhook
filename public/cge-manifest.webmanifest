@@ -1,9 +1,9 @@
 {
-  "name": "Control Gastronómico Express",
-  "short_name": "Control Gastro",
+  "name": "Estado de Gastos Operacionales",
+  "short_name": "EGO",
   "description": "Inventario, compras, mermas y proveedores para pequeños negocios gastronómicos.",
-  "id": "/app/control-gastronomico-express",
-  "start_url": "/app/control-gastronomico-express?source=pwa",
+  "id": "/app/estado-gastos-operacionales",
+  "start_url": "/app/estado-gastos-operacionales?source=pwa",
   "scope": "/app/",
   "display": "standalone",
   "orientation": "any",
