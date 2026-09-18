@@ -66,8 +66,8 @@ jobs:
 
           manifest = json.loads(Path('public/cge-manifest.webmanifest').read_text(encoding='utf-8'))
           start = urlparse(manifest['start_url'])
-          assert manifest['id'] == '/app/control-gastronomico-express'
-          assert start.path == '/app/control-gastronomico-express'
+          assert manifest['id'] == '/app/estado-gastos-operacionales'
+          assert start.path == '/app/estado-gastos-operacionales'
           assert parse_qs(start.query).get('source') == ['pwa']
           assert manifest['scope'] == '/app/'
           assert manifest['display'] == 'standalone'
@@ -76,7 +76,7 @@ jobs:
 
           sw = Path('public/app/cge-sw.js').read_text(encoding='utf-8')
           required = [
-              '/app/control-gastronomico-express',
+              '/app/estado-gastos-operacionales',
               '/cge-manifest.webmanifest',
               '/icons/cge-icon.svg',
               '/icons/cge-icon-192.png',
@@ -104,9 +104,9 @@ jobs:
       - name: Smoke test public routes and PWA assets
         run: |
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
-          curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/control-gastronomico-express > /tmp/cge-landing.html
+          curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/estado-gastos-operacionales > /tmp/cge-landing.html
           grep -Fq 'Solicitar pack fundador' /tmp/cge-landing.html
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/control-gastronomico-express
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/estado-gastos-operacionales
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/robots.txt
@@ -152,7 +152,7 @@ jobs:
           cp -a .next/static deploy-bluehosting/.next/static
           cp -a public deploy-bluehosting/public
           cat > deploy-bluehosting/DEPLOYMENT.txt <<EOF
-          JoinHook V2 + CGE Beta 0.3
+          JoinHook V2 + EGO Beta 0.3
           Source commit: $GITHUB_SHA
           Built by: GitHub Actions / Redesign CI
           Runtime: Node.js 20.20.2
@@ -182,9 +182,9 @@ jobs:
             fi
             sleep 1
           done
-          curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/control-gastronomico-express > /tmp/cge-standalone.html
+          curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/estado-gastos-operacionales > /tmp/cge-standalone.html
           grep -Fq 'Solicitar pack fundador' /tmp/cge-standalone.html
-          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/control-gastronomico-express
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/estado-gastos-operacionales
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
           curl --fail --silent --show-error --dump-header /tmp/standalone-headers.txt --output /dev/null http://127.0.0.1:3010/
           grep -qi '^content-security-policy:' /tmp/standalone-headers.txt
@@ -243,7 +243,7 @@ jobs:
           npm run start -- -p 3001 > /tmp/joinhook-commercial.log 2>&1 &
           echo $! > /tmp/joinhook-commercial.pid
           for i in {1..30}; do
-            if curl --location -fsS http://127.0.0.1:3001/herramientas/control-gastronomico-express > /tmp/cge-commercial.html; then
+            if curl --location -fsS http://127.0.0.1:3001/herramientas/estado-gastos-operacionales > /tmp/cge-commercial.html; then
               exit 0
             fi
             sleep 1
