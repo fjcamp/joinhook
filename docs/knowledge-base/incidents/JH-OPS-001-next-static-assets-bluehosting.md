@@ -129,7 +129,7 @@ El artifact actual ya contiene `document-root-assets/`, preparado por CI con:
 2. Copiar/mezclar **todo el contenido de** `/home/joinhook/joinhook-production/document-root-assets/` hacia `/home/joinhook/public_html/`, sobrescribiendo los assets del build anterior pero sin borrar todavía WordPress legado ni `.htaccess`.
 3. Verificar al menos una URL `/_next/static/chunks/<hash>.js` y un asset público nuevo, por ejemplo `/project-covers/joinops-cover.svg`.
 4. Reiniciar Passenger si cambió el runtime.
-5. Ejecutar `Ctrl + F5` y smoke test de Home, carrusel, chat, CGE y checkout.
+5. Ejecutar `Ctrl + F5` y smoke test de Home, carrusel, chat, EGO y checkout.
 
 **Regla:** no declarar un deploy completado ni pedir revisión visual hasta que runtime + `document-root-assets` estén sincronizados.
 
