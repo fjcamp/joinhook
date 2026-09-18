@@ -5,20 +5,20 @@ export default function CondicionesBeta() {
     return (
         <>
             <Head>
-                <title>Condiciones de beta | Control Gastronómico Express</title>
-                <meta name="description" content="Alcance, limitaciones y condiciones de uso de la beta de Control Gastronómico Express." />
+                <title>Condiciones de beta | Estado de Gastos Operacionales</title>
+                <meta name="description" content="Alcance, limitaciones y condiciones de uso de la beta de Estado de Gastos Operacionales." />
                 <link rel="canonical" href="https://joinhook.cl/condiciones-beta" />
             </Head>
             <main className="jh-site jh-legal-page">
                 <header className="jh-header">
                     <Link className="jh-brand" href="/"><span className="jh-brand-mark" aria-hidden="true">JH</span><span>JoinHook</span></Link>
-                    <Link className="jh-header-cta" href="/herramientas/control-gastronomico-express">Control Gastronómico</Link>
+                    <Link className="jh-header-cta" href="/herramientas/estado-gastos-operacionales">Estado de Gastos Operacionales</Link>
                 </header>
 
                 <article className="jh-legal jh-surface">
                     <span className="jh-eyebrow">Beta · actualización 19 agosto 2026</span>
-                    <h1>Condiciones de uso de Control Gastronómico Express</h1>
-                    <p>Control Gastronómico Express es una herramienta en etapa beta creada dentro de JoinHook, proyecto independiente de Francisco Javier Campos. Estas condiciones buscan explicar de forma simple qué ofrece hoy la aplicación y qué límites tiene antes de utilizarla con datos reales.</p>
+                    <h1>Condiciones de uso de Estado de Gastos Operacionales</h1>
+                    <p>Estado de Gastos Operacionales es una herramienta en etapa beta creada dentro de JoinHook, proyecto independiente de Francisco Javier Campos. Estas condiciones buscan explicar de forma simple qué ofrece hoy la aplicación y qué límites tiene antes de utilizarla con datos reales.</p>
 
                     <h2>1. Alcance actual</h2>
                     <p>La beta incluye gestión básica de inventario, compras, mermas, proveedores, ajustes de stock, alertas de mínimos, sugerencias simples de reposición, importación/exportación CSV, respaldo JSON y funcionamiento PWA compatible.</p>
@@ -50,7 +50,7 @@ export default function CondicionesBeta() {
                     <p>El tratamiento de información de contacto y el funcionamiento local de la aplicación se describen en la <Link href="/privacidad">Política de Privacidad</Link>.</p>
 
                     <div className="jh-actions">
-                        <Link className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Volver al producto</Link>
+                        <Link className="jh-button jh-button-primary" href="/herramientas/estado-gastos-operacionales">Volver al producto</Link>
                         <Link className="jh-button jh-button-soft" href="/privacidad">Privacidad</Link>
                     </div>
                 </article>
