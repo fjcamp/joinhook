@@ -1,4 +1,4 @@
-# Lanzamiento orgánico — Control Gastronómico Express
+# Lanzamiento orgánico — Estado de Gastos Operacionales
 
 ## Posicionamiento
 Herramienta simple y de bajo costo para pequeños negocios gastronómicos que necesitan controlar inventario, compras y mermas sin adoptar todavía un POS/ERP complejo ni asumir una mensualidad.
