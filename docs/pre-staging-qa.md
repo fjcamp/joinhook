@@ -1,10 +1,10 @@
-# Pre-staging QA — JoinHook V2 / CGE Beta 0.3
+# Pre-staging QA — JoinHook V2 / EGO Beta 0.3
 
 Este bloque no agrega funciones nuevas. Su objetivo es reducir riesgos antes de exponer la beta en una URL pública de staging.
 
 ## Alcance
 
-- Corregir advertencias React que afectan la hidratación/estado inicial de Control Gastronómico Express.
+- Corregir advertencias React que afectan la hidratación/estado inicial de Estado de Gastos Operacionales.
 - Validar estructura del manifest PWA y activos mínimos del shell offline.
 - Mantener el escenario comercial por defecto sin cobro automático.
 - Compilar adicionalmente la landing con checkout habilitado usando exclusivamente datos ficticios de QA.
