@@ -1,6 +1,6 @@
-# Control Gastronómico Express — checkout Mercado Pago
+# Estado de Gastos Operacionales — checkout Mercado Pago
 
-El enlace oficial de pago para **Control Gastronómico Express** es:
+El enlace oficial de pago para **Estado de Gastos Operacionales** es:
 
 - `https://mpago.li/1ZUHT1R`
 - Precio de lanzamiento: **$4.990 CLP**
@@ -10,8 +10,8 @@ El enlace oficial de pago para **Control Gastronómico Express** es:
 
 El artifact de producción de JoinHook compila la landing con estas variables públicas:
 
-- `NEXT_PUBLIC_CGE_CHECKOUT_ENABLED=true`
-- `NEXT_PUBLIC_CGE_CHECKOUT_URL=https://mpago.li/1ZUHT1R`
+- `NEXT_PUBLIC_EGO_CHECKOUT_ENABLED=true`
+- `NEXT_PUBLIC_EGO_CHECKOUT_URL=https://mpago.li/1ZUHT1R`
 
 La landing muestra el CTA **Comprar pack fundador · $4.990** y abre Mercado Pago en una pestaña nueva. El pipeline de producción verifica que tanto el CTA como el enlace oficial estén presentes en el HTML antes de publicar el artifact para BlueHosting.
 
@@ -28,7 +28,7 @@ Estos datos siguen siendo recomendables para completar la información previa de
 
 ## Reglas
 
-1. El enlace de pago debe seguir siendo específico de Control Gastronómico Express y usar HTTPS.
+1. El enlace de pago debe seguir siendo específico de Estado de Gastos Operacionales y usar HTTPS.
 2. Las variables `NEXT_PUBLIC_*` se entregan al navegador y **no deben contener secretos, tokens ni claves privadas**.
 3. Si posteriormente se integra la API o un webhook de Mercado Pago, las credenciales deben permanecer server-side y nunca usar prefijo `NEXT_PUBLIC_`.
 4. Staging mantiene el checkout desactivado por defecto para evitar cobros accidentales durante QA.
