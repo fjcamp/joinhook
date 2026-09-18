@@ -1,4 +1,4 @@
-# Control Gastronómico Express — Launch Kit v1
+# Estado de Gastos Operacionales — Launch Kit v1
 
 ## Objetivo
 Lanzar una beta útil y comprensible, conseguir primeros usuarios reales y convertir interés en solicitudes de compra/implementación sin publicidad pagada.
@@ -6,7 +6,7 @@ Lanzar una beta útil y comprensible, conseguir primeros usuarios reales y conve
 ## Mensaje central
 **Ordena inventario, compras y mermas sin partir por un sistema enorme.**
 
-Control Gastronómico Express es una PWA simple para pequeños negocios gastronómicos que necesitan control operativo antes que un ERP completo.
+Estado de Gastos Operacionales es una PWA simple para pequeños negocios gastronómicos que necesitan control operativo antes que un ERP completo.
 
 ## Oferta inicial
 - Precio de lanzamiento: **$4.990 CLP**.
@@ -55,7 +55,7 @@ Durante el desarrollo de sistemas de gestión me encontré con un problema que s
 
 Entonces preguntas muy simples se vuelven difíciles: ¿cuánto stock tengo realmente?, ¿qué necesito comprar?, ¿cuánto estoy perdiendo en mermas?, ¿qué pasó con este producto?
 
-Por eso construí Control Gastronómico Express.
+Por eso construí Estado de Gastos Operacionales.
 
 No intenta ser un ERP gigante. La primera versión se concentra en inventario, compras, mermas, proveedores, stock mínimo, sugerencias simples de reposición y respaldo.
 
@@ -80,7 +80,7 @@ Puedes probarla desde JoinHook.cl. Y si después de probarla quieres el acceso d
 Soy Francisco y esto es JoinHook: construyo, pruebo y mejoro herramientas a partir de problemas reales.
 
 ## Pantallas a grabar
-1. Home JoinHook → Control Gastronómico Express.
+1. Home JoinHook → Estado de Gastos Operacionales.
 2. Landing y precio.
 3. Onboarding demo.
 4. Dashboard.
@@ -101,7 +101,7 @@ Soy Francisco y esto es JoinHook: construyo, pruebo y mejoro herramientas a part
 
 Si manejas una cafetería, pastelería o restaurante pequeño y necesitas revisar cuadernos y planillas para responder eso, ahí hay un problema.
 
-Estoy construyendo Control Gastronómico Express para ver stock, compras y mermas en un solo lugar sin partir por un ERP enorme.
+Estoy construyendo Estado de Gastos Operacionales para ver stock, compras y mermas en un solo lugar sin partir por un ERP enorme.
 
 **CTA:** Pruébalo en JoinHook.cl.
 
@@ -110,7 +110,7 @@ Estoy construyendo Control Gastronómico Express para ver stock, compras y merma
 
 Vencimiento, errores de preparación, daño o producción: si no queda registrado, después solo sabes que falta producto.
 
-En Control Gastronómico Express registras la causa y el stock se actualiza.
+En Estado de Gastos Operacionales registras la causa y el stock se actualiza.
 
 **CTA:** La beta está en JoinHook.cl.
 
@@ -130,12 +130,12 @@ Después: inventario + compras + mermas + proveedores + respaldo en una sola PWA
 
 No quiero reemplazar todo tu negocio. Quiero ordenar primero lo que más se repite.
 
-**CTA:** Control Gastronómico Express en JoinHook.cl.
+**CTA:** Estado de Gastos Operacionales en JoinHook.cl.
 
 ## Short 5 — Creador
 Hola, soy Francisco. No soy una gran empresa de software. Estoy construyendo JoinHook como creador independiente y quiero probar mis herramientas con personas que realmente las necesiten.
 
-Mi primera herramienta comercial es Control Gastronómico Express.
+Mi primera herramienta comercial es Estado de Gastos Operacionales.
 
 Si tienes un negocio gastronómico pequeño, quiero saber si esto te sirve.
 
@@ -152,7 +152,7 @@ Si tienes un negocio gastronómico pequeño, quiero saber si esto te sirve.
 4. Distintas planillas con datos diferentes.
 5. Productos que se terminan sin aviso.
 6. No saber cuánto dinero hay inmovilizado en stock.
-7. Cierre: Prueba Control Gastronómico Express · JoinHook.cl.
+7. Cierre: Prueba Estado de Gastos Operacionales · JoinHook.cl.
 
 ## Carrusel 2: “No necesitas un ERP para empezar”
 1. Portada.
@@ -164,7 +164,7 @@ Si tienes un negocio gastronómico pequeño, quiero saber si esto te sirve.
 7. Cierre con demo.
 
 ## Publicación producto
-Título: **Control Gastronómico Express**
+Título: **Estado de Gastos Operacionales**
 Bajada: Inventario · Compras · Mermas · Proveedores.
 Precio: **$4.990 CLP · pago único de lanzamiento**.
 CTA: **Pruébalo antes en JoinHook.cl**.
@@ -250,7 +250,7 @@ Seguidores y reproducciones son métricas secundarias si no producen pruebas o c
 - URL HTTPS de staging aprobada.
 - Recorrido funcional desktop/móvil y offline.
 - Datos legales del proveedor que correspondan a la venta electrónica en Chile.
-- Enlace de cobro específico de Control Gastronómico Express (Mercado Pago u otro medio formal elegido).
+- Enlace de cobro específico de Estado de Gastos Operacionales (Mercado Pago u otro medio formal elegido).
 - Confirmación escrita de compra/entrega.
 
 Hasta cerrar esos puntos, la landing puede captar solicitudes pero no debe simular un checkout automático.
