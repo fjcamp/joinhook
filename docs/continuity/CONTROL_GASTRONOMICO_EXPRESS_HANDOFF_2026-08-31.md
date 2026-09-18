@@ -1,16 +1,16 @@
-# Control Gastronómico Express (CGE) — Handoff técnico, comercial y de continuidad
+# Estado de Gastos Operacionales (EGO) — Handoff técnico, comercial y de continuidad
 
 **Fecha de corte:** 2026-08-31  
 **Repositorio:** `fjcamp/joinhook`  
 **Rama canónica pública:** `main`  
 **Estado visible en README:** **Beta 0.3**  
-**Rutas:** `/herramientas/control-gastronomico-express` y `/app/control-gastronomico-express`
+**Rutas:** `/herramientas/estado-gastos-operacionales` y `/app/estado-gastos-operacionales`
 
 ---
 
 ## 0. Instrucciones obligatorias para otra IA
 
-1. No confundir CGE con JoinOps. CGE es un producto ligero/local-first; JoinOps es el ERP operacional de mayor alcance.
+1. No confundir EGO con JoinOps. EGO es un producto ligero/local-first; JoinOps es el ERP operacional de mayor alcance.
 2. No expandir el MVP de forma automática hacia POS, SII, recetas, cloud, usuarios o multi-sucursal. Esas capacidades pertenecen a evolución posterior o a JoinOps.
 3. El estado comercial/pagos debe verificarse antes de mostrar un CTA de cobro. Existe configuración histórica de Link de Pago y existe además un Commerce Core en PR #31 con kill switch; **no asumir que cobros productivos están habilitados**.
 4. Mantener `JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false` mientras no se hayan aprobado los gates de Commerce productivo.
@@ -23,9 +23,9 @@
 
 ---
 
-## 1. Qué es CGE
+## 1. Qué es EGO
 
-Control Gastronómico Express es una PWA local-first para pequeños negocios gastronómicos que necesitan ordenar inventario, compras, mermas y proveedores sin partir por un POS/ERP complejo ni asumir una infraestructura cloud en la validación inicial.
+Estado de Gastos Operacionales es una PWA local-first para pequeños negocios gastronómicos que necesitan ordenar inventario, compras, mermas y proveedores sin partir por un POS/ERP complejo ni asumir una infraestructura cloud en la validación inicial.
 
 ### Propuesta de valor
 
@@ -53,7 +53,7 @@ El usuario necesita responder rápidamente:
 - ¿cuánto valor aproximado hay inmovilizado?;
 - ¿puedo respaldar/exportar la información?;
 
-Sin CGE, esta información suele quedar dispersa entre cuadernos, mensajes y planillas.
+Sin EGO, esta información suele quedar dispersa entre cuadernos, mensajes y planillas.
 
 ---
 
@@ -88,14 +88,14 @@ Sin CGE, esta información suele quedar dispersa entre cuadernos, mensajes y pla
 
 - Local-first.
 - Datos operativos en navegador/dispositivo durante la beta actual.
-- Sin base cloud de JoinHook para el core de datos de CGE.
+- Sin base cloud de JoinHook para el core de datos de EGO.
 - Respaldo JSON y exportación CSV como mecanismos de portabilidad.
 
 ---
 
 ## 4. Navegación/UX — trabajo en PR #40
 
-**PR #40:** `CGE — navegación operacional y UX responsive`  
+**PR #40:** `EGO — navegación operacional y UX responsive`  
 **Rama:** `cge-navigation-ux-2026-08-27`  
 **Head observado:** `24335cce52c849cd6d539762bd2872de52eead6f`  
 **Estado al corte:** abierto, draft, mergeable; no fusionado.
@@ -167,7 +167,7 @@ Paralelamente existe **PR #31 — Commerce Core v1**, rama `feat/commerce-core-m
 
 ### JH-OPS-002
 
-Se documentó que WordPress/.htaccess podía interceptar rutas internas de Next.js y devolver un 404 del sitio legacy aun cuando la ruta CGE existía.
+Se documentó que WordPress/.htaccess podía interceptar rutas internas de Next.js y devolver un 404 del sitio legacy aun cuando la ruta EGO existía.
 
 Antes de tocar producción:
 
@@ -323,7 +323,7 @@ Usuarios que vuelven a registrar movimientos sin que se les recuerde y que usan 
 
 Si el segmento exige multiusuario/multisucursal/recetas, decidir entre:
 
-- extender CGE de forma acotada; o
+- extender EGO de forma acotada; o
 - migrar/upsell a JoinOps.
 
 Evitar duplicar dos ERPs.
@@ -357,9 +357,9 @@ Se crea este handoff. No se activó cobro ni se fusionaron ramas funcionales dur
 ## 12. Instrucción lista para otra IA
 
 ```text
-Estoy retomando Control Gastronómico Express.
-Fuente canónica: fjcamp/joinhook + docs/continuity/CONTROL_GASTRONOMICO_EXPRESS_HANDOFF_2026-08-31.md.
-CGE es Beta 0.3 local-first; no lo conviertas en JoinOps.
+Estoy retomando Estado de Gastos Operacionales.
+Fuente canónica: fjcamp/joinhook + docs/continuity/ESTADO_GASTOS_OPERACIONALES_HANDOFF_2026-08-31.md.
+EGO es Beta 0.3 local-first; no lo conviertas en JoinOps.
 Primero verifica main, CI, PWA, persistencia, backup/restore y routing JH-OPS-002. Luego compara PR #40 y PR #31 con main actual.
 No habilites pagos: conserva JOINHOOK_COMMERCE_ACCEPT_PAYMENTS=false hasta completar sandbox, seguridad, entrega, QA, formalización y aprobación humana.
 Registra bitácora y evidencia de cada cambio.
