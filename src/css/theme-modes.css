@@ -371,7 +371,7 @@ html[data-color-mode='dark'] .jh-contact {
     box-shadow: var(--jh-shadow);
 }
 
-/* Control Gastronómico Express dark mode */
+/* Estado de Gastos Operacionales dark mode */
 html[data-color-mode='dark'] .cge-app,
 html[data-color-mode='dark'] .cge-loading {
     color: var(--cge-text);
