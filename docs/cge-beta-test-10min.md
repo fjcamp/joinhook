@@ -1,10 +1,10 @@
-# Control Gastronómico Express — prueba beta de 10 minutos
+# Estado de Gastos Operacionales — prueba beta de 10 minutos
 
 ## Objetivo
 Validar si una persona que administra un pequeño negocio gastronómico puede entender y ejecutar el circuito principal sin capacitación previa.
 
 ## Preparación
-- Abrir `/app/control-gastronomico-express` en un navegador limpio o después de reiniciar la demo.
+- Abrir `/app/estado-gastos-operacionales` en un navegador limpio o después de reiniciar la demo.
 - Realizar una prueba en escritorio y otra en teléfono.
 - No explicar dónde están los botones salvo que el participante quede bloqueado.
 
@@ -61,7 +61,7 @@ Resultado esperado: Azúcar aparece en stock crítico y en Compra sugerida.
 Éxito: el usuario entiende que la sugerencia usa stock mínimo y no un pronóstico de ventas.
 
 ### 8. Importación CSV — 1 minuto
-1. Usar `public/templates/control-gastronomico-express-inventario.csv` como referencia.
+1. Usar `public/templates/estado-gastos-operacionales-inventario.csv` como referencia.
 2. Importar un CSV con al menos dos productos.
 
 Resultado esperado: productos nuevos se agregan y productos con el mismo nombre se actualizan sin duplicarse.
