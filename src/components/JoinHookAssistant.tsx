@@ -8,7 +8,7 @@ type ChatMessage = {
 
 const QUICK_REPLIES = [
     'Qué herramienta me conviene',
-    'Precio de Control Gastronómico Express',
+    'Precio de Estado de Gastos Operacionales',
     'Necesito soporte',
     'Hablar con Francisco'
 ];
@@ -42,9 +42,9 @@ function responseFor(intent: string) {
         case 'human':
             return 'Por supuesto. Si quieres conversar directamente con Francisco, escribe a contacto@joinhook.cl. Para consultas de compra, cotización o servicios también puedes usar ventas@joinhook.cl.';
         case 'sales':
-            return 'Actualmente puedes conocer Control Gastronómico Express, una herramienta enfocada en inventario, compras, mermas, stock mínimo, proveedores y respaldo PWA. El precio de lanzamiento publicado es $4.990 CLP. Si me cuentas qué necesitas, puedo ayudarte a evaluar si esta herramienta te sirve o si conviene una solución diferente.';
+            return 'Actualmente puedes conocer Estado de Gastos Operacionales, una herramienta enfocada en inventario, compras, mermas, stock mínimo, proveedores y respaldo PWA. El precio de lanzamiento publicado es $4.990 CLP. Si me cuentas qué necesitas, puedo ayudarte a evaluar si esta herramienta te sirve o si conviene una solución diferente.';
         case 'cge':
-            return 'Control Gastronómico Express ayuda a pequeños negocios gastronómicos a ordenar inventario, compras, mermas, proveedores y stock crítico en una interfaz práctica. Su beneficio principal es tener mayor control diario sin partir con la complejidad de un ERP grande.';
+            return 'Estado de Gastos Operacionales ayuda a pequeños negocios gastronómicos a ordenar inventario, compras, mermas, proveedores y stock crítico en una interfaz práctica. Su beneficio principal es tener mayor control diario sin partir con la complejidad de un ERP grande.';
         case 'snowwise':
             return 'SnowWise es un proyecto enfocado en montaña, seguridad, clima, mapas y contexto útil para actividades de nieve. Busca reunir información relevante en una experiencia más clara para planificar y tomar mejores decisiones antes y durante una salida.';
         case 'joinops':
