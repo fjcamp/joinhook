@@ -50,7 +50,7 @@ JoinHook es una empresa/proyecto tecnológico chileno en construcción orientado
 
 ### A. Productos propios
 
-- Control Gastronómico Express (CGE).
+- Estado de Gastos Operacionales (EGO).
 - SnowWise.
 - Mi Gestión Admin.
 - JoinOps.
@@ -104,7 +104,7 @@ La web debe responder con claridad:
 - Inicio.
 - Soluciones/Servicios.
 - Productos.
-- Control Gastronómico Express.
+- Estado de Gastos Operacionales.
 - SnowWise.
 - Mi Gestión / JoinOps como “en desarrollo” si corresponde.
 - Cómo trabajamos.
@@ -140,7 +140,7 @@ Commits recientes relevantes observados:
 
 ### Importante
 
-El repo contiene más que la web corporativa: también CGE, Commerce, JoinHook Local/Pulse y Agent Center. No asumir que todo comparte el mismo ciclo de release.
+El repo contiene más que la web corporativa: también EGO, Commerce, JoinHook Local/Pulse y Agent Center. No asumir que todo comparte el mismo ciclo de release.
 
 ---
 
@@ -162,7 +162,7 @@ Antes de corregir:
 4. no borrar a ciegas;
 5. desplegar artifact correcto;
 6. reiniciar Passenger solo cuando corresponda;
-7. smoke-test rutas principales y CGE;
+7. smoke-test rutas principales y EGO;
 8. comprobar assets públicos/PWA;
 9. rollback si falla.
 
@@ -252,7 +252,7 @@ Muchas pymes necesitan digitalización pero enfrentan dos extremos: herramientas
 ### Estrategia de ingresos tempranos
 
 1. servicios web/software de alcance acotado;
-2. CGE como producto de entrada;
+2. EGO como producto de entrada;
 3. SnowWise como producto/experiencia vertical;
 4. Mi Gestión para usuario individual;
 5. JoinOps como producto B2B más amplio cuando exista MVP validado.
