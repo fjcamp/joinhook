@@ -18,7 +18,7 @@ La nueva versión del sitio se desarrolla en la rama `redesign-v2` y todavía no
 
 ## Proyecto principal en lanzamiento
 
-### Control Gastronómico Express — Beta 0.3
+### Estado de Gastos Operacionales — Beta 0.3
 
 Herramienta local-first para pequeños negocios gastronómicos que necesitan ordenar inventario, compras, mermas, proveedores, ajustes trazables, reposición, importación/exportación CSV y respaldo/restauración JSON.
 
@@ -42,7 +42,7 @@ Los estados de los proyectos deben mantenerse explícitos.
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- PWA / Service Worker para Control Gastronómico Express
+- PWA / Service Worker para Estado de Gastos Operacionales
 - GitHub como fuente de verdad
 - Netlify preparado para despliegue mediante OpenNext
 
