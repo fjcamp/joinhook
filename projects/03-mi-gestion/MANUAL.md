@@ -1,30 +1,52 @@
-# 03 — Mi Gestión
+# 03 — Mi Gestión Admin
 
 ## Propósito
-Aplicación de administración para pequeños negocios. Su objetivo es transformar la gestión diaria en tareas, responsables, indicadores y procesos trazables.
+Aplicación personal de gestión profesional para un administrador o encargado que trabaja dentro de una empresa. Es una herramienta individual de apoyo a la gestión; no es un ERP, no es inicialmente multiusuario y no sustituye el sistema corporativo de la empresa.
 
-## Tecnologías candidatas
-- **Ruby on Rails:** dominio administrativo y API.
-- **Next.js + TypeScript:** PWA y panel de gestión.
-- **Django + Python:** analítica y automatización.
-- **Laravel + PHP:** alternativa web full-stack.
+## Modelo funcional
+Propósito → Responsabilidad → Capacidad → Proceso → Ejecución → Resultado → Control → Decisión → Aprendizaje → Mejora.
 
-## Funciones
-Tareas; categorías; sucursales; personal; proveedores; indicadores; gráficos; importación/exportación Markdown/CSV; operación offline; temas visuales; respaldo/restauración.
+## Alcance funcional inicial
+- Perfil y contexto profesional.
+- Responsabilidades y capacidades.
+- Objetivos.
+- Procesos.
+- Tareas y seguimiento de ejecución.
+- Registro de resultados.
+- Controles e indicadores.
+- Decisiones.
+- Aprendizajes.
+- Mejoras.
+- Auditoría de actividad.
+- Exportación y respaldo de datos.
 
-## Estructura prevista
-```text
-src/modules/tasks/          # tareas
-src/modules/staff/          # personal
-src/modules/branches/       # sucursales
-src/modules/suppliers/      # proveedores
-src/modules/reports/        # indicadores
-src/lib/storage/             # persistencia local/sincronización
-src/components/              # UI
-```
+## Arquitectura objetivo
+- PWA para PC y dispositivos móviles.
+- Backend desacoplado de la interfaz.
+- PostgreSQL como persistencia principal cuando exista backend.
+- Diseño local-first como objetivo; sincronización cloud como capacidad adicional.
+- Integraciones mediante adaptadores independientes: correo, Drive, Notion y calendario.
+- Agent Core como capacidad posterior y con permisos explícitos, trazabilidad y control del usuario.
 
-## Implementación
-Priorizar local-first cuando el caso de uso lo requiera. La sincronización cloud debe ser una capacidad adicional, no una dependencia obligatoria del primer MVP.
+## Tecnología
+No se fija todavía un framework definitivo. Ruby on Rails, Django, Laravel u otras alternativas quedan como candidatas hasta completar la investigación técnica sobre mantenimiento, PWA, PostgreSQL, autenticación, seguridad, coste inicial, portabilidad y capacidad de desarrollo local.
 
-## Criterio de terminado
-Crear, editar, completar y auditar tareas; administrar entidades básicas; visualizar KPI; exportar/restaurar datos; pruebas automatizadas y documentación de cada archivo.
+No utilizar Replit ni Vercel como dependencia de infraestructura para Mi Gestión Admin.
+
+## Separación de proyectos
+Mi Gestión Admin debe mantener su implementación ejecutable en un repositorio/proyecto independiente de JoinOps. El repositorio `fjcamp/joinhook` puede contener documentación estratégica de la iniciativa, pero no se debe introducir aquí la aplicación ejecutable si ello rompe la separación establecida.
+
+## Criterio de terminado del MVP
+- Configurar contexto profesional.
+- Crear y gestionar responsabilidades, objetivos y procesos.
+- Crear, ejecutar y completar tareas.
+- Registrar resultados.
+- Definir controles/indicadores.
+- Consultar pendientes y actividad.
+- Exportar/restaurar datos.
+- Registrar eventos de auditoría.
+- Ejecutar build, lint/typecheck y pruebas automatizadas sobre el repositorio de aplicación.
+- Documentar y respaldar cada checkpoint verificable.
+
+## Estado
+La especificación funcional, ERD y requisitos de seguridad/compliance están diseñados en `mga/foundation-2026-09-18`. No se declara una aplicación ejecutable como implementada ni verificada hasta localizar o crear su repositorio independiente y comprobar su estado real.
