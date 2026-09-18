@@ -224,9 +224,9 @@ export default function Home() {
                 <section className="jh-v1-tool jh-surface" aria-labelledby="tool-title">
                     <div className="jh-v1-tool-copy">
                         <span className="jh-eyebrow">Herramienta en uso · Beta</span>
-                        <h2 id="tool-title">Control Gastronómico Express</h2>
+                        <h2 id="tool-title">Estado de Gastos Operacionales</h2>
                         <p>Una herramienta para pequeños negocios gastronómicos que necesitan empezar a ordenar inventario, compras, mermas y proveedores sin comenzar por un ERP completo.</p>
-                        <div className="jh-actions"><Link className="jh-button jh-button-primary" href="/herramientas/control-gastronomico-express">Conocer la herramienta <ArrowIcon /></Link></div>
+                        <div className="jh-actions"><Link className="jh-button jh-button-primary" href="/herramientas/estado-gastos-operacionales">Conocer la herramienta <ArrowIcon /></Link></div>
                     </div>
                     <div className="jh-v1-tool-note"><span>Producto propio</span><strong>La herramienta nace de una necesidad operativa concreta.</strong><small>Disponible en etapa beta · alcance comunicado de forma transparente.</small></div>
                 </section>
