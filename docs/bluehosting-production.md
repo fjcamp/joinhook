@@ -61,8 +61,8 @@ Esto es obligatorio porque Passenger ejecuta Next.js fuera del document root y A
 
 - `/`
 - `/#proyectos`
-- `/herramientas/control-gastronomico-express`
-- `/app/control-gastronomico-express`
+- `/herramientas/estado-gastos-operacionales`
+- `/app/estado-gastos-operacionales`
 - `/privacidad`
 - `/condiciones-beta`
 - `/robots.txt`
@@ -78,9 +78,9 @@ Comprobar además:
 - Carrusel de proyectos: flechas laterales en escritorio, controles compactos en móvil.
 - Cambio JoinOps ↔ SnowWise ↔ Mi Gestión.
 - Modo claro/oscuro.
-- CTA de Control Gastronómico Express.
+- CTA de Estado de Gastos Operacionales.
 - Checkout Mercado Pago `https://mpago.li/1ZUHT1R`.
-- PWA de CGE y continuidad offline.
+- PWA de EGO y continuidad offline.
 - Headers de seguridad.
 
 ## Incidente conocido: HTML sin estilos
