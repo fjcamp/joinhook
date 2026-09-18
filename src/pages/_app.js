@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { generateGlobalCssVariables } from '@/utils/theme-style-utils';
-import { CGEPwaStatus } from '@/features/cge/pwa';
+import { EGOPwaStatus } from '@/features/cge/pwa';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { JoinHookAssistant } from '@/components/JoinHookAssistant';
 import { useEffect } from 'react';
@@ -37,7 +37,7 @@ export default function MyApp({ Component, pageProps }) {
     const { global, ...page } = pageProps || {};
     const { theme } = global || {};
     const router = useRouter();
-    const isCGEApp = router.pathname === '/app/control-gastronomico-express';
+    const isEGOApp = router.pathname === '/app/estado-gastos-operacionales';
     const isHome = router.pathname === '/';
 
     const cssVars = theme ? generateGlobalCssVariables(theme) : '';
@@ -50,15 +50,15 @@ export default function MyApp({ Component, pageProps }) {
         <>
             <Head>
                 <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
-                <link rel="icon" href={isCGEApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
+                <link rel="icon" href={isEGOApp ? '/icons/cge-icon.svg' : '/favicon.svg'} type="image/svg+xml" />
             </Head>
-            {isCGEApp && (
+            {isEGOApp && (
                 <Head>
                     <link rel="manifest" href="/cge-manifest.webmanifest" />
-                    <meta name="application-name" content="Control Gastronómico Express" />
+                    <meta name="application-name" content="Estado de Gastos Operacionales" />
                     <meta name="apple-mobile-web-app-capable" content="yes" />
                     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-                    <meta name="apple-mobile-web-app-title" content="Control Gastro" />
+                    <meta name="apple-mobile-web-app-title" content="EGO" />
                     <meta name="mobile-web-app-capable" content="yes" />
                     <meta name="theme-color" content="#728d78" />
                 </Head>
@@ -69,9 +69,9 @@ export default function MyApp({ Component, pageProps }) {
                 }
             `}</style>
             <Component {...pageProps} />
-            <ThemeToggle compact={isCGEApp} />
+            <ThemeToggle compact={isEGOApp} />
             {isHome && <JoinHookAssistant />}
-            {isCGEApp && <CGEPwaStatus />}
+            {isEGOApp && <EGOPwaStatus />}
         </>
     );
 }
