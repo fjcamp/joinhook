@@ -58,7 +58,7 @@ La implementación actual documentada incluye backend territorial en Supabase, t
 
 ### JoinOps
 
-La búsqueda en `fjcamp/joinhook` confirma documentación, portada visual y presencia pública del proyecto, incluyendo que la portada y el sitio lo presentan como producto en desarrollo. No apareció una ruta de aplicación ni un repositorio de código independiente que permita afirmar que existe un runtime JoinOps propio. Por ahora se mantiene **código dedicado pendiente de confirmar**, sin confundirlo con CGE. fileciteturn117file0L2-L10 fileciteturn117file10L140-L148 fileciteturn117file11L153-L160
+La búsqueda en `fjcamp/joinhook` confirma documentación, portada visual y presencia pública del proyecto, incluyendo que la portada y el sitio lo presentan como producto en desarrollo. No apareció una ruta de aplicación ni un repositorio de código independiente que permita afirmar que existe un runtime JoinOps propio. Por ahora se mantiene **código dedicado pendiente de confirmar**, sin confundirlo con EGO. fileciteturn117file0L2-L10 fileciteturn117file10L140-L148 fileciteturn117file11L153-L160
 
 ### Mi Gestión
 
@@ -91,7 +91,7 @@ La memoria y la documentación coinciden en los puntos estructurales principales
 - Business OS separado en `fjcamp/joinhook-os`.
 - SnowWise separado en `fjcamp/snowwise`.
 - Cumbre Brava conceptualmente separado de JoinHook.
-- JoinOps debe permanecer conceptualmente separado de CGE.
+- JoinOps debe permanecer conceptualmente separado de EGO.
 - GitHub como fuente de verdad para código/documentación versionada.
 - Drive como repositorio maestro para originales/binarios pesados.
 - Notion como índice, dashboard y conocimiento relacional.
