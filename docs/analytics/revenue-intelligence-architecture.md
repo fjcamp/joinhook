@@ -406,7 +406,7 @@ Ejemplo:
 
 ```text
 Instagram campaign
-→ landing CGE
+→ landing EGO
 → 64 s de tiempo activo
 → pricing_viewed
 → assistant_opened
