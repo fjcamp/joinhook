@@ -152,7 +152,7 @@ export default function ControlGastronomicoExpressApp() {
         [state]
     );
 
-    if (!state) return <div className="cge-loading"><span>CG</span><p>Preparando Control Gastronómico Express…</p></div>;
+    if (!state) return <div className="cge-loading"><span>CG</span><p>Preparando Estado de Gastos Operacionales…</p></div>;
 
     const mutate = (recipe: (draft: CGEState) => CGEState) => setState((current) => current ? recipe(current) : current);
     const notify = (message: string) => setNotice(message);
@@ -284,7 +284,7 @@ export default function ControlGastronomicoExpressApp() {
             setState({ ...parsed, onboardingCompleted: true });
             notify('Respaldo restaurado correctamente.');
         } catch {
-            window.alert('No pude leer este respaldo. Verifica que sea un archivo exportado desde Control Gastronómico Express.');
+            window.alert('No pude leer este respaldo. Verifica que sea un archivo exportado desde Estado de Gastos Operacionales.');
         } finally {
             if (backupRef.current) backupRef.current.value = '';
         }
@@ -353,7 +353,7 @@ export default function ControlGastronomicoExpressApp() {
 
     return <>
         <Head>
-            <title>Control Gastronómico Express — JoinHook</title>
+            <title>Estado de Gastos Operacionales — JoinHook</title>
             <meta name="description" content="Beta local-first para inventario, compras, mermas y proveedores de pequeños negocios gastronómicos." />
             <meta name="robots" content="noindex,nofollow" />
             <meta name="theme-color" content="#eee8dc" />
@@ -406,7 +406,7 @@ export default function ControlGastronomicoExpressApp() {
 
         <input ref={csvRef} hidden type="file" accept="text/csv,.csv" onChange={(event) => importInventoryCsv(event.target.files?.[0])} />
 
-        {onboardingOpen && <CGEModal title="Prepara tu espacio" eyebrow="Primer inicio · 1 minuto" onClose={() => setOnboardingOpen(false)}><div className="cge-onboarding"><p>Control Gastronómico Express puede abrir con datos de ejemplo para explorar o completamente en blanco para comenzar con tu negocio.</p><CGEField label="Nombre del negocio"><input value={onboardingName} onChange={(event) => setOnboardingName(event.target.value)} placeholder="Ej. Cafetería del Lago" autoFocus /></CGEField><div className="cge-onboarding-options"><button type="button" onClick={() => finishOnboarding(false)}><span>Explorar</span><strong>Usar datos de ejemplo</strong><small>Ideal para conocer el flujo sin cargar información todavía.</small></button><button type="button" className="primary" onClick={() => finishOnboarding(true)}><span>Comenzar</span><strong>Crear espacio en blanco</strong><small>Para registrar desde cero tus productos y proveedores.</small></button></div><p className="cge-onboarding-note">En ambos casos los datos permanecen únicamente en este dispositivo durante esta beta.</p></div></CGEModal>}
+        {onboardingOpen && <CGEModal title="Prepara tu espacio" eyebrow="Primer inicio · 1 minuto" onClose={() => setOnboardingOpen(false)}><div className="cge-onboarding"><p>Estado de Gastos Operacionales puede abrir con datos de ejemplo para explorar o completamente en blanco para comenzar con tu negocio.</p><CGEField label="Nombre del negocio"><input value={onboardingName} onChange={(event) => setOnboardingName(event.target.value)} placeholder="Ej. Cafetería del Lago" autoFocus /></CGEField><div className="cge-onboarding-options"><button type="button" onClick={() => finishOnboarding(false)}><span>Explorar</span><strong>Usar datos de ejemplo</strong><small>Ideal para conocer el flujo sin cargar información todavía.</small></button><button type="button" className="primary" onClick={() => finishOnboarding(true)}><span>Comenzar</span><strong>Crear espacio en blanco</strong><small>Para registrar desde cero tus productos y proveedores.</small></button></div><p className="cge-onboarding-note">En ambos casos los datos permanecen únicamente en este dispositivo durante esta beta.</p></div></CGEModal>}
 
         {productModal.open && <CGEModal title={productModal.product ? 'Editar producto' : 'Nuevo producto'} eyebrow="Inventario" onClose={() => setProductModal({ open: false })}><form className="cge-form" onSubmit={saveProduct} key={productModal.product?.id || 'new'}>{(() => { const defaults = productFormDefaults(productModal.product); return <><CGEField label="Nombre"><input name="name" required defaultValue={defaults.name} placeholder="Ej. Harina" autoFocus /></CGEField><div className="cge-form-grid"><CGEField label="Categoría"><input name="category" defaultValue={defaults.category} placeholder="Secos, lácteos…" /></CGEField><CGEField label="Unidad"><select name="unit" defaultValue={defaults.unit}>{units.map((unit) => <option key={unit}>{unit}</option>)}</select></CGEField></div>{productModal.product ? <div className="cge-stock-readonly"><div><small>Stock actual</small><strong>{decimal.format(productModal.product.stock)} {productModal.product.unit}</strong></div><button type="button" onClick={() => { setProductModal({ open: false }); setAdjustProduct(productModal.product || null); }}>Ajustar stock</button></div> : <CGEField label="Stock inicial"><input name="stock" type="number" min="0" step="0.01" required defaultValue={defaults.stock}/></CGEField>}<div className="cge-form-grid"><CGEField label="Stock mínimo"><input name="minStock" type="number" min="0" step="0.01" required defaultValue={defaults.minStock}/></CGEField><CGEField label="Costo unitario"><input name="unitCost" type="number" min="0" step="1" required defaultValue={defaults.unitCost}/></CGEField></div><CGEField label="Proveedor"><select name="supplierId" defaultValue={defaults.supplierId}><option value="">Sin proveedor</option>{suppliers.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></CGEField><div className="cge-form-actions"><button className="cge-btn" type="button" onClick={() => setProductModal({ open: false })}>Cancelar</button><button className="cge-btn cge-btn-primary" type="submit">Guardar producto</button></div></>; })()}</form></CGEModal>}
 
