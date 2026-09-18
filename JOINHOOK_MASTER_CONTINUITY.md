@@ -133,7 +133,7 @@ Repositorio Android real con código y documentación propia. Su relación con e
 - Business OS es una plataforma unificada en experiencia pero federada técnicamente.
 - Los productos con necesidad de independencia pueden mantener su propia base de datos y ciclo de despliegue.
 - n8n Community Edition se usa para automatización/orquestación, nunca como fuente de verdad.
-- No mezclar CGE con JoinOps: son productos distintos.
+- No mezclar EGO con JoinOps: son productos distintos.
 - JoinHook V2 es el sitio corporativo; no debe convertirse en contenedor indiscriminado de código de productos.
 - JoinHook Local/Pulse y Directorio Nacional deben reconciliar su identidad antes de crear otro repositorio o duplicar implementación.
 
