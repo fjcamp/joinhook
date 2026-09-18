@@ -1,4 +1,4 @@
-# Control Gastronómico Express — MVP 0.1
+# Estado de Gastos Operacionales — MVP 0.1
 
 ## Objetivo
 Resolver de forma simple y sin mensualidad inicial el control básico de inventario, compras, mermas y proveedores para pequeños negocios gastronómicos.
