@@ -2,7 +2,7 @@
 
 ## Mercado Pago
 
-Para el soft launch de JoinHook y Control Gastronómico Express se mantiene temporalmente el Link de Pago oficial ya configurado.
+Para el soft launch de JoinHook y Estado de Gastos Operacionales se mantiene temporalmente el Link de Pago oficial ya configurado.
 
 Razón: minimiza complejidad y riesgo operativo durante las primeras ventas.
 
@@ -52,7 +52,7 @@ Principios de arquitectura:
 ## Estrategia de portafolio
 
 Prioridad operativa:
-1. cerrar soft launch de JoinHook/CGE;
+1. cerrar soft launch de JoinHook/EGO;
 2. preparar SnowWise para lanzamiento rápido;
 3. continuar núcleo y trazabilidad de JoinOps;
 4. diseñar plataforma común de conocimiento regional;
