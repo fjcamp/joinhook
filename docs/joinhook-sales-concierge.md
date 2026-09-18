@@ -104,7 +104,7 @@ Cliente:
 Las tres.
 
 Asistente:
-En ese caso Control Gastronómico Express probablemente sea el punto de partida más simple. Actualmente está en beta y trabaja precisamente con inventario, compras, mermas y proveedores. Puedes probarlo antes de decidir si te sirve.
+En ese caso Estado de Gastos Operacionales probablemente sea el punto de partida más simple. Actualmente está en beta y trabaja precisamente con inventario, compras, mermas y proveedores. Puedes probarlo antes de decidir si te sirve.
 
 ¿Quieres abrir la beta ahora o prefieres que te explique primero cómo funciona?
 ```
@@ -199,7 +199,7 @@ Ejemplo:
 
 ```text
 Lead Score: 87 / 100
-Producto: Control Gastronómico Express
+Producto: Estado de Gastos Operacionales
 Segmento: cafetería
 Problema: inventario + mermas
 Acciones: revisó precio, abrió beta, regresó al chat
@@ -219,7 +219,7 @@ Ejemplo:
 🔥 Lead caliente
 
 Cafetería · Temuco
-Interés: Control Gastronómico Express
+Interés: Estado de Gastos Operacionales
 Problema: control de stock y merma
 Conversación: 11 mensajes
 Acciones: beta + precio
