@@ -1,13 +1,13 @@
-import { CGEMode, CGEState, Movement, Product, Purchase, Supplier, Waste } from './types';
+import { EGOMode, EGOState, Movement, Product, Purchase, Supplier, Waste } from './types';
 
-export const CGE_STORAGE_KEY = 'joinhook.cge.state.v1';
+export const EGO_STORAGE_KEY = 'joinhook.cge.state.v1';
 
 const now = () => new Date().toISOString();
 const id = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 const productUnits: Product['unit'][] = ['kg', 'g', 'l', 'ml', 'unidad', 'caja', 'bolsa'];
 const wasteReasons: Waste['reason'][] = ['Vencimiento', 'Preparación', 'Daño', 'Error de producción', 'Cortesía', 'Otro'];
 const movementTypes: Movement['type'][] = ['compra', 'merma', 'ajuste'];
-const modes: CGEMode[] = ['demo', 'real'];
+const modes: EGOMode[] = ['demo', 'real'];
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 type UnknownRecord = Record<string, unknown>;
@@ -97,7 +97,7 @@ function isMovement(value: unknown): value is Movement {
         && isOptionalString(value.note);
 }
 
-export function normalizeCGEState(input: unknown, fallbackMode: CGEMode = 'demo'): CGEState | null {
+export function normalizeEGOState(input: unknown, fallbackMode: EGOMode = 'demo'): EGOState | null {
     if (!isRecord(input) || input.version !== 1) return null;
     if (!Array.isArray(input.products) || !input.products.every(isProduct)) return null;
     if (!Array.isArray(input.suppliers) || !input.suppliers.every(isSupplier)) return null;
@@ -105,7 +105,7 @@ export function normalizeCGEState(input: unknown, fallbackMode: CGEMode = 'demo'
     if (!Array.isArray(input.wastes) || !input.wastes.every(isWaste)) return null;
     if (!Array.isArray(input.movements) || !input.movements.every(isMovement)) return null;
 
-    const mode = modes.includes(input.mode as CGEMode) ? input.mode as CGEMode : fallbackMode;
+    const mode = modes.includes(input.mode as EGOMode) ? input.mode as EGOMode : fallbackMode;
     return {
         version: 1,
         businessName: isString(input.businessName) ? input.businessName : '',
@@ -129,7 +129,7 @@ function product(name: string, category: string, unit: Product['unit'], stock: n
     return { id: id(), name, category, unit, stock, minStock, unitCost, supplierId, active: true, createdAt: timestamp, updatedAt: timestamp };
 }
 
-export function createDemoState(): CGEState {
+export function createDemoState(): EGOState {
     const s1 = supplier('Distribuidora Sur', 'Camila Rojas', '+56 9 5555 0101');
     const s2 = supplier('Frutas y Verduras Villarrica', 'Luis Muñoz', '+56 9 5555 0102');
     const s3 = supplier('Lácteos del Lago', 'Andrea Soto', '+56 9 5555 0103');
@@ -157,7 +157,7 @@ export function createDemoState(): CGEState {
     };
 }
 
-export function createBlankState(businessName = ''): CGEState {
+export function createBlankState(businessName = ''): EGOState {
     return {
         version: 1,
         businessName,
@@ -172,44 +172,44 @@ export function createBlankState(businessName = ''): CGEState {
     };
 }
 
-export function loadState(): CGEState {
+export function loadState(): EGOState {
     if (typeof window === 'undefined') return createDemoState();
-    const raw = window.localStorage.getItem(CGE_STORAGE_KEY);
+    const raw = window.localStorage.getItem(EGO_STORAGE_KEY);
     if (!raw) return createDemoState();
     try {
-        return normalizeCGEState(JSON.parse(raw), 'demo') || createDemoState();
+        return normalizeEGOState(JSON.parse(raw), 'demo') || createDemoState();
     } catch {
         return createDemoState();
     }
 }
 
-export function saveState(state: CGEState) {
+export function saveState(state: EGOState) {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(CGE_STORAGE_KEY, JSON.stringify({ ...state, lastSavedAt: now() }));
+    window.localStorage.setItem(EGO_STORAGE_KEY, JSON.stringify({ ...state, lastSavedAt: now() }));
 }
 
 export function resetState() {
-    if (typeof window !== 'undefined') window.localStorage.removeItem(CGE_STORAGE_KEY);
+    if (typeof window !== 'undefined') window.localStorage.removeItem(EGO_STORAGE_KEY);
 }
 
 export function makeId() {
     return id();
 }
 
-export function downloadBackup(state: CGEState) {
+export function downloadBackup(state: EGOState) {
     if (typeof window === 'undefined') return;
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `control-gastronomico-express-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.download = `estado-gastos-operacionales-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
 }
 
-export function exportInventoryCsv(state: CGEState) {
+export function exportInventoryCsv(state: EGOState) {
     if (typeof window === 'undefined') return;
     const escape = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
     const rows = [
