@@ -15,7 +15,7 @@ export default function NotFoundPage() {
                         <span className="jh-brand-mark" aria-hidden="true">JH</span>
                         <span>JoinHook</span>
                     </Link>
-                    <Link className="jh-header-cta" href="/herramientas/control-gastronomico-express">Probar herramienta</Link>
+                    <Link className="jh-header-cta" href="/herramientas/estado-gastos-operacionales">Probar herramienta</Link>
                 </header>
 
                 <section className="jh-contact" style={{ marginTop: 'clamp(3rem, 10vw, 8rem)' }}>
@@ -28,7 +28,7 @@ export default function NotFoundPage() {
                     </p>
                     <div className="jh-actions" style={{ justifyContent: 'center' }}>
                         <Link className="jh-button jh-button-primary" href="/">Volver al inicio</Link>
-                        <Link className="jh-button jh-button-soft" href="/herramientas/control-gastronomico-express">Ver Control Gastronómico</Link>
+                        <Link className="jh-button jh-button-soft" href="/herramientas/estado-gastos-operacionales">Ver Estado de Gastos Operacionales</Link>
                     </div>
                 </section>
             </main>
