@@ -116,7 +116,7 @@ El job `build` de `.github/workflows/redesign-ci.yml`:
 5. ejecuta smoke tests del build normal;
 6. prepara `deploy-bluehosting/` a partir de `.next/standalone`;
 7. copia `.next/static` y `public`;
-8. ejecuta el `server.js` standalone en un puerto temporal y vuelve a probar Home, CGE, manifest, CSP y no-indexación de staging;
+8. ejecuta el `server.js` standalone en un puerto temporal y vuelve a probar Home, EGO, manifest, CSP y no-indexación de staging;
 9. publica el artefacto `joinhook-bluehosting-standalone` con archivos ocultos incluidos para conservar `.next/`.
 
 El artefacto contiene el runtime mínimo ya compilado, incluyendo `server.js`, `package.json`, dependencias trazadas de producción, `.next/static` y `public`.
@@ -160,8 +160,8 @@ No cambiar la política HTTPS del dominio principal como parte de esta prueba.
 
 ```txt
 /
-/herramientas/control-gastronomico-express
-/app/control-gastronomico-express
+/herramientas/estado-gastos-operacionales
+/app/estado-gastos-operacionales
 /privacidad
 /condiciones-beta
 /cge-manifest.webmanifest
@@ -181,7 +181,7 @@ Rutas antiguas que deben continuar en 404:
 /projects/project-one
 ```
 
-## QA de Control Gastronómico Express
+## QA de Estado de Gastos Operacionales
 
 1. Primer inicio y onboarding.
 2. Crear proveedor.
