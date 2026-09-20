@@ -74,7 +74,3 @@ export type EGOState = {
 };
 
 export type EGOView = 'resumen' | 'inventario' | 'compras' | 'mermas' | 'proveedores' | 'respaldo';
-
-// Backward-compatible aliases for the current EGO naming migration.
-export type EGOMode = EGOMode;
-export type EGOState = EGOState;
