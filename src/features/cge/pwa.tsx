@@ -65,5 +65,5 @@ export function EGOPwaStatus() {
     );
 }
 
-// Compatibility export while the CGE → EGO naming migration is completed.
-export const CGEPwaStatus = EGOPwaStatus;
+// Compatibility export while the EGO → EGO naming migration is completed.
+export const EGOPwaStatus = EGOPwaStatus;
