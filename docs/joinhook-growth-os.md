@@ -364,7 +364,7 @@ Ejemplo:
 ```text
 source=tiktok
 medium=organic
-campaign=cge_mermas_2026w34
+campaign=ego_mermas_2026w34
 content=short_02
 ```
 
