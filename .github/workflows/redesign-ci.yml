@@ -106,8 +106,8 @@ jobs:
       - name: Smoke test public routes and PWA assets
         run: |
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/
-          curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/estado-gastos-operacionales > /tmp/cge-landing.html
-          grep -Fq 'Solicitar pack fundador' /tmp/cge-landing.html
+          curl --location --fail --silent --show-error http://127.0.0.1:3000/herramientas/estado-gastos-operacionales > /tmp/ego-landing.html
+          grep -Fq 'Solicitar pack fundador' /tmp/ego-landing.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/app/estado-gastos-operacionales
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/privacidad
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3000/condiciones-beta
@@ -184,8 +184,8 @@ jobs:
             fi
             sleep 1
           done
-          curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/estado-gastos-operacionales > /tmp/cge-standalone.html
-          grep -Fq 'Solicitar pack fundador' /tmp/cge-standalone.html
+          curl --location --fail --silent --show-error http://127.0.0.1:3010/herramientas/estado-gastos-operacionales > /tmp/ego-standalone.html
+          grep -Fq 'Solicitar pack fundador' /tmp/ego-standalone.html
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/app/estado-gastos-operacionales
           curl --fail --silent --show-error --output /dev/null http://127.0.0.1:3010/cge-manifest.webmanifest
           curl --fail --silent --show-error --dump-header /tmp/standalone-headers.txt --output /dev/null http://127.0.0.1:3010/
@@ -219,7 +219,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_EGO_CHECKOUT_ENABLED: 'true'
-      NEXT_PUBLIC_EGO_CHECKOUT_URL: 'https://example.com/cge-qa-checkout'
+      NEXT_PUBLIC_EGO_CHECKOUT_URL: 'https://example.com/ego-qa-checkout'
       NEXT_PUBLIC_SELLER_NAME: 'Proveedor QA JoinHook'
       NEXT_PUBLIC_SELLER_RUT: '00.000.000-0'
       NEXT_PUBLIC_SELLER_EMAIL: 'qa@example.com'
@@ -245,7 +245,7 @@ jobs:
           npm run start -- -p 3001 > /tmp/joinhook-commercial.log 2>&1 &
           echo $! > /tmp/joinhook-commercial.pid
           for i in {1..30}; do
-            if curl --location -fsS http://127.0.0.1:3001/herramientas/estado-gastos-operacionales > /tmp/cge-commercial.html; then
+            if curl --location -fsS http://127.0.0.1:3001/herramientas/estado-gastos-operacionales > /tmp/ego-commercial.html; then
               exit 0
             fi
             sleep 1
@@ -256,14 +256,14 @@ jobs:
       - name: Verify enabled checkout state
         run: |
           echo 'Rendered commercial markers:'
-          grep -oE '(Comprar|Solicitar) pack fundador[^<]*|Proveedor QA JoinHook|cge-qa-checkout' /tmp/cge-commercial.html || true
-          for pattern in 'Comprar pack fundador' 'Proveedor QA JoinHook' 'cge-qa-checkout'; do
-            if ! grep -Fq "$pattern" /tmp/cge-commercial.html; then
+          grep -oE '(Comprar|Solicitar) pack fundador[^<]*|Proveedor QA JoinHook|ego-qa-checkout' /tmp/ego-commercial.html || true
+          for pattern in 'Comprar pack fundador' 'Proveedor QA JoinHook' 'ego-qa-checkout'; do
+            if ! grep -Fq "$pattern" /tmp/ego-commercial.html; then
               echo "Missing expected commercial marker: $pattern"
               exit 1
             fi
           done
-          if grep -Fq 'Solicitar pack fundador' /tmp/cge-commercial.html; then
+          if grep -Fq 'Solicitar pack fundador' /tmp/ego-commercial.html; then
             echo 'Checkout-enabled build must not render the fallback CTA'
             exit 1
           fi
