@@ -38,7 +38,7 @@ function selectOptionContaining(select, text) {
         await page.locator('h1').first().waitFor({ state: 'visible' });
         await page.screenshot({ path: path.join(artifactsDir, 'home-desktop.png'), fullPage: true });
 
-        await page.goto(`${baseUrl}/app/control-gastronomico-express/`, { waitUntil: 'networkidle' });
+        await page.goto(`${baseUrl}/app/estado-gastos-operacionales/`, { waitUntil: 'networkidle' });
 
         const onboarding = page.getByRole('dialog', { name: 'Prepara tu espacio' });
         await onboarding.waitFor({ state: 'visible' });
