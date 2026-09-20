@@ -361,7 +361,7 @@ export default function EGOApp() {
 
         <main className="cge-app">
             <aside className="cge-sidebar">
-                <Link className="cge-logo" href="/" aria-label="Volver a JoinHook"><span>JH</span><div><strong>Control</strong><small>Gastronómico Express</small></div></Link>
+                <Link className="cge-logo" href="/" aria-label="Volver a JoinHook"><span>JH</span><div><strong>EGO</strong><small>Estado de Gastos Operacionales</small></div></Link>
                 <nav>
                     {views.map((item) => <button type="button" key={item.key} className={view === item.key ? 'is-active' : ''} onClick={() => setView(item.key)}><EGOIcon name={item.key} /><span><strong>{item.label}</strong><small>{item.caption}</small></span></button>)}
                 </nav>
