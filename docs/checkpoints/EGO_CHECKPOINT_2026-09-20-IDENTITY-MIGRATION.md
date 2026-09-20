@@ -27,3 +27,10 @@ No se realizó un reemplazo ciego de nombres de archivos \`cge-*\`, claves hist�
 
 ## Estado
 **IMPLEMENTADO EN RAMA / PENDIENTE DE VERIFICACIÓN CI Y MERGE.**
+
+
+## Correcciones posteriores
+- Corregido alias de tipos EGO inválido que impedía compilación TypeScript.
+- Actualizado Browser QA para usar `/app/estado-gastos-operacionales/` y el nombre de respaldo EGO.
+- Corregida identidad visible restante dentro de la aplicación.
+- CI anterior #419 y #420 resultaron fallidos; la causa detallada del job no fue expuesta por el conector, por lo que se corrigieron fallos deterministas encontrados en el código antes de continuar.
