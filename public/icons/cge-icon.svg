@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Control Gastronómico Express">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="EGO — Estado de Gastos Operacionales">
   <rect width="512" height="512" rx="120" fill="#eee8dc"/>
   <rect x="68" y="68" width="376" height="376" rx="98" fill="#f8f5ed" stroke="#d8d0c4" stroke-width="10"/>
   <path d="M166 180c0-31 25-56 56-56h68c31 0 56 25 56 56v26h-36v-23c0-13-10-23-23-23h-62c-13 0-23 10-23 23v146c0 13 10 23 23 23h62c13 0 23-10 23-23v-23h36v26c0 31-25 56-56 56h-68c-31 0-56-25-56-56V180Z" fill="#52655a"/>
