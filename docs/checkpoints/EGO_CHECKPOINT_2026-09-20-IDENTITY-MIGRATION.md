@@ -11,26 +11,22 @@ Completar la migración de identidad pública de CGE a **EGO — Estado de Gasto
 ## Ejecutado
 - Identidad visible de la aplicación migrada a EGO.
 - Símbolos públicos de componentes, tipos y PWA migrados de CGE a EGO.
-- Asistente comercial: clasificación \`cge\` → \`ego\`.
+- Asistente comercial: clasificación `cge` → `ego`.
 - Textos comerciales visibles migrados a EGO.
 - Icono SVG actualizado.
-- Service Worker corregido para la ruta real \`/app/estado-gastos-operacionales\` y cache versionado EGO.
-- Hooks CSS \`cge-*\`, rutas/archivos heredados y almacenamiento local se conservan donde funcionan como compatibilidad técnica.
+- Service Worker corregido para la ruta real `/app/estado-gastos-operacionales` y cache versionado EGO.
+- Hooks CSS `cge-*`, rutas/archivos heredados y almacenamiento local se conservan donde funcionan como compatibilidad técnica.
+- Redesign CI actualizado para identificadores actuales EGO en QA.
 
 ## Compatibilidad deliberada
-No se realizó un reemplazo ciego de nombres de archivos \`cge-*\`, claves históricas de almacenamiento ni rutas heredadas. Esos elementos requieren una migración separada si se desea eliminar completamente el legado técnico.
+No se realizó un reemplazo ciego de nombres de archivos `cge-*`, claves históricas de almacenamiento ni rutas heredadas. Esos elementos requieren una migración separada si se desea eliminar completamente el legado técnico.
 
-## Verificación pendiente
-- Redesign CI del PR #48: lint, build y browser QA.
-- Revisión final de referencias CGE y clasificación ELIMINAR/MIGRAR/COMPATIBILIDAD/HISTÓRICO.
-- Solo después de CI verde: merge a \`main\`.
+## Verificación
+- Secret History Scan: **APROBADO**.
+- Redesign CI #424: **FALLÓ con 0 jobs reportados**.
+- No existe evidencia de fallo de lint, build o browser QA porque GitHub no expuso ningún job para ese run.
+- La causa del run de 0 jobs queda pendiente de aislar.
+- Solo después de una ejecución CI con jobs verificables y checks requeridos aprobados: merge a `main`.
 
 ## Estado
-**IMPLEMENTADO EN RAMA / PENDIENTE DE VERIFICACIÓN CI Y MERGE.**
-
-
-## Correcciones posteriores
-- Corregido alias de tipos EGO inválido que impedía compilación TypeScript.
-- Actualizado Browser QA para usar `/app/estado-gastos-operacionales/` y el nombre de respaldo EGO.
-- Corregida identidad visible restante dentro de la aplicación.
-- CI anterior #419 y #420 resultaron fallidos; la causa detallada del job no fue expuesta por el conector, por lo que se corrigieron fallos deterministas encontrados en el código antes de continuar.
+**CORREGIDO EN RAMA / CI BLOQUEADO POR EJECUCIÓN SIN JOBS / NO MERGEAR AÚN.**
