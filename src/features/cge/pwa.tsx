@@ -64,6 +64,3 @@ export function EGOPwaStatus() {
         </div>
     );
 }
-
-// Compatibility export while the EGO → EGO naming migration is completed.
-export const EGOPwaStatus = EGOPwaStatus;
