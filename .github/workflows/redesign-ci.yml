@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - redesign-v2
+  workflow_dispatch:
+
   pull_request:
     branches:
       - main
@@ -338,7 +340,7 @@ jobs:
 
 
   reporting-evidence:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/redesign-v2' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/redesign-v2') }}
     needs:
       - build
       - commercial-checkout
