@@ -359,13 +359,13 @@ export default function EGOApp() {
             <meta name="theme-color" content="#eee8dc" />
         </Head>
 
-        <main className="ego-app">
-            <aside className="ego-sidebar">
-                <Link className="ego-logo" href="/" aria-label="Volver a JoinHook"><span>JH</span><div><strong>Control</strong><small>Gastronómico Express</small></div></Link>
+        <main className="cge-app">
+            <aside className="cge-sidebar">
+                <Link className="cge-logo" href="/" aria-label="Volver a JoinHook"><span>JH</span><div><strong>Control</strong><small>Gastronómico Express</small></div></Link>
                 <nav>
                     {views.map((item) => <button type="button" key={item.key} className={view === item.key ? 'is-active' : ''} onClick={() => setView(item.key)}><EGOIcon name={item.key} /><span><strong>{item.label}</strong><small>{item.caption}</small></span></button>)}
                 </nav>
-                <div className="ego-sidebar-foot"><span className="ego-local-dot" /><div><strong>Local-first · {state.mode === 'real' ? 'Uso real' : 'Demo'}</strong><small>Guardado en este dispositivo</small></div></div>
+                <div className="cge-sidebar-foot"><span className="cge-local-dot" /><div><strong>Local-first · {state.mode === 'real' ? 'Uso real' : 'Demo'}</strong><small>Guardado en este dispositivo</small></div></div>
             </aside>
 
             <section className="cge-main">
