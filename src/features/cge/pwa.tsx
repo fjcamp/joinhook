@@ -5,7 +5,7 @@ type InstallPromptEvent = Event & {
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 };
 
-export function CGEPwaStatus() {
+export function EGOPwaStatus() {
     const [online, setOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine);
     const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
     const [installed, setInstalled] = useState(() => typeof window === 'undefined' ? false : window.matchMedia('(display-mode: standalone)').matches);
@@ -64,3 +64,6 @@ export function CGEPwaStatus() {
         </div>
     );
 }
+
+// Compatibility export while the CGE → EGO naming migration is completed.
+export const CGEPwaStatus = EGOPwaStatus;
