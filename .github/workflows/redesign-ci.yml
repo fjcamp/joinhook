@@ -218,8 +218,8 @@ jobs:
   commercial-checkout:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_CGE_CHECKOUT_ENABLED: 'true'
-      NEXT_PUBLIC_CGE_CHECKOUT_URL: 'https://example.com/cge-qa-checkout'
+      NEXT_PUBLIC_EGO_CHECKOUT_ENABLED: 'true'
+      NEXT_PUBLIC_EGO_CHECKOUT_URL: 'https://example.com/cge-qa-checkout'
       NEXT_PUBLIC_SELLER_NAME: 'Proveedor QA JoinHook'
       NEXT_PUBLIC_SELLER_RUT: '00.000.000-0'
       NEXT_PUBLIC_SELLER_EMAIL: 'qa@example.com'
