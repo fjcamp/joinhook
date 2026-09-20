@@ -1,0 +1,30 @@
+name: Reporting Evidence
+
+on:
+  workflow_run:
+    workflows:
+      - Redesign CI
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: >-
+      ${{ (github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success') &&
+      secrets.REPORTING_EVIDENCE_TOKEN != '' }}
+    uses: fjcamp/reporting/.github/workflows/publish-evidence.yml@main
+    with:
+      kind: ci
+      status: passed
+      summary: JoinHook Redesign CI completed successfully; producer evidence published for Reporting correlation.
+      source_type: github_actions
+      source_identifier: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || github.run_id }}
+      source_url: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.html_url || github.server_url }}
+      evidence_id: joinhook-redesign-ci-${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || github.run_id }}
+    secrets:
+      REPORTING_EVIDENCE_TOKEN: ${{ secrets.REPORTING_EVIDENCE_TOKEN }}
