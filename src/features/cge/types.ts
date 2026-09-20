@@ -74,3 +74,7 @@ export type CGEState = {
 };
 
 export type CGEView = 'resumen' | 'inventario' | 'compras' | 'mermas' | 'proveedores' | 'respaldo';
+
+// Backward-compatible aliases for the current EGO naming migration.
+export type EGOMode = CGEMode;
+export type EGOState = CGEState;
