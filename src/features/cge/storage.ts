@@ -227,3 +227,6 @@ export function exportInventoryCsv(state: EGOState) {
     anchor.remove();
     URL.revokeObjectURL(url);
 }
+
+// Compatibility alias while callers migrate from CGE to EGO naming.
+export const normalizeCGEState = normalizeEGOState;
