@@ -13,8 +13,8 @@ jobs:
   production:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_CGE_CHECKOUT_ENABLED: 'true'
-      NEXT_PUBLIC_CGE_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
+      NEXT_PUBLIC_EGO_CHECKOUT_ENABLED: 'true'
+      NEXT_PUBLIC_EGO_CHECKOUT_URL: 'https://mpago.li/1ZUHT1R'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
