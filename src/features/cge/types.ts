@@ -58,12 +58,12 @@ export type Movement = {
     note?: string;
 };
 
-export type CGEMode = 'demo' | 'real';
+export type EGOMode = 'demo' | 'real';
 
-export type CGEState = {
+export type EGOState = {
     version: 1;
     businessName: string;
-    mode?: CGEMode;
+    mode?: EGOMode;
     onboardingCompleted?: boolean;
     products: Product[];
     suppliers: Supplier[];
@@ -73,8 +73,8 @@ export type CGEState = {
     lastSavedAt?: string;
 };
 
-export type CGEView = 'resumen' | 'inventario' | 'compras' | 'mermas' | 'proveedores' | 'respaldo';
+export type EGOView = 'resumen' | 'inventario' | 'compras' | 'mermas' | 'proveedores' | 'respaldo';
 
 // Backward-compatible aliases for the current EGO naming migration.
-export type EGOMode = CGEMode;
-export type EGOState = CGEState;
+export type EGOMode = EGOMode;
+export type EGOState = EGOState;
