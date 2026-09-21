@@ -4,7 +4,7 @@
 **Repositorio:** fjcamp/joinhook  
 **Rama:** ego-identity-migration-2026-09-20  
 **Pull Request:** #48 — refactor: complete CGE → EGO identity migration  
-**Commit de checkpoint:** pendiente al crear este archivo
+**Commit de checkpoint:** `69fb9b9d1404f4bed06db5936229150c48f91d52`
 
 ## Punto de partida
 Se retomó desde **EGO-IDENTITY-MIGRATION-2026-09-20**. El PR #48 estaba corregido en rama, pero Redesign CI terminaba con 0 jobs.
@@ -31,8 +31,8 @@ También se eliminaron los archivos temporales usados para aislar el comportamie
 
 Commit de corrección: `42a3c1103856432448063085b0b68f6a92cdf450`
 
-Redesign CI run **#428**:
-- Run ID: `35649313996`
+Redesign CI run **#429**:
+- Run ID: `35649603414`
 - Estado: **completed**
 - Conclusión: **success**
 - Jobs verificables: `build`, `commercial-checkout`, `browser-qa`
@@ -40,8 +40,8 @@ Redesign CI run **#428**:
 - `commercial-checkout`: SUCCESS
 - `browser-qa`: SUCCESS
 
-Secret History Scan run **#365**:
-- Run ID: `35649313943`
+Secret History Scan run **#366**:
+- Run ID: `35649603392`
 - Conclusión: **success**
 
 Esto demuestra que el bloqueo de 0 jobs no era un fallo demostrado de la aplicación EGO ni de lint/build/browser QA.
