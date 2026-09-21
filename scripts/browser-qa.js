@@ -38,7 +38,7 @@ function selectOptionContaining(select, text) {
         await page.locator('h1').first().waitFor({ state: 'visible' });
         await page.screenshot({ path: path.join(artifactsDir, 'home-desktop.png'), fullPage: true });
 
-        await page.goto(`${baseUrl}/app/control-gastronomico-express/`, { waitUntil: 'networkidle' });
+        await page.goto(`${baseUrl}/app/estado-gastos-operacionales/`, { waitUntil: 'networkidle' });
 
         const onboarding = page.getByRole('dialog', { name: 'Prepara tu espacio' });
         await onboarding.waitFor({ state: 'visible' });
@@ -115,7 +115,7 @@ function selectOptionContaining(select, text) {
             page.waitForEvent('download'),
             page.getByRole('button', { name: /Descargar respaldo/ }).click()
         ]);
-        assert.match(backupDownload.suggestedFilename(), /^control-gastronomico-express-\d{4}-\d{2}-\d{2}\.json$/);
+        assert.match(backupDownload.suggestedFilename(), /^estado-gastos-operacionales-\d{4}-\d{2}-\d{2}\.json$/);
         const backupPath = await backupDownload.path();
         assert.ok(backupPath, 'El respaldo JSON no generó archivo descargable');
         const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
@@ -177,7 +177,7 @@ function selectOptionContaining(select, text) {
         await page.setViewportSize({ width: 390, height: 844 });
         await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle' });
         await page.screenshot({ path: path.join(artifactsDir, 'home-mobile.png'), fullPage: true });
-        await page.goto(`${baseUrl}/app/control-gastronomico-express/`, { waitUntil: 'networkidle' });
+        await page.goto(`${baseUrl}/app/estado-gastos-operacionales/`, { waitUntil: 'networkidle' });
         await page.getByText('Cafetería QA JoinHook', { exact: true }).first().waitFor({ state: 'visible' });
         await page.screenshot({ path: path.join(artifactsDir, 'cge-mobile.png'), fullPage: true });
 

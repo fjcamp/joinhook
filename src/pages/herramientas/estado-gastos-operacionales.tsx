@@ -238,7 +238,7 @@ export default function ControlGastronomicoExpress() {
                 <section className="jh-contact" id="interes">
                     <span className="jh-eyebrow">Primeros usuarios</span>
                     <h2>¿Tu negocio todavía controla inventario y mermas con demasiados pasos?</h2>
-                    <p>Prueba la beta, cuéntame dónde se te hace difícil y ayúdame a convertir Express en una herramienta realmente útil para pequeños negocios gastronómicos de Chile.</p>
+                    <p>Prueba la beta, cuéntame dónde se te hace difícil y ayúdame a convertir EGO en una herramienta realmente útil para pequeños negocios gastronómicos de Chile.</p>
                     <div className="jh-actions">
                         <Link className="jh-button jh-button-primary" href="/app/estado-gastos-operacionales">Probar ahora</Link>
                         <a

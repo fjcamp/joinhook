@@ -249,7 +249,7 @@ Ejemplo de salida semanal:
 
 ```text
 Campaña: Control de mermas para pequeños negocios gastronómicos
-Objetivo: Leads para CGE
+Objetivo: Leads para EGO
 Buyer persona: dueño/a de cafetería pequeña
 CTA: Probar Beta
 
@@ -364,7 +364,7 @@ Ejemplo:
 ```text
 source=tiktok
 medium=organic
-campaign=cge_mermas_2026w34
+campaign=ego_mermas_2026w34
 content=short_02
 ```
 
@@ -429,7 +429,7 @@ El resto debe quedar resumido en dashboard.
 ## Fases de implementación
 
 ### Fase 0 — No frenar lanzamiento actual
-Publicar JoinHook V2 + CGE Beta y mantener feature freeze del lanzamiento.
+Publicar JoinHook V2 + EGO Beta y mantener feature freeze del lanzamiento.
 
 ### Fase 1 — Instrumentación
 - eventos web;
