@@ -338,21 +338,3 @@ jobs:
             kill "$(cat /tmp/joinhook-browser.pid)" || true
           fi
 
-
-  reporting-evidence:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/redesign-v2') }}
-    needs:
-      - build
-      - commercial-checkout
-      - browser-qa
-    uses: fjcamp/reporting/.github/workflows/publish-evidence.yml@887d2a8e7622886dc2cd735ecebf7f1d874d0e63
-    with:
-      kind: ci
-      status: passed
-      summary: JoinHook Redesign CI completed successfully; producer evidence published for Reporting correlation.
-      source_type: github_actions
-      source_identifier: ${{ github.run_id }}
-      source_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      evidence_id: joinhook-redesign-ci-${{ github.run_id }}
-    secrets:
-      REPORTING_EVIDENCE_TOKEN: ${{ secrets.REPORTING_EVIDENCE_TOKEN }}
