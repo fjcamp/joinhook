@@ -91,3 +91,8 @@ No guardar tokens, claves privadas, contraseñas ni credenciales en GitHub. No u
 ---
 
 **JoinHook es un proyecto independiente en evolución.** La prioridad es construir, probar con usuarios reales y mejorar antes de agregar complejidad innecesaria.
+
+## AI Collaboration & Continuity
+This repository is prepared for multi-AI development. GitHub is the technical source of truth; Notion is the operational index; Google Drive stores originals/heavy binaries when applicable. Before changing code, read [docs/AI_HANDOFF.md](docs/AI_HANDOFF.md) and the newest checkpoint in [docs/checkpoints](docs/checkpoints/). Progress must be evidenced as DESIGNED → IMPLEMENTED → VERIFIED → BETA → PRODUCTION. CI failures are first-class blockers. NO EVIDENCE = NO CLAIM.
+
+**Learning gate:** representative workflows must be demonstrated, including expected-success and controlled-negative scenarios, before end-user exposure.
