@@ -43,23 +43,23 @@ const projects = [
 const capabilities = [
     {
         index: '01',
-        title: 'Web y PWA',
-        text: 'Experiencias rápidas, responsive y pensadas para crecer sin empezar de cero cada vez.'
+        title: 'Diagnóstico y análisis',
+        text: 'Convierto problemas operativos en diagnósticos, indicadores y decisiones más claras antes de recomendar tecnología.'
     },
     {
         index: '02',
-        title: 'Sistemas de gestión',
-        text: 'Interfaces y flujos que transforman procesos desordenados en herramientas más entendibles.'
+        title: 'Web y PWA',
+        text: 'Construyo experiencias rápidas, responsive y pensadas para validar una idea sin empezar por una plataforma enorme.'
     },
     {
         index: '03',
-        title: 'Automatización',
-        text: 'Exploro cómo conectar tareas, datos e IA para reducir trabajo repetitivo sin perder control humano.'
+        title: 'Herramientas digitales',
+        text: 'Diseño utilidades concretas para turismo, hospitalidad y gastronomía, priorizando simplicidad y trazabilidad.'
     },
     {
         index: '04',
-        title: 'Diseño de producto',
-        text: 'Prototipo, pruebo y refino experiencias digitales combinando utilidad, estética y contexto real.'
+        title: 'Automatización con criterio',
+        text: 'Exploro datos, automatización e IA como apoyo al trabajo humano, con límites, evidencia y control.'
     }
 ];
 
@@ -94,15 +94,15 @@ export default function Home() {
                 <title>JoinHook — ideas, productos y experiencias digitales</title>
                 <meta
                     name="description"
-                    content="Soy Francisco, creador independiente detrás de JoinHook. Diseño, investigo y construyo productos digitales, sistemas de gestión, PWA y experimentos de interfaz."
+                    content="JoinHook investiga, diagnostica y construye herramientas y experiencias digitales para turismo, hospitalidad y gastronomía, con enfoque práctico y basado en evidencia."
                 />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="theme-color" content="#f3f0e8" />
                 <link rel="canonical" href="https://joinhook.cl/" />
-                <meta property="og:title" content="JoinHook — ideas, productos y experiencias digitales" />
+                <meta property="og:title" content="JoinHook — diagnóstico, herramientas y productos digitales" />
                 <meta
                     property="og:description"
-                    content="Un espacio independiente para construir, probar y compartir ideas digitales con visión práctica y creativa."
+                    content="Investigación, diagnóstico y herramientas digitales para problemas reales en turismo, hospitalidad y gastronomía."
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://joinhook.cl/" />
@@ -111,11 +111,22 @@ export default function Home() {
                     dangerouslySetInnerHTML={{
                         __html: JSON.stringify({
                             '@context': 'https://schema.org',
-                            '@type': 'Person',
-                            name: 'Francisco Javier Campos',
-                            url: 'https://joinhook.cl/',
-                            description:
-                                'Creador independiente detrás de JoinHook. Diseño y desarrollo de productos digitales, sistemas de gestión y experiencias web.'
+                            '@graph': [
+                                {
+                                    '@type': 'WebSite',
+                                    name: 'JoinHook',
+                                    url: 'https://joinhook.cl/',
+                                    description:
+                                        'Investigación, diagnóstico y herramientas digitales para turismo, hospitalidad y gastronomía.'
+                                },
+                                {
+                                    '@type': 'Person',
+                                    name: 'Francisco Javier Campos',
+                                    url: 'https://joinhook.cl/',
+                                    description:
+                                        'Creador independiente detrás de JoinHook. Investigación, diagnóstico y construcción de productos digitales.'
+                                }
+                            ]
                         })
                     }}
                 />
@@ -130,6 +141,7 @@ export default function Home() {
                     <nav className="jh-nav" aria-label="Navegación principal">
                         <a href="#proyectos">Proyectos</a>
                         <a href="#herramientas">Herramientas</a>
+                        <a href="#insights">Insights</a>
                         <a href="#lab">Lab</a>
                         <a href="#sobre-mi">Sobre mí</a>
                     </nav>
@@ -140,10 +152,10 @@ export default function Home() {
                     <div className="jh-hero-copy">
                         <div className="jh-kicker"><span className="jh-status-dot" /> Creador independiente · Chile</div>
                         <h1>
-                            Ideas digitales con <span>criterio, movimiento y propósito.</span>
+                            Investigar primero. <span>Diagnosticar, construir y mejorar.</span>
                         </h1>
                         <p className="jh-hero-lead">
-                            Hola, soy Francisco. JoinHook es mi espacio para investigar, diseñar y construir productos digitales que intentan resolver problemas reales de una forma más clara y humana.
+                            Hola, soy Francisco. JoinHook es un proyecto independiente para convertir problemas reales en diagnósticos, herramientas y experiencias digitales útiles, especialmente en turismo, hospitalidad y gastronomía.
                         </p>
                         <div className="jh-actions">
                             <a className="jh-button jh-button-primary" href="#proyectos">
@@ -312,6 +324,41 @@ export default function Home() {
                     </div>
                 </section>
 
+                <section className="jh-section" id="insights" aria-labelledby="insights-title">
+                    <div className="jh-section-heading">
+                        <div>
+                            <span className="jh-eyebrow">JoinHook Insights</span>
+                            <h2 id="insights-title">Investigación que se convierte en decisiones, herramientas y oportunidades.</h2>
+                        </div>
+                        <p>
+                            Datos públicos, análisis y aprendizajes de construcción explicados de forma clara. Una investigación importante no termina en un documento: también debe ser útil para quien la lee.
+                        </p>
+                    </div>
+                    <div className="jh-capability-grid">
+                        <article className="jh-capability jh-surface">
+                            <span>01</span>
+                            <h3>Economía gastronómica</h3>
+                            <p>Food Cost, Labor Cost, Prime Cost, margen, delivery y punto de equilibrio para entender dónde se mueve realmente el resultado.</p>
+                            <a href="/insights/restaurantes-prime-cost" aria-label="Leer Insight sobre Prime Cost">Leer insight <ArrowIcon /></a>
+                        </article>
+                        <article className="jh-capability jh-surface">
+                            <span>02</span>
+                            <h3>Hotelería y territorio</h3>
+                            <p>Ocupación, ADR, RevPAR y actividad turística de Chile y La Araucanía, usando fuentes oficiales y contexto regional.</p>
+                            <a href="/insights/araucania-hotel-performance" aria-label="Leer Insight sobre rendimiento hotelero">Leer insight <ArrowIcon /></a>
+                        </article>
+                        <article className="jh-capability jh-surface">
+                            <span>03</span>
+                            <h3>Planificación de viajes</h3>
+                            <p>Presupuestos, componentes del gasto y futuras utilities para viajeros de Chile y Latinoamérica.</p>
+                            <a href="/insights/presupuesto-viaje" aria-label="Leer Insight sobre presupuesto de viaje">Leer insight <ArrowIcon /></a>
+                        </article>
+                    </div>
+                    <div className="jh-actions">
+                        <a className="jh-button jh-button-soft" href="/insights">Ver todos los Insights <ArrowIcon /></a>
+                    </div>
+                </section>
+
                 <section className="jh-section jh-lab" id="lab" aria-labelledby="lab-title">
                     <div className="jh-section-heading">
                         <div><span className="jh-eyebrow">JoinHook Lab</span><h2 id="lab-title">La web también será parte del portafolio.</h2></div>
@@ -365,8 +412,8 @@ export default function Home() {
 
                 <footer className="jh-footer">
                     <a className="jh-brand" href="#inicio"><span className="jh-brand-mark">JH</span><span>JoinHook</span></a>
-                    <p>Un espacio independiente para diseñar, construir y aprender.</p>
-                    <span>© {new Date().getFullYear()} Francisco Javier Campos · <a href="/privacidad">Privacidad</a></span>
+                    <p>Investigación, diagnóstico, herramientas y construcción digital con criterio.</p>
+                    <span>© {new Date().getFullYear()} Francisco Javier Campos · <a href="/insights">Insights</a> · <a href="/privacidad">Privacidad</a></span>
                 </footer>
             </main>
         </>
