@@ -38,6 +38,20 @@ function selectOptionContaining(select, text) {
         await page.locator('h1').first().waitFor({ state: 'visible' });
         await page.screenshot({ path: path.join(artifactsDir, 'home-desktop.png'), fullPage: true });
 
+        await page.goto(baseUrl + '/insights', { waitUntil: 'networkidle' });
+        assert.match(await page.title(), /Insights/i);
+        await page.locator('h1').first().waitFor({ state: 'visible' });
+        await page.screenshot({ path: path.join(artifactsDir, 'insights-index-desktop.png'), fullPage: true });
+
+        for (const route of [
+            '/insights/restaurantes-prime-cost',
+            '/insights/araucania-hotel-performance',
+            '/insights/presupuesto-viaje'
+        ]) {
+            await page.goto(baseUrl + route, { waitUntil: 'networkidle' });
+            await page.locator('h1').first().waitFor({ state: 'visible' });
+        }
+
         await page.goto(`${baseUrl}/app/control-gastronomico-express/`, { waitUntil: 'networkidle' });
 
         const onboarding = page.getByRole('dialog', { name: 'Prepara tu espacio' });

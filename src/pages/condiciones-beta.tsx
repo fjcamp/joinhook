@@ -16,7 +16,7 @@ export default function CondicionesBeta() {
                 </header>
 
                 <article className="jh-legal jh-surface">
-                    <span className="jh-eyebrow">Beta · actualización 19 agosto 2026</span>
+                    <span className="jh-eyebrow">Beta · revisión 06 octubre 2026</span>
                     <h1>Condiciones de uso de Control Gastronómico Express</h1>
                     <p>Control Gastronómico Express es una herramienta en etapa beta creada dentro de JoinHook, proyecto independiente de Francisco Javier Campos. Estas condiciones buscan explicar de forma simple qué ofrece hoy la aplicación y qué límites tiene antes de utilizarla con datos reales.</p>
 

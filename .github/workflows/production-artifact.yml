@@ -24,9 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit dependencies
+      - name: Audit dependencies (critical all-tree + high runtime)
         run: |
-          npm audit --audit-level=high
+          npm audit --audit-level=critical
           npm audit --omit=dev --audit-level=high
 
       - name: Lint

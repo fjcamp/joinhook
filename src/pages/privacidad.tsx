@@ -16,7 +16,7 @@ export default function Privacidad() {
                 </header>
 
                 <article className="jh-legal jh-surface">
-                    <span className="jh-eyebrow">Privacidad · actualización 19 agosto 2026</span>
+                    <span className="jh-eyebrow">Privacidad · revisión 06 octubre 2026</span>
                     <h1>Privacidad en JoinHook y Control Gastronómico Express</h1>
                     <p>JoinHook es un proyecto independiente de Francisco Javier Campos. Esta política describe el funcionamiento de privacidad de la web y de la beta actual de Control Gastronómico Express.</p>
 
@@ -36,7 +36,7 @@ export default function Privacidad() {
                     <p>La versión actual no necesita cookies publicitarias para funcionar. Si posteriormente se incorpora analítica, autenticación, pagos o servicios externos que requieran tratamiento adicional de datos, esta política se actualizará antes de activarlos cuando corresponda.</p>
 
                     <h2>6. Derechos y consultas</h2>
-                    <p>Para consultar por información entregada directamente a JoinHook, solicitar su corrección o pedir su eliminación cuando corresponda, escribe a <a href="mailto:info@joinhook.cl?subject=Privacidad%20JoinHook">info@joinhook.cl</a>. La operación de datos personales se ajustará a la normativa chilena aplicable y esta política será revisada antes de la entrada en vigencia de las nuevas disposiciones de protección de datos previstas para diciembre de 2026.</p>
+                    <p>Para consultar por información entregada directamente a JoinHook, solicitar su corrección o pedir su eliminación cuando corresponda, escribe a <a href="mailto:info@joinhook.cl?subject=Privacidad%20JoinHook">info@joinhook.cl</a>. La operación de datos personales se ajustará a la normativa chilena aplicable. Esta política será revisada nuevamente antes de la entrada en vigencia de la Ley N.º 21.719, fijada para el 1 de diciembre de 2026, y cuando JoinHook incorpore nuevos tratamientos de datos que lo requieran.</p>
 
                     <h2>7. Cambios</h2>
                     <p>Control Gastronómico Express está en beta. Si cambia la arquitectura —por ejemplo al incorporar cuentas, sincronización cloud o pagos— esta política también deberá cambiar antes de utilizar esas funciones.</p>

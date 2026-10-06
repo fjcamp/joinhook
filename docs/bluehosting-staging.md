@@ -160,6 +160,10 @@ No cambiar la política HTTPS del dominio principal como parte de esta prueba.
 
 ```txt
 /
+/insights
+/insights/restaurantes-prime-cost
+/insights/araucania-hotel-performance
+/insights/presupuesto-viaje
 /herramientas/control-gastronomico-express
 /app/control-gastronomico-express
 /privacidad
