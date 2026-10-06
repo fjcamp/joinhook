@@ -78,7 +78,7 @@ jobs:
           exit 1
       - name: Smoke test public routes and PWA assets
         run: |
-          for url in / /herramientas/control-gastronomico-express /app/control-gastronomico-express /privacidad /condiciones-beta /robots.txt /sitemap.xml /cge-manifest.webmanifest /app/cge-sw.js /icons/cge-icon.svg /icons/cge-icon-192.png /icons/cge-icon-512.png /plantillas/control-gastronomico-inventario.csv; do curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000${url}"; done
+          for url in / /insights /insights/restaurantes-prime-cost /insights/araucania-hotel-performance /insights/presupuesto-viaje /herramientas/control-gastronomico-express /app/control-gastronomico-express /privacidad /condiciones-beta /robots.txt /sitemap.xml /cge-manifest.webmanifest /app/cge-sw.js /icons/cge-icon.svg /icons/cge-icon-192.png /icons/cge-icon-512.png /plantillas/control-gastronomico-inventario.csv; do curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:3000${url}"; done
           for path in info blog projects blog/post-one projects/project-one; do code=$(curl --location --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:3000/$path"); test "$code" = 404 || exit 1; done
       - name: Verify baseline security headers
         run: |
