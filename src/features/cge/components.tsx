@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactNode, useEffect, useRef } from 'react';
 
-export function CGEIcon({ name }: { name: string }) {
+export function EGOIcon({ name }: { name: string }) {
     const icons: Record<string, ReactNode> = {
         resumen: <><path d="M4 13h6V4H4zM14 20h6V9h-6zM4 20h6v-3H4zM14 5h6V4h-6z" /></>,
         inventario: <><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 7v10l8 4 8-4V7M12 11v10"/></>,
@@ -17,19 +17,19 @@ export function CGEIcon({ name }: { name: string }) {
     return <svg className="cge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icons[name] || icons.resumen}</svg>;
 }
 
-export function CGEStatCard({ label, value, detail, tone = 'sage' }: { label: string; value: string; detail: string; tone?: 'sage' | 'clay' | 'gold' | 'stone' }) {
+export function EGOStatCard({ label, value, detail, tone = 'sage' }: { label: string; value: string; detail: string; tone?: 'sage' | 'clay' | 'gold' | 'stone' }) {
     return <article className={`cge-stat cge-stat-${tone}`}><span>{label}</span><strong>{value}</strong><small>{detail}</small></article>;
 }
 
-export function CGEBadge({ children, tone = 'neutral' }: PropsWithChildren<{ tone?: 'neutral' | 'good' | 'warn' | 'danger' }>) {
+export function EGOBadge({ children, tone = 'neutral' }: PropsWithChildren<{ tone?: 'neutral' | 'good' | 'warn' | 'danger' }>) {
     return <span className={`cge-badge cge-badge-${tone}`}>{children}</span>;
 }
 
-export function CGEField({ label, children, hint }: PropsWithChildren<{ label: string; hint?: string }>) {
+export function EGOField({ label, children, hint }: PropsWithChildren<{ label: string; hint?: string }>) {
     return <label className="cge-field"><span>{label}</span>{children}{hint && <small>{hint}</small>}</label>;
 }
 
-export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildren<{ title: string; eyebrow?: string; onClose: () => void }>) {
+export function EGOModal({ title, eyebrow, onClose, children }: PropsWithChildren<{ title: string; eyebrow?: string; onClose: () => void }>) {
     const dialogRef = useRef<HTMLElement>(null);
     const onCloseRef = useRef(onClose);
 
@@ -88,12 +88,12 @@ export function CGEModal({ title, eyebrow, onClose, children }: PropsWithChildre
 
     return <div className="cge-modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && onClose()}>
         <section ref={dialogRef} className="cge-modal" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
-            <header><div>{eyebrow && <small>{eyebrow}</small>}<h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="Cerrar"><CGEIcon name="close" /></button></header>
+            <header><div>{eyebrow && <small>{eyebrow}</small>}<h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="Cerrar"><EGOIcon name="close" /></button></header>
             <div className="cge-modal-body">{children}</div>
         </section>
     </div>;
 }
 
-export function CGEEmpty({ title, text }: { title: string; text: string }) {
+export function EGOEmpty({ title, text }: { title: string; text: string }) {
     return <div className="cge-empty"><div className="cge-empty-mark">✦</div><strong>{title}</strong><p>{text}</p></div>;
 }

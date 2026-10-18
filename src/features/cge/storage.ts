@@ -229,4 +229,4 @@ export function exportInventoryCsv(state: EGOState) {
 }
 
 // Compatibility alias while callers migrate from CGE to EGO naming.
-export const normalizeCGEState = normalizeEGOState;
+

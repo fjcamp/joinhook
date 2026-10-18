@@ -25,7 +25,7 @@ function classifyIntent(value: string) {
     if (/soporte|problema|incidente|ayuda|cliente/.test(text)) return 'support';
     if (/francisco|humano|contacto|correo|hablar/.test(text)) return 'human';
     if (/precio|valor|costo|comprar|contratar|venta|cotiza/.test(text)) return 'sales';
-    if (/control|gastron[oó]mico|inventario|merma|proveedor/.test(text)) return 'cge';
+    if (/control|gastron[oó]mico|inventario|merma|proveedor/.test(text)) return 'ego';
     if (/snowwise/.test(text)) return 'snowwise';
     if (/joinops/.test(text)) return 'joinops';
     if (/mi gesti[oó]n|mi gestion/.test(text)) return 'mi-gestion';
@@ -43,7 +43,7 @@ function responseFor(intent: string) {
             return 'Por supuesto. Si quieres conversar directamente con Francisco, escribe a contacto@joinhook.cl. Para consultas de compra, cotización o servicios también puedes usar ventas@joinhook.cl.';
         case 'sales':
             return 'Actualmente puedes conocer Estado de Gastos Operacionales, una herramienta enfocada en inventario, compras, mermas, stock mínimo, proveedores y respaldo PWA. El precio de lanzamiento publicado es $4.990 CLP. Si me cuentas qué necesitas, puedo ayudarte a evaluar si esta herramienta te sirve o si conviene una solución diferente.';
-        case 'cge':
+        case 'ego':
             return 'Estado de Gastos Operacionales ayuda a pequeños negocios gastronómicos a ordenar inventario, compras, mermas, proveedores y stock crítico en una interfaz práctica. Su beneficio principal es tener mayor control diario sin partir con la complejidad de un ERP grande.';
         case 'snowwise':
             return 'SnowWise es un proyecto enfocado en montaña, seguridad, clima, mapas y contexto útil para actividades de nieve. Busca reunir información relevante en una experiencia más clara para planificar y tomar mejores decisiones antes y durante una salida.';

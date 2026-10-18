@@ -1,5 +1,5 @@
-const CACHE_NAME = 'cge-shell-v4';
-const APP_ROUTE = '/app/control-gastronomico-express';
+const CACHE_NAME = 'ego-shell-v5';
+const APP_ROUTE = '/app/estado-gastos-operacionales';
 const APP_SHELL = [
   APP_ROUTE,
   '/cge-manifest.webmanifest',
@@ -20,7 +20,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('cge-shell-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('ego-shell-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
