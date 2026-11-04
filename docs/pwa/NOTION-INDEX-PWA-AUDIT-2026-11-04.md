@@ -25,7 +25,7 @@ The JoinHook repository already contains separate PWA implementations:
 
 ## Changes committed on the feature branch
 
-- `public/informe/index.html`: responsive 15-part / 68-chapter index, search, accordions, honest online/offline status, and scoped service-worker registration.
+- `public/informe/index.html`: responsive 15-part / 68-chapter index, search, accordions, honest online/offline status, and scoped service-worker registration. Current chapter bodies are concise placeholders, not the complete Notion chapter text.
 - `public/informe/manifest.webmanifest`: standalone app manifest with explicit `/informe/index.html` start URL and isolated scope.
 - `public/informe/sw.js`: offline shell cache and network-first navigation fallback restricted to `/informe/`.
 - `public/informe/icon.svg`: app icon.
@@ -72,4 +72,4 @@ The service worker uses a dedicated cache namespace and route scope. It does not
 
 ## Evidence boundary
 
-The static PWA shell is committed, but it is not deployed, not installed on the user's phone, and not synchronized with Notion. No integration secrets were created or stored. No production branch or runtime was changed.
+The static PWA shell is committed, but it is not deployed, not installed on the user's phone, and not synchronized with Notion. It currently contains the chapter outline and placeholder descriptions; it does not yet download the full detailed Notion content. No integration secrets were created or stored. No production branch or runtime was changed.
