@@ -1,0 +1,20 @@
+{
+  "id": "/informe/",
+  "name": "JoinHook · Índice Maestro",
+  "short_name": "Índice JH",
+  "description": "Índice maestro JoinHook y Ánrrua para consulta offline.",
+  "start_url": "/informe/",
+  "scope": "/informe/",
+  "display": "standalone",
+  "background_color": "#f4f7f4",
+  "theme_color": "#14251f",
+  "lang": "es-CL",
+  "icons": [
+    {
+      "src": "/informe/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
