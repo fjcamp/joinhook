@@ -183,7 +183,7 @@ Se inició el trabajo en la rama aislada <code>rebuild/angular-nestjs-cloud-firs
 Registro detallado: [rebuild/docs/IMPLEMENTATION-STATUS.md](https://github.com/fjcamp/joinhook/blob/rebuild/angular-nestjs-cloud-first/rebuild/docs/IMPLEMENTATION-STATUS.md).  
 Carpeta de desarrollo: [rebuild/](https://github.com/fjcamp/joinhook/tree/rebuild/angular-nestjs-cloud-first/rebuild).  
 Rama de trabajo actual: [rebuild/angular-nestjs-cloud-first](https://github.com/fjcamp/joinhook/tree/rebuild/angular-nestjs-cloud-first).  
-Último commit observado al registrar esta nota: <code>fc0ac4d96b52cf5d7bb3ce11e81e29c752ce6a1f</code>.
+Último commit observado al registrar esta nota: <code>06d7cfe31b48539c9affb493c499b42fb972e3a1</code>.
 
 <b>Infraestructura:</b> no se han realizado cambios en cPanel, BlueHosting, Passenger, aplicaciones Node existentes, PostgreSQL, DNS, SSL ni correo.
 
