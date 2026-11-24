@@ -4,7 +4,7 @@
 **Código:** JH-WEB-CLOUDFIRST-CP-2026-11-24-001  
 **Estado:** DECISIÓN APROBADA / CONSTRUCCIÓN DE CÓDIGO PENDIENTE DE EJECUCIÓN  
 **Repositorio de referencia:** `fjcamp/joinhook`  
-**Rama de trabajo prevista:** `rebuild/angular-nestjs-cloud-first`
+**Rama de trabajo creada:** `rebuild/angular-nestjs-cloud-first`
 
 ---
 
@@ -19,12 +19,12 @@ Esta decisión prioriza la construcción ordenada del producto antes de consumir
 ## 2. Separación del legado
 
 - Mantener intacta la rama `main` como historial y referencia del sitio Next.js anterior.
-- Desarrollar la nueva web en una rama dedicada, prevista como `rebuild/angular-nestjs-cloud-first`, sin sobrescribir ni reutilizar automáticamente el frontend Next.js.
+- Desarrollar la nueva web en la rama dedicada ya creada `rebuild/angular-nestjs-cloud-first`, sin sobrescribir ni reutilizar automáticamente el frontend Next.js.
 - Mantener separados el código nuevo, la documentación histórica y los artefactos antiguos.
 - Los cambios iniciales de esta fase serán commits de código fuente, especificaciones y documentación; no despliegues.
 - No alterar cPanel, BlueHosting, Passenger, DNS, SSL, correo, aplicaciones Node existentes ni PostgreSQL durante esta etapa.
 
-La creación de la rama dedicada es un paso de aislamiento del trabajo; no equivale a que la nueva aplicación ya esté implementada.
+La rama dedicada fue creada desde `main` después de registrar este checkpoint. Es un paso de aislamiento del trabajo; no equivale a que la nueva aplicación ya esté implementada.
 
 ## 3. Arquitectura objetivo acordada
 
