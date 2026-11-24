@@ -193,3 +193,20 @@ La web anterior se considera retirada únicamente cuando:
 La nueva web se considera lista para producción solo con staging aprobado y rollback ensayado.
 
 **Regla final:** conservar código e historial; cambiar el producto público; no hacer borrados irreversibles por conveniencia.
+
+
+## Actualización operativa — construcción cloud-first, compilación aplazada (2026-11-24)
+
+Se establece como siguiente fase construir primero el código fuente de la nueva web en la nube, con GitHub como fuente de verdad. La compilación no se inicia hasta que frontend, backend, páginas, componentes, contenido, activos visuales, contratos API, modelo de datos, configuración por ambiente y documentación estén ensamblados y revisados.
+
+- Checkpoint detallado: [JH-WEB-CLOUDFIRST-CP-2026-11-24-001](./2026-11-24-cloud-first-web-construction.md).
+- Repositorio: `fjcamp/joinhook`.
+- Rama aislada creada desde `main`: `rebuild/angular-nestjs-cloud-first`.
+- `main` se conserva como legado/historial Next.js y no se reemplaza.
+- Esta rama es el espacio de trabajo de la nueva implementación Angular + NestJS + TypeScript + arquitectura hexagonal. La creación de la rama no significa que el código esté implementado.
+
+Durante esta fase no ejecutar instalación de dependencias en el hosting, builds (`ng build`, `nest build`, `npm run build`), generación de artefactos, despliegues, cambios de cPanel/Passenger, alteraciones de PostgreSQL ni cambios DNS/SSL/correo. Los workflows y pruebas pueden prepararse como código, pero no deben correr la compilación hasta abrir esa fase.
+
+Cuando el conjunto esté armado, se pasará a validación reproducible en CI/nube, compilación, pruebas, generación de artefactos, staging aislado y, finalmente, publicación aprobada con rollback. El historial de despliegue anterior ya documentado se conserva como aprendizaje; no se debe volver a pedir al usuario reconstruirlo.
+
+Estado al registrar esta actualización: decisión documentada, rama creada; código de la nueva web aún no implementado, compilación no ejecutada y hosting sin modificaciones.
