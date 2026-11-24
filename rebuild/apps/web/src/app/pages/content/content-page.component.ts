@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { SitePageContent } from '../../content/site-pages';
+import type { SitePageContent } from '../../content/site-pages';
 
 const fallbackPage: SitePageContent = {
   path: '',
