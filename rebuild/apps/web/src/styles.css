@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+
+:root {
+  /* Provisional tokens: replace after exact comparison with approved Canva brand assets. */
+  --jh-paper: #f7f6f0;
+  --jh-paper-soft: #f1f0e9;
+  --jh-ink: #202b26;
+  --jh-primary: #496457;
+  --jh-primary-dark: #354d42;
+  --jh-accent: #a87958;
+  --jh-accent-soft: #d8c3aa;
+  --jh-muted: #66736b;
+  --jh-line: #dedfd7;
+  --jh-line-strong: #c8cec4;
+  --jh-container: 76rem;
+  --jh-body: 'DM Sans', Arial, sans-serif;
+  --jh-display: 'DM Serif Display', Georgia, serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--jh-paper); }
+body { min-width: 320px; margin: 0; background: var(--jh-paper); color: var(--jh-ink); font-family: var(--jh-body); font-size: 16px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+button, input, select, textarea { font: inherit; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--jh-accent); outline-offset: 4px; }
+::selection { background: var(--jh-accent-soft); color: var(--jh-ink); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

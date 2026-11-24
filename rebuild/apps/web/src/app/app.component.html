@@ -1,0 +1,68 @@
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" routerLink="/" aria-label="JoinHook, inicio" (click)="closeMenu()">
+      <span class="brand-mark" aria-hidden="true">J</span>
+      <span class="brand-copy">
+        <strong>JoinHook</strong>
+        <small>Acompañamiento para proyectos turísticos</small>
+      </span>
+    </a>
+
+    <button
+      class="menu-toggle"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="primary-navigation"
+      aria-label="Abrir o cerrar el menú"
+      (click)="toggleMenu()">
+      <span></span><span></span>
+    </button>
+
+    <nav
+      id="primary-navigation"
+      class="primary-navigation"
+      [class.is-open]="menuOpen()"
+      aria-label="Navegación principal">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Inicio</a>
+      <a routerLink="/servicios" routerLinkActive="is-active" (click)="closeMenu()">Servicios</a>
+      <a routerLink="/como-trabajamos" routerLinkActive="is-active" (click)="closeMenu()">Cómo trabajamos</a>
+      <a routerLink="/proyectos" routerLinkActive="is-active" (click)="closeMenu()">Proyectos</a>
+      <a routerLink="/conocimiento" routerLinkActive="is-active" (click)="closeMenu()">Conocimiento</a>
+      <a routerLink="/nosotros" routerLinkActive="is-active" (click)="closeMenu()">Nosotros</a>
+      <a routerLink="/colaboraciones" routerLinkActive="is-active" (click)="closeMenu()">Colaboraciones</a>
+      <a class="nav-cta" routerLink="/formulario-clientes" (click)="closeMenu()">Cuéntanos tu proyecto</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main-content">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <div class="footer-main">
+    <div>
+      <a class="footer-brand" routerLink="/">JoinHook</a>
+      <p>Acompañamiento para proyectos turísticos.</p>
+      <p class="footer-location">Villarrica · Araucanía · Chile</p>
+    </div>
+    <div class="footer-links">
+      <a routerLink="/servicios">Servicios</a>
+      <a routerLink="/como-trabajamos">Cómo trabajamos</a>
+      <a routerLink="/conocimiento">Conocimiento</a>
+      <a routerLink="/colaboraciones">Colaboraciones</a>
+      <a routerLink="/privacidad">Privacidad</a>
+    </div>
+    <div class="footer-contact">
+      <span class="eyebrow">CONVERSEMOS</span>
+      <a routerLink="/formulario-clientes">Presentar un proyecto</a>
+      <a routerLink="/formulario-colaboradores">Explorar una colaboración</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© JoinHook</span>
+    <span>Territorio · gestión · experiencia</span>
+  </div>
+</footer>

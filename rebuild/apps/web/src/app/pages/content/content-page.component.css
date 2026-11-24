@@ -1,0 +1,23 @@
+:host { display: block; min-height: 55vh; }
+.content-shell { width: min(100% - 3rem, var(--jh-container)); margin-inline: auto; }
+.content-hero { padding: clamp(4rem, 9vw, 8rem) 0 4rem; background: linear-gradient(135deg, #eeeee8, #f7f6f0 70%); }
+.content-hero .content-shell { max-width: min(100% - 3rem, 58rem); }
+.eyebrow { color: var(--jh-accent); font-size: .7rem; font-weight: 700; letter-spacing: .14em; }
+.content-hero h1 { max-width: 16ch; margin: 1rem 0; color: var(--jh-ink); font-family: var(--jh-display); font-size: clamp(2.8rem, 6vw, 5.5rem); font-weight: 500; letter-spacing: -.06em; line-height: 1.02; }
+.intro { max-width: 47rem; color: var(--jh-muted); font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.75; }
+.content-body { padding-top: 4rem; padding-bottom: 5rem; }
+.content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.content-card { min-height: 12rem; padding: 1.4rem; border: 1px solid var(--jh-line); border-radius: .9rem; background: var(--jh-paper-soft); }
+.content-index { color: var(--jh-accent); font-size: .68rem; font-weight: 700; }
+.content-card h2 { margin: 1.7rem 0 .5rem; color: var(--jh-ink); font-family: var(--jh-display); font-size: 1.45rem; font-weight: 500; letter-spacing: -.03em; }
+.content-card p { margin: 0; color: var(--jh-muted); font-size: .84rem; line-height: 1.7; }
+.content-note { max-width: 55rem; margin: 2rem 0; padding: 1.3rem 1.5rem; border-left: 3px solid var(--jh-accent); background: #eeeee8; }
+.content-note .eyebrow { margin: 0; }
+.content-note p { margin: .5rem 0 0; color: var(--jh-muted); font-size: .86rem; line-height: 1.7; }
+.button { display: inline-flex; gap: 1rem; align-items: center; margin-top: 1rem; padding: .9rem 1.3rem; border-radius: 999px; background: var(--jh-primary); color: white; font-size: .88rem; font-weight: 650; text-decoration: none; }
+@media (max-width: 760px) {
+  .content-shell { width: min(100% - 2rem, var(--jh-container)); }
+  .content-grid { grid-template-columns: 1fr; }
+  .content-card { min-height: auto; }
+  .content-card h2 { margin-top: 1rem; }
+}

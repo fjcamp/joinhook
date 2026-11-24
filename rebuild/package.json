@@ -1,0 +1,38 @@
+{
+  "name": "@joinhook/rebuild",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^24.15.0"
+  },
+  "scripts": {
+    "dev:web": "ng serve joinhook-web",
+    "dev:api": "nest start --watch --config apps/api/nest-cli.json",
+    "build:web": "ng build joinhook-web",
+    "build:api": "nest build --config apps/api/nest-cli.json",
+    "start:api": "node apps/api/dist/main.js"
+  },
+  "dependencies": {
+    "@angular/common": "22.3.0",
+    "@angular/compiler": "22.3.0",
+    "@angular/core": "22.3.0",
+    "@angular/forms": "22.3.0",
+    "@angular/platform-browser": "22.3.0",
+    "@angular/router": "22.3.0",
+    "@nestjs/common": "12.6.0",
+    "@nestjs/core": "12.6.0",
+    "@nestjs/platform-express": "12.6.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@angular/build": "22.3.0",
+    "@angular/cli": "22.3.0",
+    "@angular/compiler-cli": "22.3.0",
+    "@nestjs/cli": "12.0.15",
+    "@nestjs/schematics": "12.0.15",
+    "@types/node": "^24.0.0",
+    "typescript": "6.0.3"
+  }
+}
