@@ -141,3 +141,50 @@ Mantener los estados separados:
 
 **Regla:** NO EVIDENCE = NO CLAIM.  
 **Decisión vigente:** construir primero en la nube y en GitHub; compilar después de que el conjunto esté armado y revisado.
+
+## Actualización de desarrollo — primera fundación de código (24-11-2026)
+
+<b>Estado:</b> FUNDACIÓN FRONTEND/BACKEND INCORPORADA A GITHUB / PENDIENTE DE REVISIÓN VISUAL Y TÉCNICA / BUILD NO EJECUTADO.
+
+Se inició el trabajo en la rama aislada <code>rebuild/angular-nestjs-cloud-first</code>, manteniendo intactos el sitio histórico en la raíz del repositorio y la rama <code>main</code> como legado.
+
+### Trabajo versionado
+
+**Frontend Angular**
+- Workspace Angular y configuración TypeScript.
+- Aplicación standalone, router, layout global, navegación adaptable y footer.
+- Home con propuesta de valor de Canva, CTA prioritario para propietarios, segundo recorrido para negocios turísticos, servicios, método de seis pasos, enfoque de evidencia y conocimiento.
+- Sitemap y contenido inicial para páginas de servicios, terrenos, negocios, método, proyectos, conocimiento, blog, actualidad, nosotros, colaboraciones, formularios, contacto y privacidad.
+- Página 404.
+- Formulario de clientes en modo de vista previa: campos deshabilitados, sin envío ni persistencia.
+- Tokens, estilos y composición visual provisionales; falta integrar la imagen/hero original exportada y contrastar la identidad visual exacta con Canva.
+
+**Backend NestJS**
+- Configuración inicial NestJS + TypeScript con ESM.
+- Módulo Health organizado en capas hexagonales: dominio, puerto, caso de uso, adaptador de runtime y controlador HTTP.
+- Prefijo inicial <code>/api/v1</code> y CORS por allowlist.
+- PostgreSQL se marca explícitamente <code>not_checked</code>; no se ha conectado ni probado.
+
+**Documentación**
+- README y arquitectura de la nueva base.
+- Base tecnológica de referencia.
+- Sitemap.
+- Gate futuro de instalación, pruebas y compilación.
+- Archivo de estado de implementación.
+
+### Límites y pendientes
+- No existe todavía API para captar leads; el formulario no funciona como envío real.
+- El formulario de colaboradores aún no tiene campos implementados.
+- No hay modelo de datos, migraciones ni adaptador PostgreSQL.
+- No se eligió ORM.
+- No se han añadido imágenes definitivas ni identidad visual confirmada.
+- No se ejecutaron pruebas, instalación de dependencias, lint, build, generación de artefactos ni despliegues.
+
+Registro detallado: [rebuild/docs/IMPLEMENTATION-STATUS.md](https://github.com/fjcamp/joinhook/blob/rebuild/angular-nestjs-cloud-first/rebuild/docs/IMPLEMENTATION-STATUS.md).  
+Carpeta de desarrollo: [rebuild/](https://github.com/fjcamp/joinhook/tree/rebuild/angular-nestjs-cloud-first/rebuild).  
+Rama de trabajo actual: [rebuild/angular-nestjs-cloud-first](https://github.com/fjcamp/joinhook/tree/rebuild/angular-nestjs-cloud-first).  
+Último commit observado al registrar esta nota: <code>fc0ac4d96b52cf5d7bb3ce11e81e29c752ce6a1f</code>.
+
+<b>Infraestructura:</b> no se han realizado cambios en cPanel, BlueHosting, Passenger, aplicaciones Node existentes, PostgreSQL, DNS, SSL ni correo.
+
+<b>Regla:</b> el código fuente está incorporado, pero el proyecto permanece <code>PENDING BUILD</code>. No declarar BUILD-VERIFIED, STAGING-VERIFIED ni PRODUCTION.
