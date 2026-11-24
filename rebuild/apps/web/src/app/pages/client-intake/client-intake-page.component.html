@@ -1,0 +1,86 @@
+<section class="form-hero">
+  <div class="form-shell">
+    <p class="eyebrow">FORMULARIO DE CLIENTES</p>
+    <h1>Cuéntanos sobre tu proyecto.</h1>
+    <p class="intro">Con información general es suficiente para iniciar la conversación. No necesitas adjuntar documentos ni tener el proyecto terminado.</p>
+  </div>
+</section>
+
+<section class="form-shell form-body">
+  <div class="form-grid">
+    <div class="form-context">
+      <span class="step-label">PRIMERA CONVERSACIÓN</span>
+      <h2>Partamos por comprender dónde estás.</h2>
+      <p>Este primer contacto está pensado para conocer tu necesidad, el tipo de espacio y la etapa del proyecto. Los antecedentes técnicos se revisan más adelante, si corresponde.</p>
+      <div class="privacy-note">
+        <strong>Por ahora, no adjuntes:</strong>
+        <ul>
+          <li>RUT, cédula o datos bancarios.</li>
+          <li>Escrituras o títulos de propiedad.</li>
+          <li>Planos privados ni documentos sensibles.</li>
+        </ul>
+      </div>
+      <a routerLink="/privacidad" class="privacy-link">Revisar información de privacidad provisional ↗</a>
+    </div>
+
+    <form class="intake-form" aria-describedby="form-preview-notice">
+      <div class="preview-label">VISTA PREVIA · ENVÍO DESHABILITADO</div>
+
+      <label>
+        <span>Nombre y apellido</span>
+        <input type="text" name="name" autocomplete="name" placeholder="Cómo te llamas" disabled>
+      </label>
+
+      <label>
+        <span>Correo electrónico</span>
+        <input type="email" name="email" autocomplete="email" placeholder="nombre@correo.cl" disabled>
+      </label>
+
+      <label>
+        <span>¿Qué tipo de proyecto tienes?</span>
+        <select name="projectType" disabled>
+          <option value="">Selecciona una alternativa</option>
+          <option>Terreno o parcela</option>
+          <option>Alojamiento turístico</option>
+          <option>Camping o espacio para viajeros</option>
+          <option>Negocio turístico en funcionamiento</option>
+          <option>Proyecto en desarrollo</option>
+          <option>Otro</option>
+        </select>
+      </label>
+
+      <div class="field-row">
+        <label>
+          <span>Región</span>
+          <input type="text" name="region" placeholder="Ej. La Araucanía" disabled>
+        </label>
+        <label>
+          <span>Comuna</span>
+          <input type="text" name="commune" placeholder="Ej. Villarrica" disabled>
+        </label>
+      </div>
+
+      <label>
+        <span>¿En qué etapa estás?</span>
+        <select name="stage" disabled>
+          <option value="">Selecciona una alternativa</option>
+          <option>Solo tengo una idea</option>
+          <option>Estoy evaluando posibilidades</option>
+          <option>Estoy desarrollando el proyecto</option>
+          <option>Ya está funcionando</option>
+        </select>
+      </label>
+
+      <label>
+        <span>¿Qué necesitas resolver?</span>
+        <textarea name="need" rows="4" placeholder="Cuéntanos brevemente qué te gustaría evaluar u ordenar." disabled></textarea>
+      </label>
+
+      <p id="form-preview-notice" class="form-notice">
+        Este formulario todavía no está conectado a un sistema de recepción. Los campos están deshabilitados y no se envía ni se almacena información.
+      </p>
+      <button type="button" disabled>Envío aún no habilitado</button>
+      <p class="form-footnote">La autorización para recibir comunicaciones comerciales, si se incorpora, será independiente y opcional.</p>
+    </form>
+  </div>
+</section>
